@@ -1,0 +1,704 @@
+<apex:component access="global" controller="PaymentDetailsController">
+    <apex:attribute name="bookingId" type="Id" description="Training Booking Id" required="true" access="global" assignTo="{!tbId}"/>
+    <apex:attribute name="ver" type="String" description="HTML or text version" access="global" />
+    <apex:attribute name="source" type="String" description="email or booking form" required="true" access="global"/>
+    
+    <!-- HTML version -->
+    <apex:panelGroup rendered="{!AND(booking!=null, ver='HTML')}">
+    
+        <!-- Payment Method CARD -->
+        <apex:panelGroup rendered="{!booking.Payment_Method__c = 'Card'}">
+            
+            <apex:outputText rendered="{!source='email'}" value="{!booking.Training_Translations__r.Online_Booking_Received_Paid_Card__c}" />
+            <apex:outputText rendered="{!source='form'}" value="{!$Label.TrainingBookingStep6Card}" />
+            
+            
+            <br/><br/>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Card__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Card__c}" /><br/><br/>
+            </apex:panelGroup>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Card__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Card__c}" /><br/><br/>
+            </apex:panelGroup>
+        </apex:panelGroup>
+        
+        
+        <!-- Payment calculation SFDC with bankTransfer set-->
+        <apex:panelGroup rendered="{!AND(countrySetting.Calculate_Tax_Method__c = 'SFDC', booking.Payment_Method__c != 'Card', CONTAINS(countrySetting.Flags__c,'bankTransfer'))}">
+            {!$Label.TrainingBookingStep6BankTransfer}
+            <br/><br/>
+            
+            <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.Label}" />:&nbsp;
+            
+            <apex:outputText value="{0,number,{!countrySetting.Currency_Format__c}}">
+                <apex:param value="{!booking.Total_Price__c}" />
+            </apex:outputText>
+            <br/>
+        
+            <apex:outputText value="{!$Label.TrainingBookingStep6PaymentRef}" />:&nbsp;
+            {!booking.Name}
+            <br/><br/>
+            
+            <!-- bank details -->
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'CN'}">
+                户名: 英标认证技术培训（北京）有限公司<br/>
+                帐号: 626198899001<br/>
+                开户银行: 汇丰银行(中国)有限公司北京分行<br/>
+                联行号: 501100000011<br/>
+                银行地址: 中國北京市朝阳区东三环中路5号财富金融中心16层 (邮编:100020)<br/>
+                交换代码: HSBC CNSHBJG<br/>
+                <br/>
+                请在交易附言里注明BSI参考号<br/>
+                <br/>
+                英标认证技术培训（北京）有限公司<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'IN'}">
+                HSBC (Bank a/c. No. 166-045294-001), 25 Barakhamba Road, New Delhi 110 001, India<br/>
+                (NEFT/RTGS: HSBC0110002 / Swift Code: HSBCINBB / MICR Code: 110039002)<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TW'}">
+                <!--支票抬頭:香港商英國標準協會太平洋有限公司台灣分公司<br/>
+                支票郵寄地址:11492 台北市內湖區基湖路37號2樓財務部收<br/>
+                電匯戶名:香港商 英國標準協會太平洋有限公司台灣分公司<br/>
+                銀行名稱:匯豐(台灣)商業銀行台北分 行 銀行地址:台北市信義區松仁路93號1樓<br/>
+                帳號:001-291921-001<br/>
+                銀行代號:081<br/>
+                分行代號:0016<br/>-->
+
+                
+                費用繳付方式:<br/><br/>
+
+                公司名稱: <br/>
+                香港商英國標準協會太平洋有限公司台灣分公司<br/>
+                (BSI Pacific Ltd. Taiwan Branch)<br/><br/>
+                
+                匯款:<br/>
+                銀行名稱: 匯豐(台灣)銀行 台北分行<br/>
+                銀行代號: 081<br/>
+                分行代號: 0016<br/>
+                帳號: 001-291921-001<br/>
+                地址: 台北市信義區松仁路93號1樓   <br/><br/>                  
+                
+                ATM 轉帳:<br/>
+                銀行代號: 081<br/>
+                帳號: 001-291921-001<br/><br/>
+                
+                支票郵寄:<br/>
+                地址: 台北市內湖區基湖路37號2樓 訓練標準部收<br/><br/>
+                
+                <!--><table class="multi-column">
+                <tr><td>公司電話: </td><td>(02)2656-0333</td><td>訓練標準部</td><td></td></tr>
+                <tr><td></td><td>蕭小姐# 133</td><td>吳小姐#116 </td><td>姜小姐#139</td></tr>
+                <tr><td></td><td>張小姐#102 </td><td>朱小姐#152</td><td>林小姐#141</td></tr>
+                </table>  -->   
+                
+                公司電話:<br/>
+                (02)2656-0333&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;訓練標準部<br/>
+                蕭小姐#133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;吳小姐#116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;姜小姐#139 <br/>                              
+                張小姐#102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;朱小姐#152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;林小姐#141<br/>
+                  <br/>
+                公司傳真:    (02)2656-0222<br/><br/>
+                
+                
+                **請於匯款後將匯款收據註明您的大名及參加課程名稱 傳真或Email至本公司訓練標準部收, 以利對帳，謝謝 !!
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'JP'}">
+                お振込み先： 香港上海銀行　東京支店<br/>
+                当座 No. 0404031<br/>
+                口座名　ビーエスアイグループジャパン(カ<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'MY'}">
+                HSBC Bank Malaysia Bhd<br/>
+                Damansara Utama Branch<br/>
+                55-59G Jalan SS21/37,<br/>
+                Damansara Utama<br/>
+                47400 Petaling Jaya, Selangor<br/>
+                Malaysia<br/>
+                MYR Bank Account No: 316 055367 101<br/>
+                Swift code: HBMBMYKL<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                <!--The Hongkong and Shanghai<br/>
+                Banking Corporation Limited<br/>
+                THB Bank Account No: 001-719590-001<br/>
+                Swift Code: HSBCTHBK<br/>-->
+                บัญชีกระแสรายวัน ธนาคารกรุงเทพ หมายเลขบัญชี 086-3-501631 สาขาเซ็นทรัลพระราม 3 ในนาม บริษัท บีเอสไอ กรุ๊ป (ประเทศไทย) จำกัด <br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'SG'}">
+                HSBC Bank (Code 7232)<br/>
+                Collyer Quay Branch(147),<br/>
+                Singapore<br/>
+                Bank Account No: 147-460794-001<br/>
+                Swift code: HSBCSGSG<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'HK'}">
+                PLEASE NOTE THIS INVOICE IS DUE IMMEDIATELY. PAYMENT SHOULD BE MADE BY CHEQUE PAYABLE TO “BSI PACIFIC LIMITED” OR BANK TRANSFER TO OUR BANK ACCOUNT. ALL BANK CHARGES AND WITHHOLDING TAXES SHALL BE BORNE BY THE CLIENT. PLEASE WRITE DOWN THE INVOICE NUMBER ON THE BACK OF YOUR CHEQUE OR EMAIL/ FAX THE PAY-IN SLIP WITH YOUR COMPANY NAME AND INVOICE NUMBER TO US AFTER THE TRANSFER.<br/>
+                <br/>                
+                FOR BANK TRANSFER<br/>
+                Company Name :BSI Pacific Limited<br/>
+                Our Banker :The Hongkong and Shanghai Banking Corporation Limited<br/>
+                Address :1 Queen’s Road, Central, Hong Kong<br/>
+                Bank Code :004<br/>
+                Account No :511-289100-001<br/>
+                Swift Code :HSBCHKHHHKH<br/>
+                <br/>
+                敬請即時付款給BSI 太平洋有限公司或銀行轉賬到以下戶口,而所有銀行費用及 應繳稅務都應由貴司負責支付。
+                請於支票背後寫上發票編號或匯款後將銀行匯款單電郵或傳真到敝公司，並注明公司 名稱及發票編號。<br/>
+                <br/>
+                銀行轉賬<br/>
+                帳戶名稱:BSI 太平洋有限公司<br/>
+                銀行名稱:香港上海匯豐銀行<br/>
+                銀行地址:香港中環皇后大道中一號<br/>
+                銀行號碼:004<br/>
+                港幣戶口號碼:511-289100-001<br/>
+                匯款代碼:HSBCHKHHHKH<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'VN'}">
+                Beneficiary Name: BSI Vietnam Co.,Ltd<br/>
+                Bank Account: 001-510916-061<br/>
+                Bank Name: HSBC Bank (Vietnam) Ltd<br/>
+                Bank Address: 235 Dong Khoi Street, District 1, HCMC, Vietnam<br/>
+                Swift Code : HSBCVNVX<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'ID'}">
+                PT BANK HSBC INDONESIA<br/>
+                World Trade Center<br/>
+                Jl.Jendral Sudiman Kav 29-31<br/>
+                Jakarta 12920, Indonesia<br/>
+                IDR Bank Account No &amp; Name:<br/>
+                050-215425-068<br/>
+                PT BSI Group Indonesia<br/>
+                Swift Code: HSBCIDJA<br/>
+            </apex:panelGroup>
+            <br/>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+        </apex:panelGroup>
+        
+        <!-- Payment calculation SAP and bankDetails exist -->
+        <apex:panelGroup rendered="{!AND(countrySetting.Calculate_Tax_Method__c = 'SAP', booking.Payment_Method__c != 'Card', CONTAINS(countrySetting.Flags__c,'bankDetails'))}">          
+            {!$Label.TrainingBookingStep6BankTransfer}
+            <br/><br/>
+            
+            <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.Label}" />:&nbsp;
+            
+            <apex:outputText value="{0,number,{!countrySetting.Currency_Format__c}}">
+                <apex:param value="{!booking.Total_Price__c}" />
+            </apex:outputText>
+            <br/>
+        
+            <apex:outputText value="{!$Label.TrainingBookingStep6PaymentRef}" />:&nbsp;
+            {!booking.Name}
+            <br/><br/>
+            
+            <!-- bank details -->
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'CN'}">
+                户名: 英标认证技术培训（北京）有限公司<br/>
+                帐号: 626198899001<br/>
+                开户银行: 汇丰银行(中国)有限公司北京分行<br/>
+                联行号: 501100000011<br/>
+                银行地址: 中國北京市朝阳区东三环中路5号财富金融中心16层 (邮编:100020)<br/>
+                交换代码: HSBC CNSHBJG<br/>
+                <br/>
+                请在交易附言里注明BSI参考号<br/>
+                <br/>
+                英标认证技术培训（北京）有限公司<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'IN'}">
+                HSBC (Bank a/c. No. 166-045294-001), 25 Barakhamba Road, New Delhi 110 001, India<br/>
+                (NEFT/RTGS: HSBC0110002 / Swift Code: HSBCINBB / MICR Code: 110039002)<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TW'}">
+                <!--支票抬頭:香港商英國標準協會太平洋有限公司台灣分公司<br/>
+                支票郵寄地址:11492 台北市內湖區基湖路37號2樓財務部收<br/>
+                電匯戶名:香港商 英國標準協會太平洋有限公司台灣分公司<br/>
+                銀行名稱:匯豐(台灣)商業銀行台北分 行 銀行地址:台北市信義區松仁路93號1樓<br/>
+                帳號:001-291921-001<br/>
+                銀行代號:081<br/>
+                分行代號:0016<br/>-->
+
+                
+                費用繳付方式:<br/><br/>
+
+                公司名稱: <br/>
+                香港商英國標準協會太平洋有限公司台灣分公司<br/>
+                (BSI Pacific Ltd. Taiwan Branch)<br/><br/>
+                
+                匯款:<br/>
+                銀行名稱: 匯豐(台灣)銀行 台北分行<br/>
+                銀行代號: 081<br/>
+                分行代號: 0016<br/>
+                帳號: 001-291921-001<br/>
+                地址: 台北市信義區松仁路93號1樓   <br/><br/>                  
+                
+                ATM 轉帳:<br/>
+                銀行代號: 081<br/>
+                帳號: 001-291921-001<br/><br/>
+                
+                支票郵寄:<br/>
+                地址: 台北市內湖區基湖路37號2樓 訓練標準部收<br/><br/>
+                
+                <!--><table class="multi-column">
+                <tr><td>公司電話: </td><td>(02)2656-0333</td><td>訓練標準部</td><td></td></tr>
+                <tr><td></td><td>蕭小姐# 133</td><td>吳小姐#116 </td><td>姜小姐#139</td></tr>
+                <tr><td></td><td>張小姐#102 </td><td>朱小姐#152</td><td>林小姐#141</td></tr>
+                </table>  -->   
+                
+                公司電話:<br/>
+                (02)2656-0333&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;訓練標準部<br/>
+                蕭小姐#133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;吳小姐#116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;姜小姐#139 <br/>                              
+                張小姐#102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;朱小姐#152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;林小姐#141<br/>
+                  <br/>
+                公司傳真:    (02)2656-0222<br/><br/>
+                
+                
+                **請於匯款後將匯款收據註明您的大名及參加課程名稱 傳真或Email至本公司訓練標準部收, 以利對帳，謝謝 !!
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'JP'}">
+                お振込み先： 香港上海銀行　東京支店<br/>
+                当座 No. 0404031<br/>
+                口座名　ビーエスアイグループジャパン(カ<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'MY'}">
+                HSBC Bank Malaysia Bhd<br/>
+                Damansara Utama Branch<br/>
+                55-59G Jalan SS21/37,<br/>
+                Damansara Utama<br/>
+                47400 Petaling Jaya, Selangor<br/>
+                Malaysia<br/>
+                MYR Bank Account No: 316 055367 101<br/>
+                Swift code: HBMBMYKL<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                <!--The Hongkong and Shanghai<br/>
+                Banking Corporation Limited<br/>
+                THB Bank Account No: 001-719590-001<br/>
+                Swift Code: HSBCTHBK<br/>-->
+                บัญชีกระแสรายวัน ธนาคารกรุงเทพ หมายเลขบัญชี 086-3-501631 สาขาเซ็นทรัลพระราม 3 ในนาม บริษัท บีเอสไอ กรุ๊ป (ประเทศไทย) จำกัด <br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'SG'}">
+                HSBC Bank (Code 7232)<br/>
+                Collyer Quay Branch(147),<br/>
+                Singapore<br/>
+                Bank Account No: 147-460794-001<br/>
+                Swift code: HSBCSGSG<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'HK'}">
+                PLEASE NOTE THIS INVOICE IS DUE IMMEDIATELY. PAYMENT SHOULD BE MADE BY CHEQUE PAYABLE TO “BSI PACIFIC LIMITED” OR BANK TRANSFER TO OUR BANK ACCOUNT. ALL BANK CHARGES AND WITHHOLDING TAXES SHALL BE BORNE BY THE CLIENT. PLEASE WRITE DOWN THE INVOICE NUMBER ON THE BACK OF YOUR CHEQUE OR EMAIL/ FAX THE PAY-IN SLIP WITH YOUR COMPANY NAME AND INVOICE NUMBER TO US AFTER THE TRANSFER.<br/>
+                <br/>                
+                FOR BANK TRANSFER<br/>
+                Company Name :BSI Pacific Limited<br/>
+                Our Banker :The Hongkong and Shanghai Banking Corporation Limited<br/>
+                Address :1 Queen’s Road, Central, Hong Kong<br/>
+                Bank Code :004<br/>
+                Account No :511-289100-001<br/>
+                Swift Code :HSBCHKHHHKH<br/>
+                <br/>
+                敬請即時付款給BSI 太平洋有限公司或銀行轉賬到以下戶口,而所有銀行費用及 應繳稅務都應由貴司負責支付。
+                請於支票背後寫上發票編號或匯款後將銀行匯款單電郵或傳真到敝公司，並注明公司 名稱及發票編號。<br/>
+                <br/>
+                銀行轉賬<br/>
+                帳戶名稱:BSI 太平洋有限公司<br/>
+                銀行名稱:香港上海匯豐銀行<br/>
+                銀行地址:香港中環皇后大道中一號<br/>
+                銀行號碼:004<br/>
+                港幣戶口號碼:511-289100-001<br/>
+                匯款代碼:HSBCHKHHHKH<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'VN'}">
+                Beneficiary Name: BSI Vietnam Co.,Ltd<br/>
+                Bank Account: 001-510916-061<br/>
+                Bank Name: HSBC Bank (Vietnam) Ltd<br/>
+                Bank Address: 235 Dong Khoi Street, District 1, HCMC, Vietnam<br/>
+                Swift Code : HSBCVNVX<br/>
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'ID'}">
+                PT BANK HSBC INDONESIA<br/>
+                World Trade Center<br/>
+                Jl.Jendral Sudiman Kav 29-31<br/>
+                Jakarta 12920, Indonesia<br/>
+                IDR Bank Account No &amp; Name:<br/>
+                050-215425-068<br/>
+                PT BSI Group Indonesia<br/>
+                Swift Code: HSBCIDJA<br/>
+            </apex:panelGroup>
+            <br/>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+        </apex:panelGroup>
+                   
+
+        <!-- Payment Method INVOICE -->
+        <apex:panelGroup rendered="{!AND(booking.Payment_Method__c = 'Invoice', NOT(OR(CONTAINS(countrySetting.Flags__c,'bankTransfer'), CONTAINS(countrySetting.Flags__c,'bankDetails'))))}">
+            <apex:outputText rendered="{!source='email'}" value="{!booking.Training_Translations__r.Online_Booking_Received_Invoice__c}" />
+            <apex:outputText rendered="{!source='form'}" value="{!$Label.TrainingBookingStep6Invoice}" />
+            <br/><br/>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" /><br/><br/>
+            </apex:panelGroup>
+        </apex:panelGroup>
+
+    </apex:panelGroup>
+
+
+    <!-- plain text version -->
+    <apex:panelGroup rendered="{!AND(booking!=null, ver!='HTML')}">
+    
+        <!-- Payment Method CARD -->
+        <apex:panelGroup rendered="{!booking.Payment_Method__c = 'Card'}">
+            <apex:outputText value="{!booking.Training_Translations__r.Online_Booking_Received_Paid_Card__c}" />
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Card__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Card__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Card__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Card__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+        </apex:panelGroup>
+    
+    
+        <!-- Payment calculation SFDC and bank details exist-->
+        <apex:panelGroup rendered="{!AND(countrySetting.Calculate_Tax_Method__c = 'SFDC', booking.Payment_Method__c != 'Card', CONTAINS(countrySetting.Flags__c,'bankTransfer'))}">
+            {!$Label.TrainingBookingStep6BankTransfer}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.Label}" />:&nbsp;
+            <apex:outputText value="{0,number,{!countrySetting.Currency_Format__c}}">
+                <apex:param value="{!booking.Total_Price__c}" />
+            </apex:outputText>
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:outputText value="{!$Label.TrainingBookingStep6PaymentRef}" />:&nbsp; {!booking.Name}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <!-- bank details -->
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'CN'}">
+                户名: 英标认证技术培训（北京）有限公司
+                帐号: 626198899001
+                开户银行: 汇丰银行(中国)有限公司北京分行
+                联行号: 501100000011
+                银行地址: 中國北京市朝阳区东三环中路5号财富金融中心16层 (邮编:100020)
+                交换代码: HSBC CNSHBJG
+
+                请在交易附言里注明BSI参考号
+
+                英标认证技术培训（北京）有限公司
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'IN'}">
+                HSBC (Bank a/c. No. 166-045294-001), 25 Barakhamba Road, New Delhi 110 001, India
+                (NEFT/RTGS: HSBC0110002 / Swift Code: HSBCINBB / MICR Code: 110039002)
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TW'}">
+                <!--支票抬頭:香港商英國標準協會太平洋有限公司台灣分公司
+                支票郵寄地址:11492 台北市內湖區基湖路37號2樓財務部收
+                電匯戶名:香港商 英國標準協會太平洋有限公司台灣分公司
+                銀行名稱:匯豐(台灣)商業銀行台北分 行 銀行地址:台北市信義區松仁路93號1樓
+                帳號:001291921001
+                銀行代號:081
+                分行代號:0016-->
+                
+                費用繳付方式:
+
+                公司名稱: 
+                香港商英國標準協會太平洋有限公司台灣分公司
+                (BSI Pacific Ltd. Taiwan Branch)
+                
+                匯款:
+                銀行名稱: 匯豐(台灣)銀行 台北分行
+                銀行代號: 081
+                分行代號: 0016
+                帳號: 001-291921-001
+                地址: 台北市信義區松仁路93號1樓                     
+                
+                ATM 轉帳:
+                銀行代號: 081
+                帳號: 001-291921-001
+                
+                支票郵寄:
+                地址: 台北市內湖區基湖路37號2樓 訓練標準部收
+                
+                公司電話:    (02)2656-0333      訓練標準部
+                             蕭小姐# 133        吳小姐#116      姜小姐#139
+                             張小姐#102        .朱小姐#152      林小姐#141
+                  
+                公司傳真:    (02)2656-0222
+                
+                
+                **請於匯款後將匯款收據註明您的大名及參加課程名稱 傳真或Email至本公司訓練標準部收, 以利對帳，謝謝 !!
+
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'JP'}">
+                お振込み先： 香港上海銀行　東京支店
+                当座 No. 0404031
+                口座名　ビーエスアイグループジャパン(カ
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'MY'}">
+                HSBC Bank Malaysia Bhd
+                Damansara Utama Branch
+                55-59G Jalan SS21/37,
+                Damansara Utama
+                47400 Petaling Jaya, Selangor
+                Malaysia
+                MYR Bank Account No: 316 055367 101
+                Swift code: HBMBMYKL
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                The Hongkong and Shanghai
+                Banking Corporation Limited
+                THB Bank Account No: 001-719590-001
+                Swift Code: HSBCTHBK
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'SG'}">
+                HSBC Bank (Code 7232)
+                Collyer Quay Branch(147),
+                Singapore
+                Bank Account No: 147-460794-001
+                Swift code: HSBCSGSG
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'HK'}"><!--JS updated translation below at HK request 20200813-->
+                FOR BANK TRANSFER
+                Company Name :BSI Pacific Limited
+                Our Banker :The Hongkong and Shanghai Banking Corporation Limited
+                Address :1 Queen’s Road, Central, Hong Kong
+                Bank Code :004
+                Account No :511-289100-001
+                Swift Code :HSBCHKHHHKH
+
+                敬請即時付款給BSI 太平洋有限公司或銀行轉賬到以下戶口,而所有銀行費用及 應繳稅務都應由貴司負責支付。
+                請於支票背後寫上發票編號或匯款後將銀行匯款單電郵或傳真到敝公司，並注明公司 名稱及發票編號。
+
+                銀行轉賬
+                帳戶名稱:BSI 太平洋有限公司
+                銀行名稱:香港上海匯豐銀行
+                銀行地址:香港中環皇后大道中一號
+                銀行號碼:004
+                港幣戶口號碼:511-289100-001
+                匯款代碼:HSBCHKHHHKH
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'VN'}">
+                Beneficiary Name: BSI Vietnam Co.,Ltd
+                Bank Account: 001-510916-061
+                Bank Name: HSBC Bank (Vietnam) Ltd
+                Bank Address: 235 Dong Khoi Street, District 1, HCMC, Vietnam
+                Swift Code : HSBCVNVX
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'ID'}">
+                PT BANK HSBC INDONESIA
+                World Trade Center
+                Jl.Jendral Sudiman Kav 29-31
+                Jakarta 12920, Indonesia
+                IDR Bank Account No &amp; Name:
+                050-215425-068
+                PT BSI Group Indonesia
+                Swift Code: HSBCIDJA
+            </apex:panelGroup>
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+        </apex:panelGroup>
+    
+        <!-- Payment calculation SAP and bankDetails exist -->
+        <apex:panelGroup rendered="{!AND(countrySetting.Calculate_Tax_Method__c = 'SAP', booking.Payment_Method__c != 'Card', CONTAINS(countrySetting.Flags__c,'bankDetails'))}">
+            {!$Label.TrainingBookingStep6BankTransfer}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.Label}" />:&nbsp;
+            <apex:outputText value="{0,number,{!countrySetting.Currency_Format__c}}">
+                <apex:param value="{!booking.Total_Price__c}" />
+            </apex:outputText>
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:outputText value="{!$Label.TrainingBookingStep6PaymentRef}" />:&nbsp; {!booking.Name}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <!-- bank details -->
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'CN'}">
+                户名: 英标认证技术培训（北京）有限公司
+                帐号: 626198899001
+                开户银行: 汇丰银行(中国)有限公司北京分行
+                联行号: 501100000011
+                银行地址: 中國北京市朝阳区东三环中路5号财富金融中心16层 (邮编:100020)
+                交换代码: HSBC CNSHBJG
+
+                请在交易附言里注明BSI参考号
+
+                英标认证技术培训（北京）有限公司
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'IN'}">
+                HSBC (Bank a/c. No. 166-045294-001), 25 Barakhamba Road, New Delhi 110 001, India
+                (NEFT/RTGS: HSBC0110002 / Swift Code: HSBCINBB / MICR Code: 110039002)
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TW'}">
+                <!--支票抬頭:香港商英國標準協會太平洋有限公司台灣分公司
+                支票郵寄地址:11492 台北市內湖區基湖路37號2樓財務部收
+                電匯戶名:香港商 英國標準協會太平洋有限公司台灣分公司
+                銀行名稱:匯豐(台灣)商業銀行台北分 行 銀行地址:台北市信義區松仁路93號1樓
+                帳號:001291921001
+                銀行代號:081
+                分行代號:0016-->
+                
+                費用繳付方式:
+
+                公司名稱: 
+                香港商英國標準協會太平洋有限公司台灣分公司
+                (BSI Pacific Ltd. Taiwan Branch)
+                
+                匯款:
+                銀行名稱: 匯豐(台灣)銀行 台北分行
+                銀行代號: 081
+                分行代號: 0016
+                帳號: 001-291921-001
+                地址: 台北市信義區松仁路93號1樓                     
+                
+                ATM 轉帳:
+                銀行代號: 081
+                帳號: 001-291921-001
+                
+                支票郵寄:
+                地址: 台北市內湖區基湖路37號2樓 訓練標準部收
+                
+                公司電話:    (02)2656-0333      訓練標準部
+                             蕭小姐# 133        吳小姐#116      姜小姐#139
+                             張小姐#102        .朱小姐#152      林小姐#141
+                  
+                公司傳真:    (02)2656-0222
+                
+                
+                **請於匯款後將匯款收據註明您的大名及參加課程名稱 傳真或Email至本公司訓練標準部收, 以利對帳，謝謝 !!
+
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'JP'}">
+                お振込み先： 香港上海銀行　東京支店
+                当座 No. 0404031
+                口座名　ビーエスアイグループジャパン(カ
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'MY'}">
+                HSBC Bank Malaysia Bhd
+                Damansara Utama Branch
+                55-59G Jalan SS21/37,
+                Damansara Utama
+                47400 Petaling Jaya, Selangor
+                Malaysia
+                MYR Bank Account No: 316 055367 101
+                Swift code: HBMBMYKL
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                The Hongkong and Shanghai
+                Banking Corporation Limited
+                THB Bank Account No: 001-719590-001
+                Swift Code: HSBCTHBK
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'SG'}">
+                HSBC Bank (Code 7232)
+                Collyer Quay Branch(147),
+                Singapore
+                Bank Account No: 147-460794-001
+                Swift code: HSBCSGSG
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'HK'}"><!--JS updated translation below at HK request 20200813-->
+                FOR BANK TRANSFER
+                Company Name :BSI Pacific Limited
+                Our Banker :The Hongkong and Shanghai Banking Corporation Limited
+                Address :1 Queen’s Road, Central, Hong Kong
+                Bank Code :004
+                Account No :511-289100-001
+                Swift Code :HSBCHKHHHKH
+
+                敬請即時付款給BSI 太平洋有限公司或銀行轉賬到以下戶口,而所有銀行費用及 應繳稅務都應由貴司負責支付。
+                請於支票背後寫上發票編號或匯款後將銀行匯款單電郵或傳真到敝公司，並注明公司 名稱及發票編號。
+
+                銀行轉賬
+                帳戶名稱:BSI 太平洋有限公司
+                銀行名稱:香港上海匯豐銀行
+                銀行地址:香港中環皇后大道中一號
+                銀行號碼:004
+                港幣戶口號碼:511-289100-001
+                匯款代碼:HSBCHKHHHKH
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'VN'}">
+                Beneficiary Name: BSI Vietnam Co.,Ltd
+                Bank Account: 001-510916-061
+                Bank Name: HSBC Bank (Vietnam) Ltd
+                Bank Address: 235 Dong Khoi Street, District 1, HCMC, Vietnam
+                Swift Code : HSBCVNVX
+            </apex:panelGroup>
+            <apex:panelGroup layout="none" rendered="{!booking.Training_Event__r.Event_Country__c = 'ID'}">
+                PT BANK HSBC INDONESIA
+                World Trade Center
+                Jl.Jendral Sudiman Kav 29-31
+                Jakarta 12920, Indonesia
+                IDR Bank Account No &amp; Name:
+                050-215425-068
+                PT BSI Group Indonesia
+                Swift Code: HSBCIDJA
+            </apex:panelGroup>
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+        </apex:panelGroup>
+                
+    
+            
+    
+    
+        <!-- Payment Method INVOICE -->
+        <apex:panelGroup rendered="{!AND(booking.Payment_Method__c = 'Invoice', NOT(OR(CONTAINS(countrySetting.Flags__c,'bankTransfer'), CONTAINS(countrySetting.Flags__c,'bankDetails'))))}">
+            <apex:outputText value="{!booking.Training_Translations__r.Online_Booking_Received_Invoice__c}" />
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+            {!booking.Training_Translations__r.X14_Cht_space__c}
+    
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_DL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+            
+            <apex:panelGroup rendered="{!AND(booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning', booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c != null)}">
+                <apex:outputText escape="false" value="{!booking.Training_Translations__r.Online_Booking_Received_Text_EL_Invoice__c}" />
+                {!booking.Training_Translations__r.X14_Cht_space__c}
+            </apex:panelGroup>
+        </apex:panelGroup>
+    
+    </apex:panelGroup>
+</apex:component>

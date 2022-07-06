@@ -1,0 +1,5 @@
+<apex:page standardcontroller="Product2" extensions="bz_PartInUseMessage">
+  <apex:pageBlock id="messages" rendered="{!hasMessages}">
+           <apex:pageMessages />
+  </apex:pageBlock>
+</apex:page>

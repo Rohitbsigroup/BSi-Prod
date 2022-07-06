@@ -1,0 +1,226 @@
+<apex:page renderAs="PDF" standardController="Enrollment__c" showHeader="false" pageStyle="all" >
+<head>
+
+<!-- 
+01062018 JS Brought code from DEV3 and updated links to logos etc
+04062018 JS Removed background
+10/10/2018 - PC - used Signature from Static Resources
+  -->
+
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 landscape;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;         
+}
+.footer {
+   position: fixed;
+   left: 12mm;
+   bottom: 6mm;
+   z-index:+2;
+   font-size: 7pt;
+   line-height: 4px;
+   }
+.small8 {
+    font-size: 7pt;
+    text-align: left;
+    line-height: 4px;
+   }
+.size12 {
+    font-size: 12pt;
+    text-align: left;
+    }
+.size15 {
+    font-size: 15pt;
+    text-align: left;
+    }    
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 34px;
+    }   
+.size33 {
+    font-weight: bold;  
+    font-size: 33pt;
+    text-align: left;
+    line-height: 34px;
+    
+    }   
+</style>
+</head> 
+
+
+<!-- this sets the background template image for the certificate JS commented out 04062018-->
+
+<!--<img src="{!URLFOR($Resource.TrainingCertificatesv4, 'BSI_training_certificate_newv4-2014.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="29.7cm" height="21cm"/>-->
+<body>
+
+<!---- this creates a table to insert the text in the correct places---->
+    <table width="99%" table-layout="fixed">
+    
+        <!---- this inserts a space at the top---->
+        <tr>
+            <td width ="0.8cm" ></td>
+            <td  height="120"></td>
+            <td width ="0.8cm" ></td>
+        </tr>
+        <tr>
+            <td width ="0.8cm" ></td>
+            <td align="left" valign="bottom" height="40">
+        
+<!--brings in the text "BSI Certified Auditor or Lead Auditor"-->
+        
+            <apex:outputText styleClass="size33" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Lead'}"  value="Certified Lead Auditor"/>
+            <apex:outputText styleClass="size33" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Internal'}" value="Certified Auditor"/>
+            </td>
+        </tr>
+            
+        <tr> 
+            <td width ="0.8cm" ></td>
+            <td align="left" valign="bottom" height="50" styleClass="size12" >
+       
+<!--brings in the text to state "This is to certify that:"-->
+        
+                <apex:outputText styleClass="size12"  value="This is to certify that "/>
+            </td>
+        </tr> 
+
+<!---- this inserts a space ---->
+        <tr>
+            <td width ="0.8cm" ></td>
+            <td height="12" ></td>
+        </tr>  
+        <tr>
+            <td width="0.8cm" height="20" ></td>
+            <td align="left" valign="middle">
+        
+<!--DELEGATE NAME-->
+            <apex:outputText value="{!Enrollment__c.Delegate_name__r.Name}" styleClass="size22"/>
+            </td>
+      </tr>
+      <tr>
+      <td width ="0.8cm" ></td>
+      <td height="20"></td>
+      </tr>
+    
+      <tr> 
+        <td width ="0.8cm" ></td>
+        <td height="60"  align="left" valign="middle">
+
+<!--Text about Qualification-->
+
+           <apex:outputText styleClass="size15" value="Has successfully met the qualification criteria to become a BSI Certified" /><apex:outputText styleClass="size15"  rendered="{!IF(Enrollment__c.Certified_Auditor_Type__c = 'Lead',true,false)}" escape="false" value=" Lead"/><apex:outputText styleClass="size15" value=" Auditor for the following Management Systems Standards: {!Enrollment__c.Certified_Auditor_Standards__c}" />
+        
+        </td>   
+      </tr>    
+    </table>
+
+        <table width="99%" table-layout="fixed">      
+            <tr>
+              <td width ="0.8cm" ></td>
+              <td height="20"></td>
+            </tr>        
+        </table>
+
+
+
+<!--  SIGNATURE --------------      -------------       --------------     ---------------- -->
+
+    <table width="99%" table-layout="fixed">
+        <tr>
+            <td width ="0.8cm" ></td>
+            
+            <td frame="below" style="align:left; valign:bottom; border-bottom: 1px solid #000;" height="50"> 
+              <apex:image rendered="{!IF((Enrollment__c.Translation_Formula__c ='UK (English)'), true,false)}" height="2.5cm" width="9cm" 
+              url="{!URLFOR($Resource.TrainingCertificateSignatures, Enrollment__c.Training_Translations__r.Signature_Image__c)}"/>
+            </td>
+            <td width ="15.0cm"></td>
+        </tr>
+    </table>
+
+
+<!---- This adds the managers name under the line---->     
+    <table width="99%" align="center" table-layout="fixed" >
+        <tr>
+            <td height="30"  width="0.8cm" ></td>
+            <td valign="top" colspan="2">
+                 
+                 <apex:outputText styleClass="size12" value="{!Enrollment__c.Training_Translations__r.Training_Manager__c}"/>
+    
+                 
+            </td>
+        </tr>
+    </table>
+
+<br/>
+    <table width="100%" align="center" table-layout="fixed" >
+<!--Expiry Date: 21/07/2015 (Insert Qualification Stage Expiry Date field)-->
+        <tr>
+            <td width ="0.8cm" ></td>
+            <td   align="left" >
+              <apex:outputText styleClass="size12" value="Expiry Date: "/>
+              <apex:outputPanel > 
+                  <apex:outputtext styleClass="size12" value="{0,date,dd/MM/yyyy}"> 
+                  <apex:param value="{!Enrollment__c.Qualification_Stage_Expiry_Date__c}"/>
+                  </apex:outputText>
+             </apex:outputpanel>
+            </td> 
+        </tr>
+
+<!--Membership number: BSI1925 (Insert Personal Qualification - Membership Number field)-->
+        <tr>
+            <td width ="0.8cm" ></td>
+            <td  align="left" >
+              <apex:outputText styleClass="size12" value="Membership Number: "/><apex:outputText styleClass="size12" value="{!Enrollment__c.Personal_Qualification__r.Membership_Number__c }"/>
+            </td> 
+        </tr>
+        <tr>
+            <td height="1cm"></td>
+        </tr>
+    </table>
+
+
+        
+<!-- --------------- ---------------- LOGO  -------------- -------------- -->
+
+    <table width="100%" valign="middle" table-layout="fixed" >
+        <tr>
+             <td width ="0.8cm" ></td>
+             <td>
+                <!--DEV Logos
+                <apex:image width="120" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Lead'}" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=0159E000000JXTb&oid=00D9E0000000z8g"/>
+                <apex:image width="120" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Internal'}" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=0159E000000JXTg&oid=00D9E0000000z8g"/>
+                -->
+                <!--PRD Logos -->
+                <apex:image width="120" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Lead'}" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=015D0000004L3Oh&oid=00DD0000000mhEp"/>
+                <apex:image width="120" rendered="{!Enrollment__c.Certified_Auditor_Type__c='Internal'}" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=015D0000004L3Oc&oid=00DD0000000mhEp"/>
+                                     
+             </td>
+                
+          </tr>      
+               
+    </table>
+
+<!-- this sets out the office address in the footer at the bottom of the page -->
+<table width="100%" align="left" valign="middle" table-layout="fixed">
+<tr>
+     <td width ="0.8cm" ></td>  
+     <td  valign="bottom">
+         <apex:panelGroup styleClass="footer">
+         {!Enrollment__c.Training_Translations__r.Royal_Charter__c}<br/><br/><br/>
+         {!Enrollment__c.Training_Translations__r.Office_Address__c}
+         </apex:panelGroup>  
+     </td>     
+</tr> 
+</table>
+
+
+</body> 
+</apex:page>

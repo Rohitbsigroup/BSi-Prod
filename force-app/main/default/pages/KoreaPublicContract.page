@@ -1,0 +1,560 @@
+<apex:page renderAs="PDF" standardController="TrainingBooking__c" showHeader="false" language="ko">
+
+<head>
+        <style type="text/css" media="print" >
+            html, body
+            {
+                margin: 0;
+                padding: 0;
+                font-family: Arial Unicode MS;
+                font-size: 11px;
+            }
+            @page
+            {
+                size: A4 portrait;
+                margin: 0cm 0cm 0cm 0cm;
+                @top-left {content: element(header); width: 100%;}
+                @bottom-left {content: element(footer); width: 100%;}
+            }
+
+            
+            p.questions
+            {
+                display: block;
+                position: absolute;
+                right: 1.6cm;
+                top: 1.1cm;
+                margin: 0;
+                font-weight: 500;
+                font-size: 18px;
+                font-size: 1.8rem;
+            }
+            p.phone-no
+            {
+                display: block;
+                position: absolute;
+                right: 1.6cm;
+                top: 1.8cm;
+                margin: 0cm;
+                color: #D73000;
+                font-weight: 500;
+                font-size: 24px;
+                font-size: 2.4rem;
+            }
+            h1
+            {
+                font-size: 28px;
+                margin: 10px 0;
+            }
+            h2
+            {
+                font-weight: normal;
+                font-size: 15px;
+                margin: 1px 0;
+            }
+            h2.section-heading
+            {
+                margin: 12px 0 3px 0;
+            }
+            h3
+            {
+                font-weight: normal;
+                font-size: 13px;
+                margin: 1px 0;
+                }
+            table.page
+            {
+                width: 90%;
+                left: 4cm;
+                top:4.25cm;
+            }
+            table.full-width
+            {
+                width: 100%;
+                border: 1px solid gray;
+            }
+            table.full-width td:first-child
+            {
+                width: 35%;
+            }
+            table.multi-column
+            {
+                width: 100%;
+                border: 1px solid gray;
+            }
+            table.multi-column th td
+            {
+                font-weight: normal;
+                text-align: left;
+                vertical-align: top;
+            }
+            table.layout
+            {
+                width: 100%;
+                border: 1px solid gray;
+                vertical-align: top;
+            }
+            table.layout td
+            {
+                width: 50%;
+            }
+             table.layout1
+            {
+                width: 100%;
+                
+            }
+            table.layout1 td
+            {
+                width: 100%;
+            }
+            table.internal
+            {
+                width: 100%;
+            }
+
+        </style> 
+    </head>
+
+
+<body>
+
+<img src="{!URLFOR($Resource.BSI_Document_New_Brand)}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="21cm" height="29.7"/>
+
+
+<table width="18.4cm" align="center" table-layout="fixed">
+<tr>
+<td height ="1.8cm" ></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td width ="0cm" ></td>
+<td align="center"><h1>교육훈련 위탁계약서</h1></td>
+</tr>
+
+<tr>
+<td width ="0cm" ></td> 
+<td valign="top">
+본 계약의 “갑”과“을”은 다음과 같이 교육훈련 위탁계약을 체결한다.<br/><br/>
+<!-- cm 09-02-15 below -->
+개인정보의 수집 및 이용&nbsp;&nbsp;
+개인정보 수집 이용 목적: 고용보험 환급 관련 업무&nbsp;&nbsp;
+수집하는 개인정보의 항목: 교육생 성명, 이메일 주소, 주민등록번호, 연락처&nbsp;&nbsp;
+개인정보 보유 및 이용기간: 직업능력개발법에 따라 3년 보관하며 산업인력공단에 제공합니다.&nbsp;&nbsp;
+기타 개인정보 취급방침은 http://www.onbsi.com/Etc/Footer/Page1.html에게시되어 있습니다.<br/><br/>
+
+
+<!-- Image of check box to left of KR text saying like: I agree to the collection of personal information . (Check is required) -->
+<apex:image rendered="true" height=".4cm" width=".4cm"  url="{!$Resource.rscCheckbox_Image}"/>&nbsp;&nbsp;개인정보 수집에 동의합니다. (체크필수 사항 입니다.)<br/><br/>
+
+<h3>제1조 (계약의 범위)</h3>
+</td>
+</tr>        
+<tr>
+<td width ="0cm" ></td> 
+<td> 
+         
+<table class="layout">
+            <tr>
+                 <td class="layout1" colspan="2"><apex:outputField value="{!TrainingBooking__c.Training_Event__r.Course__r.Product_Name_Local__c}" /></td>
+              </tr>
+              <tr>   
+                <td>
+                
+                    <!-- Course Details Name,Venue and Dates -->
+                    <table class="internal">
+                    
+                       
+                        <tr>
+                            <td width="2cm"><apex:outputText value="{!$Label.TrainingBookingLocationHeader}" />:&nbsp;</td>
+                            <td><apex:outputField value="{!TrainingBooking__c.Training_Event__r.Training_Venue__r.Name}"/></td>
+                        </tr>
+                      
+                        <tr>
+                            <td><apex:outputText value="교육기간"/>:&nbsp;</td>
+                            <td>                     
+                              <apex:outputText value="{0,date,{!TrainingBooking__c.Training_Translations__r.Date_Format__c}} - ">
+                                  <apex:param value="{!TrainingBooking__c.Training_Event__r.Start_date__c}"/>
+                              </apex:outputText>
+                              <apex:outputText value="{0,date,{!TrainingBooking__c.Training_Translations__r.Date_Format__c}}">
+                                  <apex:param value="{!TrainingBooking__c.Training_Event__r.End_Date3__c}"/>
+                              </apex:outputText>
+                               
+                            </td>
+                        </tr>
+
+                    </table>
+                
+                </td>
+                <td>
+                
+                    <!-- Price Details -->
+                    <table class="internal">
+                            <tr>
+                                <td><apex:outputLabel for="Name" value="{!$ObjectType.TrainingBooking__c.fields.Name.label}"/></td>
+                                <td><apex:outputField id="Name" value="{!TrainingBooking__c.Name}"/></td>
+                            </tr>
+                            <apex:outputPanel layout="none" rendered="{!NOT(TrainingBooking__c.Number_of_Delegates__c=null)}">
+                                <tr>
+                                    <td><apex:outputLabel for="NoDelegates" value="{!$ObjectType.TrainingBooking__c.fields.Number_of_Delegates__c.label}"/></td>
+                                    <td><apex:outputField id="NoDelegates" value="{!TrainingBooking__c.Number_of_Delegates__c}"/></td>
+                                </tr>
+                            </apex:outputPanel>
+                            
+                            <tr>
+                                <td><apex:outputLabel for="NetPrice" value="{!$ObjectType.TrainingBooking__c.fields.Net_Price__c.label}"/></td>
+                                <td>
+                                    <!-- MD 15th March 2018 Modified to display Total Price if Net Price is empty -->
+                                    <!-- Expect online bookings to have a Net Price and sales bookings to have a Total Price -->
+                                    <apex:outputText id="NetPrice" rendered="{!TrainingBooking__c.Net_Price__c<>null}" 
+                                        value="{0,number,{!TrainingBooking__c.Training_Translations__r.Currency_Format__c}}">
+                                        <apex:param value="{!TrainingBooking__c.Net_Price__c}"/>
+                                    </apex:outputText>
+                                    <apex:outputText id="TotalPrice" rendered="{!TrainingBooking__c.Net_Price__c=null}" 
+                                        value="{0,number,{!TrainingBooking__c.Training_Translations__r.Currency_Format__c}}">
+                                        <apex:param value="{!TrainingBooking__c.Total_Price__c}"/>
+                                    </apex:outputText>
+                                </td>
+                            </tr>
+                            <apex:outputPanel layout="none" rendered="{!AND(TrainingBooking__c.Discount__c<>null,TrainingBooking__c.Discount__c<>0)}">
+                                <tr>
+                                    <td><apex:outputLabel for="Discount" value="{!$ObjectType.TrainingBooking__c.fields.Discount__c.label}"/></td>
+                                    <td>
+                                        <apex:outputText id="Discount" value="{0,number,{!TrainingBooking__c.Training_Translations__r.Currency_Format__c}}">
+                                            <apex:param value="{!TrainingBooking__c.Discount__c}"/>
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(TrainingBooking__c.Tax__c<>null,TrainingBooking__c.Tax__c<>0)}">
+                                <tr>
+                                    <td><apex:outputLabel for="Tax" value="{!$ObjectType.TrainingBooking__c.fields.Tax__c.label}"/></td>
+                                    <td>
+                                        <apex:outputText id="Tax" value="{0,number,{!TrainingBooking__c.Training_Translations__r.Currency_Format__c}}">
+                                            <apex:param value="{!TrainingBooking__c.Tax__c}"/>
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                           <!-- MD 15th March 2018 Total Price displayed above, not needed here -->
+                           <!-- MD COMMENTED OUT FROM HERE
+                           <apex:outputPanel layout="none" rendered="{!AND(TrainingBooking__c.Total_Price__c<>null,TrainingBooking__c.Total_Price__c<>0)}">
+                                <tr>
+                                    <td><apex:outputLabel for="TotalPrice" value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.label}"/></td>
+                                    <td>
+                                        <apex:outputText id="TotalPrice" value="{0,number,{!TrainingBooking__c.Training_Translations__r.Currency_Format__c}}">
+                                            <apex:param value="{!TrainingBooking__c.Total_Price__c}"/>
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                             MD COMMENTED OUT TO HERE -->
+                    </table>
+                
+                </td>
+            </tr>
+        </table>
+ 
+<!-- Contact details ------>
+<h3><apex:outputLabel value="{!$Label.TrainingBookingConfirmationPrintContact}"/></h3>
+<table class="layout">
+
+            <tr>
+                <td>
+                
+                    <!-- Contact Name and Email  -->
+                    <table class="internal">
+
+                    <tr>
+                        <td><apex:outputLabel value="이름"/></td>
+                        <td><apex:outputField value="{!TrainingBooking__c.Last_Name__c}"/><apex:outputField value="{!TrainingBooking__c.First_Name__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputLabel for="EmailAddress" value="{!$ObjectType.TrainingBooking__c.fields.Email_Address__c.label}"/></td>
+                        <td><apex:outputField id="EmailAddress" value="{!TrainingBooking__c.Email_Address__c}"/></td>
+                    </tr>
+                    
+                    
+                    
+                    </table>
+                    </td>
+                    <td>
+                    <!-- Contact Phone and Mobile  -->
+                    <table class="internal">
+                    <tr>
+                        <td><apex:outputLabel for="ContactPhone" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Phone__c.label}"/></td>
+                        <td><apex:outputField id="ContactPhone" value="{!TrainingBooking__c.Contact_Phone__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputLabel for="ContactMobile" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Mobile__c.label}"/></td>
+                        <td><apex:outputField id="ContactMobile" value="{!TrainingBooking__c.Contact_Mobile__c}"/></td>
+                    </tr>
+                    
+                    
+                    </table>
+               </td>
+            </tr>                   
+</table>                    
+
+
+        <!-- Other details -->
+        <h3 class="section-heading">사업자 정보 (전자계산서 발행 정보와 다를 경우 연락바랍니다.)</h3>
+        <table class="layout">
+            <tr>
+                <td>
+                
+                    <!-- Company address -->
+                    <table class="internal">
+
+                        <tr>
+                            <td><apex:outputLabel for="CompanyName" value="{!$ObjectType.TrainingBooking__c.fields.Company_Name__c.label}"/></td>
+                            <td><apex:outputField id="CompanyName" value="{!TrainingBooking__c.Company_Name__c}"/></td>
+                        </tr>
+                        
+                        <tr>
+                            <td ><apex:outputLabel for="KRRep" value="{!$ObjectType.TrainingBooking__c.fields.Representatives__c.label}"/></td>
+                            <td><apex:outputField id="KRRep" value="{!TrainingBooking__c.Representatives__c}"/></td>
+                            
+                        </tr>
+                        
+                        <tr>
+                            <td><apex:outputLabel for="BusinessNumber" value="{!$ObjectType.TrainingBooking__c.fields.Business_Number__c.label}"/></td>
+                            <td><apex:outputField id="BusinessNumber" value="{!TrainingBooking__c.Business_Number__c}"/></td>                               
+                                
+                            
+                         </tr>
+                         <tr>
+                             <td><apex:outputLabel for="TypyeofIndustry" value="{!$ObjectType.TrainingBooking__c.fields.Type_Of_Industry__c.label}"/></td>
+                             <td><apex:outputField id="TypyeofIndustry" value="{!TrainingBooking__c.Type_Of_Industry__c}"/></td>
+                         </tr>
+
+                         <tr>
+                <td></td>
+                <td></td>
+                         </tr>
+                        
+                    </table>
+                
+                </td>
+                <td>
+                
+                    <!-- Contact address -->
+                    <table class="internal">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><apex:outputLabel for="CompanyCityKorea" value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label}"/></td>
+                                <td><apex:outputField id="CompanyCityKR" value="{!TrainingBooking__c.Company_City__c}"/></td>
+                            </tr>
+                            <tr>
+                                <td><apex:outputLabel for="CompanyStreetKorea" value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label}"/></td>
+                                <td><apex:outputField id="CompanyStreetKR" value="{!TrainingBooking__c.Company_Street__c}"/></td>
+                            </tr>
+                            <tr>
+                                <td><apex:outputLabel for="CompanyPostcodeKorea" value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}"/></td>
+                                <td><apex:outputField id="CompanyPostcodeKR" value="{!TrainingBooking__c.Company_Postcode__c}"/></td>
+                         </tr>
+                                                                                            
+                     </table>
+                
+                </td>
+            </tr>
+        </table>
+
+        <!-- Delegate details -->
+        <h3 class="section-heading">{!$Label.TrainingBookingConfirmationPrintDelegates}</h3>
+        <table class="multi-column">
+            <tr>
+                <th>
+                    <apex:outputLabel for="BookerLastName" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name__c.label}"/>
+                </th>
+                <th>
+                        <apex:outputLabel for="BookerFirstNameEast" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}"/>
+                </th>
+                <th>
+                    <apex:outputLabel for="BookerEmailAddress" value="{!$ObjectType.TrainingDelegate__c.fields.Email_Address__c.label}"/>
+                </th>
+                <apex:outputPanel layout="none" rendered="{!TrainingBooking__c.Training_Event__r.Course__r.Training_Event_Residential__c}">
+                    <th>
+                        <apex:outputLabel for="BookerAccommodationReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_Required__c.label}"/>
+                    </th>
+                </apex:outputPanel>
+                    <th>
+                        <apex:outputLabel value="{!$ObjectType.TrainingDelegate__c.fields.Social_Security_Number__c.label}"/>
+                        <!-- <apex:outputtext value="주민등록번호"/> -->
+                    </th>
+                    <th>
+                        <apex:outputLabel value="{!$ObjectType.TrainingDelegate__c.fields.Mobile_Number__c.label}"/>
+                        <!-- <apex:outputtext value="모바일"/> -->
+                    </th>
+                <!-- 30/08/2017 MD - Project 56 Enhancements - Start Part 4 -->
+                <!--               - Display column headers for Online Exam/Standard if any delegates have these options -->
+                <apex:outputPanel layout="none" rendered="{!NOT(TrainingBooking__c.Delegates_inc_exam__c=null)}">
+                    <th>
+                        <h3><apex:outputLabel for="DelegateIncludeOnlineExam" value="{!$ObjectType.TrainingDelegate__c.fields.Online_Exam__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                
+                <apex:outputPanel layout="none" rendered="{!NOT(TrainingBooking__c.Delegates_inc_standard__c=null)}">
+                    <th>
+                        <h3><apex:outputLabel for="DelegateIncludeOnlineStandard" value="{!$ObjectType.TrainingDelegate__c.fields.Standard__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>                
+                <!-- 30/08/2017 MD - Project 56 Enhancements - Finish Part 4 -->
+            </tr>
+            <apex:repeat value="{!TrainingBooking__c.Training_Delegates__r}" var="d">
+                <tr>
+                <!-- If Conversion Contact set, take Name etc. from related Contact using Local Name if set. Otherwise take directly from Training Delegate. -->
+                <apex:outputPanel layout="none" rendered="{!AND(d.Conversion_Contact__c<>null,d.Conversion_Contact__r.LastNameLocal=null)}">
+                    <td><apex:outputField id="BookerLastNameCC" value="{!d.Conversion_Contact__r.LastName}"/></td>
+                    <td><apex:outputField id="BookerFirstNameCC" value="{!d.Conversion_Contact__r.FirstName}"/></td>
+                    <td><apex:outputField id="BookerEmailAddressCC" value="{!d.Conversion_Contact__r.Email}"/></td>
+                    <td><apex:outputtext value="{!d.Social_Security_Number__c}"/></td>
+                    <td><apex:outputtext value="{!d.Conversion_Contact__r.MobilePhone}"/></td>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(d.Conversion_Contact__c<>null,d.Conversion_Contact__r.LastNameLocal<>null)}">
+                    <td><apex:outputField id="BookerLastNameLCC" value="{!d.Conversion_Contact__r.LastNameLocal}"/></td>
+                    <td><apex:outputField id="BookerFirstNameLCC" value="{!d.Conversion_Contact__r.FirstNameLocal}"/></td>
+                    <td><apex:outputField id="BookerEmailAddressLCC" value="{!d.Conversion_Contact__r.Email}"/></td>
+                    <td><apex:outputtext value="{!d.Social_Security_Number__c}"/></td>
+                    <td><apex:outputtext value="{!d.Conversion_Contact__r.MobilePhone}"/></td>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!d.Conversion_Contact__c=null}">
+                    <td><apex:outputField id="BookerLastName" value="{!d.Last_Name__c}"/></td>
+                    <td><apex:outputField id="BookerFirstNameEast" value="{!d.First_Name__c}"/></td>
+                    <td><apex:outputField id="BookerEmailAddress" value="{!d.Email_Address__c}"/></td>
+                    <td><apex:outputtext value="{!d.Social_Security_Number__c}"/></td>
+                    <td><apex:outputtext value="{!d.Mobile_Number__c}"/></td>
+                </apex:outputPanel>
+               <!-- 30/08/2017 MD - Project 56 Enhancements - Start Part 5 -->
+               <!--               - Display Online Exam and Standard checkboxes if these columns are included in table -->
+               <apex:outputPanel layout="none" rendered="{!NOT(TrainingBooking__c.Delegates_inc_exam__c=null)}">
+                   <td><apex:outputField id="DelegateIncludeOnlineExam" value="{!d.Online_Exam__c}"/></td>
+               </apex:outputPanel>
+
+               <apex:outputPanel layout="none" rendered="{!NOT(TrainingBooking__c.Delegates_inc_standard__c=null)}">
+                   <td><apex:outputField id="DelegateIncludeOnlineStandard" value="{!d.Standard__c}"/></td>
+               </apex:outputPanel>                 
+               <!-- 30/08/2017 MD - Project 56 Enhancements - Finish Part 5 -->
+                </tr>
+            </apex:repeat>
+        </table>
+
+       <!-- MD 01/09/2017 New table for capture of Bank Details -->
+        <h3 class="section-heading">환급금 수령 법인계좌 및 담당자 정보</h3>
+        <table class="multi-column">
+            <tr height="5000">
+                <th>
+                    <apex:outputLabel for="NameOfBank" value="은행명"/>
+                </th>
+                <th>
+                    <apex:outputLabel for="AccountNumber" value="계좌번호"/>
+                </th>
+                <th>
+                    <apex:outputLabel for="AccountHolder" value="예금주"/>
+                </th>
+                <th>
+                    <apex:outputLabel for="Manager" value="담당자"/>
+                </th>
+                <th>
+                    <apex:outputLabel for="ContactEmail" value="담당자 이메일"/>
+                </th>
+            </tr>
+            <tr>
+                  <td colspan="5">&nbsp;</td>
+            </tr>
+        </table>
+
+
+<table class="layout1"> 
+<tr>
+<td width ="16cm">
+
+<b>교육비 납부 정보: 국민은행/995737-01-000628/㈜비에스아이그룹코리아</b><br/> 
+<b>제2조 (계약기간 및 인원)</b><br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 가. 계약기간은 훈련을 수행하는 기간으로 훈련이 종료되는 시점까지를 의미한다.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 나. “갑”은 교육비 전액을 “을”에게 납부하고 훈련과정을 수료한 자에 한하여 “을”이 한국산업인력공단에 환급금을 신청하여 수령 후 <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;“갑”에게 지급하는 방식(2형)을 따르며, 교육 종료 후 2개월 이내에 “갑”에게 지급한다.<br/>
+ 
+<b>제3조 (훈련진행에 관한 사항)</b> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;“갑”은 “을”이 정하는 훈련시간에 위탁훈련생들이 성실히 훈련을 받을 수 있도록 하여야 하고 다만, 부득이한<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;사유로 훈련을 받을 수 없을 경우 “을”과 사전협의를 하여야 한다.<br/>
+   
+<b>제4조 (수료)</b> “을”은 훈련과정 지정상의 훈련수료기준을 통과한 훈련생에 대해서는 수료처리하고 수료증을 발급한다.<br/> 
+ 
+<b>제5조 (성실의무)</b><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 가. “갑”과 “을”은 본 계약서에 의거 훈련목표가 이루어질 수 있도록 상호 협력하여 제반 사항을 성실히 이행하여야 한다.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 나. 허위•부정한 방법으로 훈련을 실시하는 등 “을”의 귀책사유로 인•지정 관할지방노동관서의 장에 의해 당해 <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;훈련과정이 취소되어 “갑”이 고용보험법 및 근로자직업능력개발법에 의한 훈련비용을 지원 받을 수<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;없는 경우에 “을”이 책임을 진다.<br/>
+     
+<b>제6조 (해석 및 합의)</b> 본 계약서상에 명시 되지 아니한 사항은 쌍방이 협의한 바에 따른다.  <br/>
+
+</td>   
+</tr>
+<tr>
+
+<td align="right">계약일자:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;년&nbsp;&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</td>
+</tr>
+</table>
+            
+<!-- Signature and stamp ------>
+
+<table class="layout1">
+
+            <tr>
+                <td>
+                
+                    <!-- For signature -->
+                    <table class="internal">
+                    <tr>
+                        <td colspan="2"><h3><apex:outputtext value="'갑'"/></h3></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputtext value="회사명"/></td>
+                        <td ></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputtext value="주  소"/></td>
+                        <td ></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputtext value="대표자"/></td>
+                        <td >(인)</td>
+                    </tr>
+
+                    </table>
+                    </td>
+                    <td>
+                    <!-- Stamp MD TBD CHANGE IMAGE TO RESOURCE - DOESN'T RENDER AS IS-->
+                    <table width="9cm">
+                    <tr>
+                        <td colspan="2"><h3><apex:outputtext >'을'</apex:outputtext></h3></td>
+                    </tr>
+                    <tr>
+                        <td><apex:outputtext value="회 사 명: ㈜비에스아이그룹코리아"/></td>
+                        <td ></td>
+                    </tr>
+                    <tr>
+                        <td style="align: left; valign: bottom;">주    소: 서울 종로구 인사동5길 29 태화빌딩 8층<apex:image style="position:absolute;left:490px;z-index:-1;margin:0 0 -15px 0;" width="1.2cm" height="1.2cm" url="{!$Resource.rscBSI_Korea_Stamp_for_Contract}"/></td>                 
+                    </tr>
+                    <tr>
+
+                        <td><apex:outputtext >대표이사:이 종 호   (인)</apex:outputtext></td>
+                        <td ></td>
+                     </tr>
+                    
+
+                    </table>
+               </td>
+            </tr>  
+                          
+</table>
+</td>
+</tr>
+</table>
+</body>
+</apex:page>

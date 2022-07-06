@@ -1,0 +1,233 @@
+<apex:page controller="TrainingBookingOgone"
+    action="{!processor}"
+    language="{!pageLanguage}"
+    standardstylesheets="false"
+    showheader="false"
+    cache="false"
+    applyBodyTag="false"
+    applyHtmlTag="false"
+    docType="html-5.0">
+    <!-- PK(NEB) 12 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <!-- JS 20180920 Updated privacyURL render logic and added updated submit button-->
+
+    <!-- Display the HTML than invokes 3D Secure -->
+    <apex:outputText value="{!response}" escape="false" rendered="{!paramMode='3D'}" />
+
+    <!-- Displayed the default display -->
+    <apex:panelGroup layout="none" rendered="{!NOT(paramMode='3D')}">
+    <html>
+        <head>
+            <title>{!$Label.TrainingBookingTitle}</title>
+            <!-- PK(NEB) 13 Sep 2018 - Added mobile support -->
+            <meta name="viewport" content="width=device-width" />
+            <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}" />
+            <!--[if lte IE 7]>;
+                <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Legacy.css')}" />
+            <![endif]-->
+
+            <!-- PK(NEB) 12 Sep 2018 - Added mobile specific stylesheet -->
+            <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+
+            <!-- *** General show/hide function *** -->
+            <script type="text/javascript">
+                function divOnOff(id) {
+                    var tag = document.getElementById(id);
+                    if (tag.style.display !== 'none') {
+                        tag.style.display = 'none';
+                    }
+                    else {
+                        tag.style.display = 'block';
+                    }
+                }
+            </script>
+
+            <!-- *** Google Analytics *** -->
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-21147145-1']);
+                _gaq.push(['_setDomainName', 'force.com']);
+                _gaq.push(['_setAllowLinker', true]);
+                _gaq.push(['_trackPageview', 'Step5']);
+
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+            </script>
+
+        </head>
+        <body>
+            <div class="wrapper">
+                <div class="page">
+
+                    <div class="header">
+                        <a class="logo" href="http://bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                        <p class="site-strap ir">Making excellence a habit</p>
+                        <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                        <p class="phone-no">
+                            <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                            <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}" />
+                        </p>
+                    </div> <!-- /.header -->
+
+                    <div class="main">
+
+                        <ul class="progress clearfix">
+                            <!-- PK(NEB) 12 Sep 2018 - Added new span tags for specific classes for mobile -->
+                            <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                                <li class="{!IF(pageStep = 1,'current-step','inactive-step')}"><span class="step-label-1">{!$Label.TrainingBookingStep1}</span></li>
+                                <li class="{!IF(pageStep = 2,'current-step','inactive-step')}"><span class="step-label-2">{!$Label.TrainingBookingStep2}</span></li>
+                                <li class="{!IF(pageStep = 3,'current-step','inactive-step')}"><span class="step-label-3">{!$Label.TrainingBookingStep3}</span></li>
+                                <li class="{!IF(OR(pageStep = 4, pageStep = 5),'current-step','inactive-step')}"><span class="step-label-4">{!$Label.TrainingBookingStep4}</span></li>
+                                <li class="{!IF(pageStep = 6,'current-step','inactive-step')}"><span class="step-label-5">{!$Label.TrainingBookingStep6}</span></li>
+                            </apex:outputPanel>
+                        </ul>
+
+
+                        <!-- *** Details *** -->
+                        <h1 class="title">{!courseName}</h1>
+                        <apex:outputPanel rendered="{!pageShowSelection}">
+                            <h2 class="subtitle">
+                                <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                                <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                            </h2>
+                            <h2 class="subtitle">
+                                <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                                <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                            </h2>
+                        </apex:outputPanel>
+
+                        <apex:messages id="messages" styleClass="messages" />
+
+                        <!-- *** Introduction *** -->
+                        <p class="intro">{!$Label.TrainingBookingOgoneIntro}</p>
+                        <apex:image style="margin-top: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'VISA.gif')}"/>
+                        <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'mastercard.gif')}"/>
+
+                        <!-- *** Body *** -->
+                        <apex:panelGroup layout="block" styleClass="two-thirds">
+                            <!-- Submit card details to the Ogone Alias Gateway -->
+                            <form name="ogone" action="{!ALIASGATEWAY_URL}" method="post" onsubmit="return validate(this);" >
+                                <h2 class="subtitle-first">{!$Label.TrainingBookingOgoneHeading}</h2>
+                                <fieldset class="form-fields">
+                                    <div class="field-item">
+                                        <apex:outputLabel value="{!$Label.TrainingBookingOgoneCardholdersName} *" />
+                                        <input name="CN" type="text" maxlength="50" value="{!cn}" />
+                                    </div>
+                                    <!--<div class="field-item">
+                                        <apex:outputLabel value="{!$Label.TrainingBookingOgoneCardType} *" />
+                                        <select name="BRAND" size="1">
+                                            <apex:outputText escape="false" rendered="{!brand='MasterCard'}">
+                                                <option selected="selected">MasterCard</option>
+                                            </apex:outputText>
+                                            <apex:outputText escape="false" rendered="{!NOT(brand='MasterCard')}">
+                                                <option>MasterCard</option>
+                                            </apex:outputText>
+                                            <apex:outputText escape="false" rendered="{!brand='VISA'}">
+                                                <option selected="selected">VISA</option>
+                                            </apex:outputText>
+                                            <apex:outputText escape="false" rendered="{!NOT(brand='VISA')}">
+                                                <option>VISA</option>
+                                            </apex:outputText>
+                                        </select>
+                                    </div>-->
+                                    <div class="field-item">
+                                        <apex:outputLabel value="{!$Label.TrainingBookingOgoneCardNumber} *" />
+                                        <input name="CARDNO" type="text" maxlength="35" value="{!cardno}" />
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel value="{!$Label.TrainingBookingOgoneCvc} *" />
+                                        <input name="CVC" type="text" maxlength="6" value="{!cvc}" class="short" />
+                                        <a href="#" class="tooltip-button" onclick="divOnOff('{!$Component.CvcTooltip}');return false;">
+                                            <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'info.gif')}"/>
+                                        </a>
+                                        <apex:outputText id="CvcTooltip" style="display: none;" styleClass="tooltip-below" value="{!$Label.TrainingBookingOgoneCvcTooltip}" />
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel value="{!$Label.TrainingBookingOgoneExpiryDate} *" />
+                                        <input name="ED" type="text" maxlength="4" value="{!ed}" class="short" />
+                                    </div>
+                                    <input name="ACCEPTURL" type="hidden" value="{!pageUrl}?MODE=ALIAS" />
+                                    <!-- 22 Nov 2016 Vim added code to get Invoicing and Delivery customer to show on Ogone Translation Page Layout -->
+                                    <input name="ECOM_BILLTO_POSTAL_NAME_FIRST" type="hidden" value="{!objBooking.Billing_Name__c}" />
+                                    <input name="ECOM_SHIPTO_POSTAL_NAME_FIRST" type="hidden" value="{!objBooking.First_Name__c} {!objBooking.Last_Name__c}" />
+                                    <!-- Vim code ends -->
+                                    <input name="EXCEPTIONURL" type="hidden" value="{!pageUrl}?MODE=ALIAS" />
+                                    <input name="ORDERID" type="hidden" value="{!objBooking.Name}" />
+
+                                    <input name="PSPID" type="hidden" value="{!PSPID}" />
+                                    <input name="PARAMPLUS" type="hidden" value="CT={!paramCountry}&L={!paramLanguage}&ID={!objBooking.Id}" />
+                                    <input name="SHASIGN" type="hidden" value="{!aliasGatewayShaIn}" />
+
+                                </fieldset>
+                                <div style="float: left; width: auto; margin-bottom: 15px;">
+                                    <input name="SUBMIT" type="submit" value="Submit" />
+                                    <apex:image id="ACTIVE" style="visibility: hidden; margin-top: 5px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'ajax-loader.gif')}"/>
+                                </div>
+
+                                <!-- *** Basic form validation *** -->
+                                <script type="text/javascript">
+                                    function validate(form) {
+                                        form.SUBMIT.disabled = true;
+                                        var active = document.getElementById('{!$Component.ACTIVE}');
+                                        if (active != null) active.style.visibility = 'visible';
+                                        return true;
+                                    }
+                                </script>
+
+                            </form>
+                        </apex:panelGroup>
+
+                        <!-- *** Notes *** -->
+                        <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                            <p>{!$Label.TrainingBookingOgoneNotes}</p>
+                        </apex:outputPanel>
+
+                        <!-- *** Invoice instead option *** -->
+                        <apex:outputPanel layout="block" styleClass="notes" rendered="{!selectedCountry.isInvoiceAllowed}">
+                            <apex:form >
+                                <apex:commandLink action="{!invoiceInstead}" value="{!$Label.TrainingBookingInvoiceInstead}" immediate="true" />
+                            </apex:form>
+                        </apex:outputPanel>
+
+                    </div> <!-- /.main -->
+
+                    <div class="footer">
+                        <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                        <ul>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}"> 
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                        </ul>
+                    </div> <!-- /.footer -->
+
+                </div> <!-- /.page -->
+            </div> <!-- /.wrapper -->
+        </body>
+    </html>
+    </apex:panelGroup>
+</apex:page>

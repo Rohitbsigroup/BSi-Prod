@@ -1,0 +1,247 @@
+<apex:page standardController="Project__c" extensions="emq_ProjectController">
+    <apex:sectionHeader title="Project Edit" rendered="{!project.Id != ''}" />
+    <apex:sectionHeader title="Project New" rendered="{!project.Id == ''}" />
+    <apex:form >
+        <style>
+            .data2Col {
+                border-bottom: none !important;
+                padding-left:0 !important;
+            }
+            .dataCol {
+                width:auto !important;
+            }
+        </style>
+        <script type="text/javascript">
+		    function clearSpecifierSelection(specifierId) {
+		        var specifier = document.getElementById(specifierId);
+	        	specifier.selectedIndex = -1;
+		    }
+		</script>
+    <apex:pageBlock >
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Save" action="{!save}"/>
+            <apex:commandButton value="Cancel" action="{!cancel}"/>            
+        </apex:pageBlockButtons>
+         <apex:outputPanel id="errorMessages"><apex:pageMessages ></apex:pageMessages></apex:outputPanel>
+        <apex:pageBlockSection columns="1">
+            <!-- Render output field for editing record & input field for new record -->
+            <apex:outputField value="{!project.Project_Family__c}" rendered="{!project.Id != ''}" />
+            
+            <apex:pageBlockSection columns="1">
+                <!--For product certification stream render different section itself on change-->
+                <apex:inputField value="{!project.Project_Family__c}" rendered="{!project.Id == ''}" style="display:none" label="">
+                    <apex:actionsupport event="onchange" action="{!onProjectFamilyChange}" rerender="professionalServices,customisedAudits,productCertification"/>
+                </apex:inputField>
+            </apex:pageBlockSection>
+            
+            <!-- Professional services section -->
+            <apex:pageBlockSection columns="1" id="professionalServices">
+                <apex:pageBlockSection columns="1" rendered="{!project.Project_Family__c == 'Professional Services'}">
+                    <apex:outputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id == ''}" />
+                    
+                    <apex:outputField value="{!project.Project_Template__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.Project_Template__c}" rendered="{!project.Id == ''}" />
+                    
+                    <apex:inputField value="{!project.Project_Name__c}" />
+                    
+                    <apex:inputField value="{!project.Project_Start_Date__c}"/>
+                    <apex:inputField value="{!project.Project_End_Date__c}" />
+                    <apex:inputField value="{!project.External_Project_ID__c}"/>
+                    <apex:inputField value="{!project.Project_Status__c}" rendered="{!project.Id != ''}"/>
+                    <apex:inputField value="{!project.Active__c}" rendered="{!project.Id != ''}"/>
+                    
+                    <apex:outputField value="{!project.Name}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Account__c}" rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Product__c}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputLabel rendered="{!project.Id != ''}"></apex:outputLabel>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+            
+            <!-- Customized Audits section -->
+            <apex:pageBlockSection columns="1" id="customisedAudits">
+                <apex:pageBlockSection columns="1" rendered="{!project.Project_Family__c == 'Customized Audits'}">
+                    <apex:outputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id == ''}">
+                        <apex:actionsupport event="onchange" action="{!onProjectFamilyChange}" rerender="customisedAuditSearch,productSearchResults"/>
+                    </apex:inputField>
+                    
+                    <apex:outputPanel id="customisedAuditSearch">
+                        <apex:pageBlockSection columns="5" title="Search" rendered="{!project.Id == ''}">
+                            <apex:inputText value="{!productName}">
+                                <apex:outputLabel value="Product Name " />
+                            </apex:inputText>
+                            <apex:commandButton action="{!searchCustomisedAuditProducts}" value="Search" id="Search" status="status" reRender="productSearchResults,errorMessages"/>
+                        </apex:pageBlockSection>
+                        
+                        <apex:outputPanel id="productSearchResults" rendered="{!project.Id == ''}">
+                            <apex:pageBlockTable value="{!products}" var="prod" style="width:100%">
+                                <apex:column headervalue="Select">
+                                    <apex:actionSupport event="onclick" action="{!selectProduct}" reRender="configurationType,certificationType, errorMessages, directTesting, projectName, registrationPath, specifier">
+                                        <input type="radio" name="selectedProduct" />
+                                        <apex:param name="selectedProductId" value="{!prod.Id}" />
+                                    </apex:actionSupport>                
+                                </apex:column>
+                                <apex:column headervalue="Product Name" value="{!prod.Name}">
+                                </apex:column>
+                            </apex:pageBlockTable>
+                            <div style="width:100%;text-align:center;padding:10px;">
+                                <apex:outputLabel value="No products match the search criteria, use filters above to refine the results." rendered="{!products.size == null || products.size == 0}" />
+                            </div>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+					
+		            <apex:outputField value="{!project.Specifier__c}" rendered="{!project.Id != ''}" />
+		            <apex:outputLabel value="Specifier" />
+                    <apex:selectList multiselect="true" size="4" value="{!selectedSpecifiers}" id="specifier" rendered="{!project.Id == ''}" style="width:180px">                    	
+                    	<apex:selectOptions value="{!availableSpecifiers}"/>
+		            </apex:selectList>
+		            <apex:outputPanel rendered="{!project.Id == ''}">
+		            	<button onclick="clearSpecifierSelection('{!$Component.specifier}')" type="button" style="width:180px">Clear Specifier Selection</button>
+		            </apex:outputPanel>
+		            
+                    <apex:outputField value="{!project.RegistrationPath__c}" rendered="{!project.Id != ''}" />
+                    <apex:selectList multiselect="false" size="1" value="{!project.RegistrationPath__c}" id="registrationPath" rendered="{!project.Id == ''}">
+                    	<apex:selectOptions value="{!availableRegistrationPaths}"/>
+		            </apex:selectList>
+		            
+		            <apex:outputField value="{!project.ContractParty__c}" rendered="{!project.Id != ''}"/>
+		            <apex:inputField value="{!project.ContractParty__c}" rendered="{!project.Id == ''}"/>
+                                                           
+                    <apex:inputField value="{!project.Project_Name__c}" id="projectName" />                    
+                    <apex:inputField value="{!project.External_Project_ID__c}"/>
+                    <apex:inputField value="{!project.Project_Status__c}" rendered="{!project.Id != ''}"/>
+                    <apex:inputField value="{!project.Active__c}" rendered="{!project.Id != ''}"/>
+                    
+                    <apex:outputField value="{!project.Name}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Account__c}" rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Product__c}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputLabel rendered="{!project.Id != ''}"></apex:outputLabel>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+            
+            <!-- Regulatory Services section -->
+            <apex:pageBlockSection columns="1" id="regulatoryServices">
+                <apex:pageBlockSection columns="1" rendered="{!project.Project_Family__c == 'Regulatory Services'}">
+                    
+                    <apex:outputPanel id="regulatoryServicesSearch">
+                        <apex:pageBlockSection columns="5" title="Search" rendered="{!project.Id == ''}">
+                            <apex:inputText value="{!productName}">
+                                <apex:outputLabel value="Product Name " />
+                            </apex:inputText>
+                            <apex:commandButton action="{!searchRegulatoryServicesProducts}" value="Search" id="Search" status="status" reRender="productSearchResults,errorMessages"/>
+                        </apex:pageBlockSection>
+                        
+                        <apex:outputPanel id="productSearchResults" rendered="{!project.Id == ''}">
+                            <apex:pageBlockTable value="{!products}" var="prod" style="width:100%">
+                                <apex:column headervalue="Select">
+                                    <apex:actionSupport event="onclick" action="{!selectProduct}" reRender="configurationType,certificationType, errorMessages, directTesting, projectName, registrationPath">
+                                        <input type="radio" name="selectedProduct" />
+                                        <apex:param name="selectedProductId" value="{!prod.Id}" />
+                                    </apex:actionSupport>                
+                                </apex:column>
+                                <apex:column headervalue="Product Name" value="{!prod.Name}">
+                                </apex:column>
+                            </apex:pageBlockTable>
+                            <div style="width:100%;text-align:center;padding:10px;">
+                                <apex:outputLabel value="No products match the search criteria, use filters above to refine the results." rendered="{!products.size == null || products.size == 0}" />
+                            </div>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+										
+                    <apex:outputField value="{!project.RegistrationPath__c}" rendered="{!project.Id != ''}" />
+                    <apex:selectList multiselect="false" size="1" value="{!project.RegistrationPath__c}" id="registrationPath" rendered="{!project.Id == ''}">
+                    	<apex:selectOptions value="{!availableRegistrationPaths}"/>
+		            </apex:selectList>
+                                                           
+                    <apex:inputField value="{!project.Project_Name__c}" id="projectName" />                    
+                    <apex:inputField value="{!project.External_Project_ID__c}"/>
+                    <apex:inputField value="{!project.Project_Status__c}" rendered="{!project.Id != ''}"/>
+                    <apex:inputField value="{!project.Active__c}" rendered="{!project.Id != ''}"/>
+                    
+                    <apex:outputField value="{!project.Name}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Account__c}" rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Product__c}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputLabel rendered="{!project.Id != ''}"></apex:outputLabel>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+            
+            <!-- Product certification section -->
+            <apex:pageBlockSection columns="1" id="productCertification">
+                <apex:pageBlockSection columns="1" rendered="{!project.Project_Family__c == 'Product Certification'}">
+                    <apex:outputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.Area_of_Practice__c}" rendered="{!project.Id == ''}" />
+                    
+                    <apex:outputField value="{!project.SubPractice__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.SubPractice__c}" rendered="{!project.Id == ''}" />
+                    
+                    <apex:pageBlockSection columns="5" title="Search" rendered="{!project.Id == ''}" >
+                        <apex:inputText value="{!productName}">
+                            <apex:outputLabel value="Product Name " />
+                        </apex:inputText>
+                        <apex:inputText value="{!standard}">
+                            <apex:outputLabel value="Standard " />
+                        </apex:inputText>   
+                        <apex:commandButton action="{!searchProducts}" value="Search" id="Search" status="status" reRender="productSearchResults,errorMessages"/>
+                    </apex:pageBlockSection>
+                    
+                    <apex:outputPanel id="productSearchResults" rendered="{!project.Id == ''}" >
+                        <apex:pageBlockTable value="{!products}" var="prod" style="width:100%">
+                            <apex:column headervalue="Select">
+                                <apex:actionSupport event="onclick" action="{!selectProduct}" reRender="configurationType,certificationType, errorMessages, directTesting, projectName, registrationPath">
+                                    <input type="radio" name="selectedProduct" />
+                                    <apex:param name="selectedProductId" value="{!prod.Id}" />
+                                </apex:actionSupport>                
+                            </apex:column>
+                            <apex:column headervalue="Product Name" value="{!prod.LongProductName__c}">
+                            </apex:column>
+                            <apex:column headervalue="Standard" value="{!prod.Standard__c}">
+                            </apex:column>                            
+                            <apex:column headervalue="Client Sector" value="{!prod.ClientSector__c}">
+                            </apex:column>
+                        </apex:pageBlockTable>
+                        <div style="width:100%;text-align:center;padding:10px;">
+                            <apex:outputLabel value="No products match the search criteria, use filters above to refine the results." rendered="{!products.size == null || products.size == 0}" />
+                        </div>
+                    </apex:outputPanel>
+                    
+                    <apex:outputField value="{!project.CertificationType__c}" rendered="{!project.Id != ''}" />
+                    <apex:selectCheckboxes value="{!selectedCertificationTypes}" rendered="{!project.Id == ''}" id="certificationType">
+                        <apex:outputLabel value="Certificate Type" />
+                        <apex:selectOptions value="{!availableCertTypes}"></apex:selectOptions>
+                    </apex:selectCheckboxes>
+                    
+                    <apex:outputField value="{!project.DirectTesting__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputCheckbox value="{!project.DirectTesting__c}" rendered="{!project.Id == ''}" disabled="{!!directTestingAvailable}" id="directTesting"/>
+                    
+                    <apex:outputField value="{!project.RegistrationPath__c}" rendered="{!project.Id != ''}" />
+                    <apex:inputField value="{!project.RegistrationPath__c}" rendered="{!project.Id == ''}" id="registrationPath">
+                        <apex:actionSupport event="onclick" action="{!updateConfiguratorType}" reRender="configurationType,errorMessages">
+                        </apex:actionSupport>    
+                    </apex:inputField>
+                    
+                    <apex:outputField value="{!project.Project_Template__c}" rendered="{!project.Id != ''}" />
+                    <apex:outputField value="{!project.ConfigurationType__c}" id="configurationType" />
+                    
+                    <apex:inputField value="{!project.Project_Name__c}" id="projectName" />
+                    
+                    <apex:inputField value="{!project.ProjectStartDate__c}"/>
+                    <apex:inputField value="{!project.ProjectEndDate__c}" />
+                    <apex:inputField value="{!project.External_Project_ID__c}"/>
+                    
+                    <apex:inputField value="{!project.NotesClauses__c}" style="width:500px;height:100px;" />
+                    
+                    <apex:inputField value="{!project.Project_Status__c}" rendered="{!project.Id != ''}"/>
+                    <apex:inputField value="{!project.Active__c}" rendered="{!project.Id != ''}"/>
+                    
+                    <apex:outputField value="{!project.Name}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Account__c}" rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.Product__c}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputField value="{!project.ProductId__c}"  rendered="{!project.Id != ''}"/>
+                    <apex:outputLabel rendered="{!project.Id != ''}"></apex:outputLabel>
+                </apex:pageBlockSection>   
+            </apex:pageBlockSection>   
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>

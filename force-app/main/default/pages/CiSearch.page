@@ -1,0 +1,177 @@
+<apex:page controller="CiSearchController" readOnly="true">
+
+    <!-- Override standard styling -->
+    <style>
+        .criteria {width: 100%; margin-bottom: 7px;}
+        .criteria .layoutCol {width: 50%;}
+        .criteria .labelCol {width: 25% !important;}
+        .criteria .multiSelectPicklistRow select {width: 200px !important;}
+        .criteria .findRow {height: 35px !important; vertical-align: middle !important;}
+        .criteria .findButton {font-size: 1em;}
+        .criteria .checkBox {margin-top: 0 !important;}
+        .criteria .checkLabel {margin-right: 10px !important;}
+        .related .pbHeader {border-bottom: none !important;}
+        .related .pbTitle {padding: 5px 0 8px 5px !important;}
+        .related .pbBody {margin: 6px !important;}
+    </style>
+
+    <apex:sectionHeader title="CI Data" subtitle="Advanced Search" />
+    <apex:form >
+
+        <!-- Criteria -->
+        <apex:pageBlock id="criteria" mode="edit">
+            <table class="criteria">
+                <tr>
+                    <td class="layoutCol">
+                        <apex:pageBlockSection columns="1">
+                            <apex:inputField value="{!criteria.Name_Contains__c}" />
+                            <apex:inputField value="{!criteria.Sector__c}" />
+                            <apex:inputField value="{!criteria.Secondary_Sector__c}" />
+                            <apex:inputField value="{!criteria.Size_Employees__c}" />
+                            <apex:inputField value="{!criteria.Spend_Band__c}" />
+                            <apex:inputField value="{!criteria.Country__c}" />
+                            <apex:pageBlockSectionItem />
+                            <apex:pageBlockSectionItem />
+                            <apex:pageBlockSectionItem labelStyleClass="findRow" dataStyleClass="findRow" >
+                                <apex:actionStatus id="loader">
+                                    <apex:facet name="start">
+                                        <apex:image url="{!URLFOR($Resource.CiSearchResources, 'ajax-loader.gif')}"/>
+                                    </apex:facet>
+                                    <apex:facet name="stop">
+                                        <apex:commandButton value="Find" action="{!find}" rerender="criteria, messages, accounts, sites, endorsements" status="loader" styleClass="findButton" />
+                                    </apex:facet>
+                                </apex:actionStatus>
+                                <apex:panelGrid columns="6">
+                                    <apex:inputField id="inc1" value="{!criteria.Show_Accounts__c}" styleClass="checkBox" />
+                                    <apex:outputLabel value="Accounts" for="inc1" styleClass="checkLabel" />
+                                    <apex:inputField id="inc2" value="{!criteria.Show_Sites__c}" styleClass="checkBox" />
+                                    <apex:outputLabel value="Sites" for="inc2" styleClass="checkLabel" />
+                                    <apex:inputField id="inc3" value="{!criteria.Show_Endorsements__c}" styleClass="checkBox" />
+                                    <apex:outputLabel value="Endorsements" for="inc3" />
+                                </apex:panelGrid>
+                            </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection>
+                    </td>
+                    <td class="layoutCol">
+                        <apex:pageBlockSection columns="1">
+                            <apex:pageBlockSectionItem helpText="{!$ObjectType.CI_Search__c.fields.Substream_s__c.inlineHelpText}" >
+                                <apex:outputLabel value="{!$ObjectType.CI_Search__c.fields.Substream_s__c.label}" for="ss1" />
+                                <apex:panelGroup >
+                                    <apex:inputField id="ss1" value="{!criteria.Substream_Logic__c}" />
+                                    <apex:inputField value="{!criteria.Substream_s__c}" />
+                                </apex:panelGroup>
+                            </apex:pageBlockSectionItem>
+                            <apex:pageBlockSectionItem helpText="{!$ObjectType.CI_Search__c.fields.Families__c.inlineHelpText}">
+                                <apex:outputLabel value="{!$ObjectType.CI_Search__c.fields.Families__c.label}" for="fy1" />
+                                <apex:panelGroup >
+                                    <apex:inputField id="fy1" value="{!criteria.Family_Logic__c}" />
+                                    <apex:inputField value="{!criteria.Families__c}" />
+                                </apex:panelGroup>
+                            </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection>
+                    </td>
+                </tr>
+           </table>
+        </apex:pageBlock>
+
+        <!-- Error messages -->
+        <apex:pageMessages id="messages" />
+
+        <!-- CI Account list -->
+        <apex:outputPanel id="accounts" layout="none">
+            <apex:outputPanel layout="block" styleClass="bRelatedList related" rendered="{!AND(criteria.Show_Accounts__c,ciAccounts.size>0)}">
+                <apex:pageBlock tabStyle="CI_Account__c">
+                    <apex:facet name="header">
+                        <div class="pbTitle">
+                            <img src="/img/icon/building24.png" class="relatedListIcon" />
+                            <h3 class="mainTitle">&nbsp;CI Accounts - {!IF(ciAccountsCtrl.resultSize=1000,'1000+',ciAccountsCtrl.resultSize)} records - Page {!ciAccountsCtrl.pageNumber} of {!CEILING(ciAccountsCtrl.resultSize/ciAccountsCtrl.pageSize)}</h3>
+                        </div>
+                    </apex:facet>
+                    <apex:pageBlockTable value="{!ciAccounts}" var="a">
+                        <apex:column headerValue="CI Account">
+                            <apex:outputLink value="{!URLFOR($Action.CI_Account__c.View, a.Id)}" target="_blank">{!a.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column value="{!a.Sector_Link__c}" />
+                        <apex:column value="{!a.Location_s__c}" />
+                        <apex:column value="{!a.Current_Holdings__c}" />
+                        <apex:column value="{!a.Size_Employees_Link__c}" />
+                        <apex:column value="{!a.Spend_Band__c}" />
+                    </apex:pageBlockTable>
+                    <apex:panelGrid columns="4" style="margin-top: 10px;">
+                        <apex:commandButton value="First" action="{!firstAccount}" reRender="accounts" disabled="{!NOT(ciAccountsCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Previous" action="{!previousAccount}" reRender="accounts" disabled="{!NOT(ciAccountsCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Next" action="{!nextAccount}" reRender="accounts" disabled="{!NOT(ciAccountsCtrl.hasNext)}" />
+                        <apex:commandButton value="Last" action="{!lastAccount}" reRender="accounts" disabled="{!NOT(ciAccountsCtrl.hasNext)}" />
+                    </apex:panelGrid>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:outputPanel>
+
+        <!-- CI Site list -->
+        <apex:outputPanel id="sites" layout="none">
+            <apex:outputPanel layout="block" styleClass="bRelatedList related" rendered="{!AND(criteria.Show_Sites__c,ciSites.size>0)}">
+                <apex:pageBlock tabStyle="CI_Site__c">
+                    <apex:facet name="header">
+                        <div class="pbTitle">
+                            <img src="/img/icon/factory24.png" class="relatedListIcon" />
+                            <h3 class="mainTitle">&nbsp;CI Sites - {!IF(ciSitesCtrl.resultSize=1000,'1000+',ciSitesCtrl.resultSize)} records - Page {!ciSitesCtrl.pageNumber} of {!CEILING(ciSitesCtrl.resultSize/ciSitesCtrl.pageSize)}</h3>
+                        </div>
+                    </apex:facet>
+                    <apex:pageBlockTable value="{!ciSites}" var="s">
+                        <apex:column headerValue="CI Site">
+                            <apex:outputLink value="{!URLFOR($Action.CI_Site__c.View, s.Id)}" target="_blank">{!s.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column headerValue="CI Account">
+                            <apex:outputLink value="{!URLFOR($Action.CI_Account__c.View, s.CI_Account__r.Id)}" target="_blank">{!s.CI_Account__r.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column value="{!s.Sector_Link__c}" />
+                        <apex:column value="{!s.Country__c}" />
+                        <apex:column value="{!s.Current_Holdings__c}" />
+                        <apex:column value="{!s.Size_Employees_Link__c}" />
+                        <apex:column value="{!s.Spend_Band__c}" />
+                    </apex:pageBlockTable>
+                    <apex:panelGrid columns="4" style="margin-top: 10px;">
+                        <apex:commandButton value="First" action="{!firstSite}" reRender="sites" disabled="{!NOT(ciSitesCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Previous" action="{!previousSite}" reRender="sites" disabled="{!NOT(ciSitesCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Next" action="{!nextSite}" reRender="sites" disabled="{!NOT(ciSitesCtrl.hasNext)}" />
+                        <apex:commandButton value="Last" action="{!lastSite}" reRender="sites" disabled="{!NOT(ciSitesCtrl.hasNext)}" />
+                    </apex:panelGrid>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:outputPanel>
+
+        <!-- CI Endorsement list -->
+        <apex:outputPanel id="endorsements" layout="none">
+            <apex:outputPanel layout="block" styleClass="bRelatedList related" rendered="{!AND(criteria.Show_Endorsements__c,ciEndorsements.size>0)}">
+                <apex:pageBlock tabStyle="CI_Endorsement__c">
+                    <apex:facet name="header">
+                        <div class="pbTitle">
+                            <img src="/img/icon/trophy24.png" class="relatedListIcon" />
+                            <h3 class="mainTitle">&nbsp;CI Endorsements - {!IF(ciEndorsementsCtrl.resultSize=1000,'1000+',ciEndorsementsCtrl.resultSize)} records - Page {!ciEndorsementsCtrl.pageNumber} of {!CEILING(ciEndorsementsCtrl.resultSize/ciEndorsementsCtrl.pageSize)}</h3>
+                        </div>
+                    </apex:facet>
+                    <apex:pageBlockTable value="{!ciEndorsements}" var="e">
+                        <apex:column headerValue="CI Endorsement">
+                            <apex:outputLink value="{!URLFOR($Action.CI_Endorsement__c.View, e.Id)}" target="_blank">{!e.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column headerValue="CI Account">
+                            <apex:outputLink value="{!URLFOR($Action.CI_Account__c.View, e.CI_Account__r.Id)}" target="_blank" rendered="{!NOT(ISBLANK(e.CI_Account__r.Name))}">{!e.CI_Account__r.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column value="{!e.Document_Type__c}" />
+                        <apex:column value="{!e.Language__c}" />
+                        <apex:column value="{!e.Availability__c}" />
+                        <apex:column value="{!e.Valid_From__c}" />
+                        <apex:column value="{!e.Valid_To__c}" />
+                    </apex:pageBlockTable>
+                    <apex:panelGrid columns="4" style="margin-top: 10px;">
+                        <apex:commandButton value="First" action="{!firstEndorsement}" reRender="endorsements" disabled="{!NOT(ciEndorsementsCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Previous" action="{!previousEndorsement}" reRender="endorsements" disabled="{!NOT(ciEndorsementsCtrl.hasPrevious)}" />
+                        <apex:commandButton value="Next" action="{!nextEndorsement}" reRender="endorsements" disabled="{!NOT(ciEndorsementsCtrl.hasNext)}" />
+                        <apex:commandButton value="Last" action="{!lastEndorsement}" reRender="endorsements" disabled="{!NOT(ciEndorsementsCtrl.hasNext)}" />
+                    </apex:panelGrid>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:outputPanel>
+        
+    </apex:form>
+</apex:page>

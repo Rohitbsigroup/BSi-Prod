@@ -1,0 +1,30 @@
+<apex:page standardController="Lead">
+
+	<apex:pageBlock title="{!$Label.Leadfieldsrequired}" >
+		<apex:pageBlockSection columns="3" rendered="{!Lead.RecordType.DeveloperName!='Training_Leads'}">
+			<apex:variable var="fldcnt" value="{!0}" />
+			<apex:repeat value="{!$ObjectType.Lead.FieldSets.RequiredToConvert}" var="field">
+				<apex:outputPanel layout="none" rendered="{!ISBLANK(Lead[field])}">
+					<apex:variable var="fldcnt" value="{!fldcnt+1}" />
+					<apex:pageBlockSectionItem labelStyleClass="width:100px;" dataStyleClass="width:10px;">
+						<apex:outputText value="{!$ObjectType.Lead.fields[field].label}"/>
+					</apex:pageBlockSectionItem>
+				</apex:outputPanel>
+			</apex:repeat>
+			<apex:outputText rendered="{!fldcnt=0}" value="{!$Label.LeadFieldsCompleted}" />
+		</apex:pageBlockSection>
+		<!-- new pageBlockSection for Training Leads -->
+		<apex:pageBlockSection columns="3" rendered="{!Lead.RecordType.DeveloperName='Training_Leads'}">
+			<apex:variable var="fldcnt" value="{!0}" />
+			<apex:repeat value="{!$ObjectType.Lead.FieldSets.RequiredToConvert_Training}" var="field">
+				<apex:outputPanel layout="none" rendered="{!ISBLANK(Lead[field])}">
+					<apex:variable var="fldcnt" value="{!fldcnt+1}" />
+					<apex:pageBlockSectionItem labelStyleClass="width:100px;" dataStyleClass="width:10px;">
+						<apex:outputText value="{!$ObjectType.Lead.fields[field].label}"/>
+					</apex:pageBlockSectionItem>
+				</apex:outputPanel>
+			</apex:repeat>
+			<apex:outputText rendered="{!fldcnt=0}" value="{!$Label.LeadFieldsCompleted}" />
+		</apex:pageBlockSection>
+	</apex:pageBlock>
+</apex:page>

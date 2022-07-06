@@ -1,0 +1,29 @@
+<apex:page standardController="APXTConga4__Conga_Template__c"  
+    extensions="bg_CongaTemplateCloneWithItemsController" >
+    <apex:pageMessages />
+    <apex:form >
+        <apex:pageBlock title="Clone Item Options">
+            <apex:pageBlockSection columns="2" >
+                
+                <apex:inputField label="New Template Name" value="{!newCongaTemplate.APXTConga4__Name__c}" />
+
+                <apex:selectList id="LanguagePickList" label="Language of template" value="{!newCongaTemplate.Language__c}" size="1" required="true">
+                    <apex:selectOptions value="{!Languages}"/>
+                </apex:selectList>
+
+                <apex:selectList label="Countries template used for" value="{!countryList}" required="true" size="10" multiselect="true">
+                    <apex:selectOptions value="{!Countries}"/>
+                </apex:selectList>
+
+                <apex:selectList label="Currency" value="{!newCongaTemplate.currencyISOCode}" required="true" size="1">
+                    <apex:selectOptions value="{!Currency}"/>
+                </apex:selectList>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,7 @@
+<apex:page standardController="Opportunity" sidebar="false" showHeader="false">
+
+	<c:civMain theRecord="{!Opportunity}" theName="{!Opportunity.Name}" theCompany="{!Opportunity.Account.Name}"
+		theEmail="{!Opportunity.PrimaryContact__r.Email}" thePostcode="{!Opportunity.Account.BillingPostalCode}" thePhone="{!Opportunity.Account.Phone}" 
+		theAccountId="{!Opportunity.AccountId}" theContactId="{!Opportunity.PrimaryContact__c}" />
+
+</apex:page>

@@ -1,0 +1,222 @@
+<apex:page id="SiteTemplate" controller="TrainingBookingController" language="{!pageLanguage}" title="{!$Label.TrainingBookingTitle}" standardstylesheets="false" showheader="false" cache="false" >
+<!--20160919 - JS - Added extra snippet for google tracking
+    20180910 Nebula Task 18752754 (PK) - Various changes to support a mobile browser 
+    20180920 - JS - Updated privacyURL render logic 
+    20190215 - JS - Updated Pardot tracker
+-->
+    <html>
+        <head>
+            <title>{!$Label.TrainingBookingTitle}</title>
+            <!-- PK(NEB) 10 Sep 2018 - Added mobile support -->
+            <meta name="viewport" content="width=device-width" />
+            <!--<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />-->
+            <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+            <!-- VA 10 oct 2016 - code to avoid Gesta style for Poland -->
+            <!-- MD 18 Sep 2017 - extending solution to Vietnam -->
+            <apex:variable var="PLStyle" value="PLStylesheet" rendered="{!OR(selectedCountry.countryOptionsDefault = 'Poland',selectedCountry.countryOptionsDefault = 'Vietnam')}" >
+                <apex:stylesheet value="{!URLFOR($Resource.TrainingBookingResources, 'GTStyleSheet.css')}"/>
+            </apex:variable>
+            <apex:variable var="PLStyle" value="PLStylesheet" rendered="{!NOT(OR(selectedCountry.countryOptionsDefault = 'Poland',selectedCountry.countryOptionsDefault = 'Vietnam'))}" >
+                <apex:stylesheet value="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}"/>
+            </apex:variable>
+            <!-- PK(NEB) 10 Sep 2018 - Added mobile specific stylesheet -->
+            <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+            <!-- code ends here -->
+
+
+            <!--[if lte IE 7]>;
+                <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Legacy.css')}" />
+            <![endif]-->
+
+            <!-- *** General show/hide function *** -->
+            <script type="text/javascript">
+                function divOnOff(id) {
+                    var tag = document.getElementById(id);
+                    if (tag.style.display !== 'none') {
+                        tag.style.display = 'none';
+                    }
+                    else {
+                        tag.style.display = 'block';
+                    }
+                }
+            </script>
+
+            <!-- *** Google Analytics *** -->
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-21147145-1']);
+                _gaq.push(['_setDomainName', 'force.com']);
+                _gaq.push(['_setAllowLinker', true]);
+                _gaq.push(['_trackPageview', 'Step{!pageStep}']);
+                <apex:insert name="analytics"/>
+
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+            </script>
+            
+            <!-- GTM CountryCode fix -->
+            <script type="text/javascript">
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                 'event': 'countryReady',
+                 'countryCode': '{!paramCountry}'
+                });
+            </script>
+
+<!-- *** JS Updated 15/02/2019 Pardot tracking script *** -->
+                <script type="text/javascript">
+                    var piProtocol = (("https:" == document.location.protocol) ? "https://pi." : "http://cdn.");
+                    document.write(unescape("%3Cscript src='" + piProtocol + "pardot.com/pi.js' type='text/javascript'%3E%3C/script%3E"));
+                    </script>
+                    <script type="text/javascript">
+                    piAId = '74472';
+                    piCId = '1462';
+                    piTracker();
+                    piAId = '36972';
+                    piCId = '2434';
+                    piTracker();
+                </script>
+
+        </head>
+        <body>
+
+<!-- *** JS NEW 19/09 Google tracking script *** -->
+                <!-- Google Tag Manager -->
+                <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-WX52CM"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+                <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','GTM-WX52CM');</script>
+                <!-- End Google Tag Manager -->
+
+            <div class="wrapper">
+                <div class="page">
+
+                    <!-- 28 March 2017 Vim commented Espion logo section as it is not no longer required to have seperate logo for espion. Question field is from label and is generic. Phone number if from config file -->
+                    <!-- Updated by Vimlesh on 17 Aug 2016 to include Espion Header details -->
+                    <!--<apex:outputPanel layout="none" rendered="{!OR((selectedCountry.countryOptionsDefault = 'Ireland'),(selectedCountry.countryOptionsDefault = 'ireland'))}">
+                        <div class="header">
+                            <a title="Espion Group" class ="logoEspion"  style='background-image: url("{!URLFOR($Resource.TrainingBookingResources, "Espion_BSI_Logo1.png")}");' href="https://www.espiongroup.com/">
+                            </a>
+                            <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                            <p class="phone-no">
+                                <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                                <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}"  />
+                            </p>
+                        </div>
+                    </apex:outputPanel>-->
+                    <!--<apex:outputPanel layout="none" rendered="{!NOT(selectedCountry.countryOptionsDefault = 'Ireland')}">-->
+                        <div class="header">
+                            <a class="logo" href="https://www.bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                            <p class="site-strap ir">Making excellence a habit</p>
+                            <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                            <p class="phone-no">
+                                <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                                <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}"  />
+                            </p>
+                        </div> <!-- /.header -->
+                    <!--</apex:outputPanel>-->
+
+                    <!-- Vim Code update finish-->
+
+                    <div class="main">
+
+                        <ul class="progress clearfix">
+                            <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                                <!-- PK(NEB) 10 Sep 2018 - Added new span tags for specific classes for mobile -->
+                              <li class="{!IF(pageStep = 1,'current-step','inactive-step')}"><span class="step-label-1">{!$Label.TrainingBookingStep1}</span></li>
+                              <li class="{!IF(pageStep = 2,'current-step','inactive-step')}"><span class="step-label-2">{!$Label.TrainingBookingStep2}</span></li>
+                              <li class="{!IF(pageStep = 3,'current-step','inactive-step')}"><span class="step-label-3">{!$Label.TrainingBookingStep3}</span></li>
+                              <li class="{!IF(OR(pageStep = 4, pageStep = 5),'current-step','inactive-step')}"><span class="step-label-4">{!$Label.TrainingBookingStep4}</span></li>
+                              <li class="{!IF(pageStep = 6,'current-step','inactive-step')}"><span class="step-label-5">{!$Label.TrainingBookingStep6}</span></li>
+                            </apex:outputPanel>
+                        </ul>
+
+                        <!-- *** Details to be supplied by each page *** -->
+                        <apex:insert name="details"/>
+                        <!-- *** End *** -->
+
+                        <apex:messages id="messages" styleClass="messages" />
+
+                        <!-- *** Introduction to be supplied by each page *** -->
+                        <apex:insert name="introduction"/>
+                        <!-- *** End *** -->
+
+                        <!-- *** Body to be supplied by each page *** -->
+                        <apex:insert name="body"/>
+                        <!-- *** End *** -->
+
+                        <!-- *** Notes to be supplied by each page *** -->
+                        <apex:insert name="notes"/>
+                        <!-- *** End *** -->
+
+                    </div> <!-- /.main -->
+
+                    <div class="footer">
+                        <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsDefault = 'South Korea'}"> 
+                            <apex:outputText escape="false" value="㈜비에스아이그룹코리아,    서울시 종로구 인사동5길 29 태화빌딩 8층,    대표자: 송경수 <br/>
+                                            사업자등록번호: 104-81-44779, 통신판매업 신고번호 제 01-2287호,  전화:02-777-4123~4" /><br/><br/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsDefault = 'Vietnam'}"> 
+                            <a href='http://online.gov.vn/Home/WebDetails/75301'><img alt='vnLogo' title='vnLogo' width='100' style='position: relative; top: 13px; right: 13px;' src='{!URLFOR($Resource.TrainingBookingVNLogo)}'/></a>
+                        </apex:outputPanel>
+                        <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                        <ul>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                        </ul>
+                    </div> <!-- /.footer -->
+
+                </div> <!-- /.page -->
+            </div> <!-- /.wrapper -->
+        <!-- PK(NEB) 10 Sep 2018 - Added JS to change type fields from text to tel or email to better support mobile browsers -->
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.js-phone').forEach(function(a){
+              a.type = 'tel';
+            });
+            document.querySelectorAll('.js-email').forEach(function(a){
+              a.type = 'email';
+              /*a.oninvalid = function(e) {
+                e.target.setCustomValidity("");
+                if (!e.target.validity.valid) {
+                  e.target.setCustomValidity("{!JSENCODE($Label.TrainingBookingEmailMismatch)}");
+                }
+              };
+              a.oninput = function(e) {
+                e.target.setCustomValidity("");
+              };*/
+            });
+        });
+        </script>
+        </body>
+    </html>
+</apex:page>

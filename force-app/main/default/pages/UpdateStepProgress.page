@@ -1,0 +1,27 @@
+<apex:page standardController="Step_Progress__c" recordSetVar="Steps" extensions="UpdateStepProgressExt" sidebar="false" lightningStylesheets="">
+    <apex:sectionHeader title="Update Step Progress"/>
+            <apex:form >
+            <apex:pageBlock >
+                <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton action="{!quicksave}" value="Update"/>
+                </apex:pageBlockButtons>  
+            
+                <!-- Notes-->                                   
+                <apex:pageBlockSection title="Selected Steps" columns="1" collapsible="False">
+                    <apex:pageBlockTable value="{!selectedProgressList}" var="Step">
+                       <apex:column value="{!Step.name}"/>
+                       <apex:column value="{!Step.Name__c}"/>
+                       <apex:column value="{!Step.Name_Local__c}"/>
+                       <apex:column headerValue="Progress"><apex:inputField value="{!Step.Progress__c}"/></apex:column>
+                       <apex:column headerValue="Evidence(if Exempt)"><apex:inputField value="{!Step.Evidence__c}"/></apex:column>
+                       <apex:column headerValue="Evidence Review(for Portfolio)"><apex:inputField value="{!Step.EvidenceReviewer__c}"/></apex:column>
+                       <apex:column headerValue="Order on Transcript"><apex:inputField value="{!Step.Order__c}"/></apex:column>                       
+                     </apex:pageBlockTable>
+                </apex:pageBlockSection> 
+                
+            </apex:pageBlock>    
+            </apex:form>           
+</apex:page>

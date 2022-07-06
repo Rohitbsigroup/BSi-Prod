@@ -1,0 +1,13 @@
+<apex:page standardController="Qualification__c" >
+
+  
+    <flow:interview name="Add_courses_to_a_Qualification">
+      <apex:param name="QualificationIDin" value="{!Qualification__c.ID}"/>
+      <apex:param name="countryin" value="{!Qualification__c.Country__c}"/>
+      <apex:param name="languagein" value="{!Qualification__c.Language__c}"/>
+      
+           
+    </flow:interview>
+
+
+</apex:page>

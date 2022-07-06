@@ -1,0 +1,66 @@
+<apex:component access="global">
+<!--<apex:component standardcontroller="Enrollment__c" access="global">-->
+<apex:attribute name="cnTrainerName" type="string" description="Name of Trainer" />
+<apex:attribute name="cnTrainerFirstName" type="string" description="First Name of Trainer"/>
+<apex:attribute name="cnTrainerPhone" type="string" description="Phone No. of Trainer"/>
+<apex:attribute name="cnTrainerEmail" type="string" description="Email of Trainer"/>
+<!-- call the component from page and pass back some values eg <c:Your_Trainer cnTrainerName="abc" cnTrainerFirstName="{!relatedto.blah blah} />-->
+<head>
+<style type="text/css">
+
+body
+{
+color:#000000;
+font-family:"Tahoma";
+font-size:11pt;
+font-style:normal;
+}
+
+p
+{
+color:#000000;
+font-family:"Tahoma";
+font-size:11pt;
+}
+
+
+h1
+{
+color:#000000;
+font-family:"Tahoma";
+font-size:16pt;
+font-style:normal;
+}
+
+h3
+{
+color:#E52013;
+font-family:"Tahoma";
+font-size:11pt;
+font-style:normal;
+}
+
+</style>
+</head>
+
+<body>
+Your course will be delivered by {!cnTrainerName}. Please find contact details for {!cnTrainerFirstName} below, should you have any questions or concerns. Your trainer will be contacting you two weeks out from your course start date.
+    <br/><br/>
+    <table align="left" cellpadding="5" cellspacing="0" styleclass="table"  border="0.1" style=" top: 2.5cm; text-align: center; font-size:10pt;">        
+        <tr>
+            <td align="left">Trainer Name :</td>
+            <td align="left">{!cnTrainerName}</td>
+        </tr> 
+        <tr >
+            <td align="left">Trainer Phone No.:  </td>
+             <td align="left">{!cnTrainerPhone}</td>
+        </tr>
+        <tr>
+            <td align="left">Trainer email: </td>
+            <td align="left">{!cnTrainerEmail}</td> 
+        </tr>
+    </table>
+    <br/> <br/>   
+</body>
+    <br/><br/>
+</apex:component>

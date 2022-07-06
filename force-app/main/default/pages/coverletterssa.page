@@ -1,0 +1,86 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false">
+
+<head>
+  
+<!--
+10/10/2018 - PC - used Signature from Static Resources
+-->
+
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: "Arial Unicode MS" "Sans-Serif";
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0"> 
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Account.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingStreet}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCity}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Mailing_District__c}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingPostalCode}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCountry}</apex:outputText>
+<br/>
+<apex:outputText >{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>
+</apex:panelGrid>
+
+<br/><br/>
+<!---- this brings in the salutation and delegate name  ---->
+<apex:outputText value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Name},"/> 
+<br/><br/>
+
+<!---- this brings in the delegate number  ---->
+<apex:outputText value="Student Number:"/><apex:outputText value=" {!Enrollment__c.Delegate_name__r.Delegate_Number__c},"/>
+<br/><br/>
+<!---- Text for the Certificate Letter---->
+<apex:outputText value="In this package you will find your self-study {!Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c}."></apex:outputText>
+<br/><br/>
+<apex:outputText value=" This assessment was issued on {!Enrollment__c.Date_Materials_Sent_to_Delegate__c} and is due by {!Enrollment__c.Expected_Completion_Date__c}. Once you have completed the assessment 
+please send it through to qualification.aus@bsigroup.com."></apex:outputText>
+<br/><br/>
+<apex:outputText value="Your BSI Assessor will be {!Enrollment__c.Supporting_Tutor__r.FirstName} {!Enrollment__c.Supporting_Tutor__r.LastName}.  {!Enrollment__c.Supporting_Tutor__r.FirstName} will contact you within the next 5 working days 
+to further assist you and answer any questions."></apex:outputText>
+<br/><br/>
+<apex:outputText value="Thank you for selecting us as your training provider. We look forward to guiding you on your training journey."></apex:outputText>
+<br/><br/>
+<apex:outputText value="If you have any further requirements, please contact us on 1300 730 134 or qualifications.aus@bsigroup.com."></apex:outputText>
+<br/><br/>
+Yours Sincerly,
+<br/><br/>
+<!---- this brings in the manager signature, name and designation---->
+<apex:image height="0.7cm" url="{!URLFOR($Resource.TrainingCertificateSignatures, Enrollment__c.Training_Translations__r.Signature_Image__c)}"/> 
+<br/><br/>
+<apex:outputText styleClass="size10" value="{!Enrollment__c.Training_Translations__r.Training_Manager__c}"/>
+</apex:page>

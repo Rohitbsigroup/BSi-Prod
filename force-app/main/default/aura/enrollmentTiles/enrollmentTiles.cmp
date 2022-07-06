@@ -1,0 +1,77 @@
+<aura:component implements="force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" extends="c:lightningUtility" description="BSI Custom Tiles Component" controller="EnrollmentTilesController">
+    
+
+    <aura:attribute name="recordId"      	type="String"                   default="{!v.recordId}"/>
+
+    <aura:attribute name="materialListVisible"  type="Boolean"  access="global"     default="false"/>
+    <aura:attribute name="tileClicked"          type="String"   access="global"     default=""/>
+
+    <!--TILE TO BE DISPLAYED-->
+    <aura:attribute name="tilesToDisplay"           type="Object[]"/>
+    
+   
+    <aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+
+    <div class="container">
+        <div class="body">
+            <aura:iteration items="{!v.tilesToDisplay}" var="tile" indexVar="index">
+                <aura:if isTrue="{!or(tile.title == $Label.c.CLP_ExtraResources_TileTitle, tile.title == $Label.c.CLP_PreCourseLearningMaterials_TileTitle)}">
+                        <button class="{!tile.isClicked ? 'clickedClass' : 'noClickedClass'}" name="{!tile.sObjectField}" onclick="{!c.onClickTile}">
+                            <span>
+                                <span class="title">{!tile.title}</span> <br></br>
+                                <span class="description">{!tile.description}</span> <br></br>
+                            </span>                 
+                        </button>
+                    <aura:set attribute="else">
+                        <aura:if isTrue="{!not(tile.url == 'Greyed Out')}">
+                            <!--<a href="{!tile.url}" name="{!tile.sObjectField}" onclick="{!c.onClickTile}" target="_blank">    -->
+                                <button class="{!tile.isClicked ? 'clickedClass' : 'noClickedClass'}" name="{!tile.sObjectField}" id="{!tile.url}" onclick="{!c.redirectUser}">
+                                    <span>
+                                        <aura:if isTrue="{!or(or(or(or(or(or(tile.title == $Label.c.CLP_CourseMaterials_TileTitle, tile.title == $Label.c.CLP_AccessMyCourse_TileTitle, tile.title == $Label.c.CLP_VirtualClassroom_TileTitle),tile.title == $Label.c.CLP_VirtualClassroom_TileTitle), tile.title == $Label.c.CLP_MyExam_TileTitle), tile.title == $Label.c.CLP_MyCertificate_TileTitle), tile.title == $Label.c.CLP_MyPostCourseQuestionnaire_TileTitle), tile.title == $Label.c.CLP_CertificateVerification_TileTitle)}">
+                                            <a href="{!tile.url}" name="{!tile.sObjectField}" onclick="{!c.onClickTile}" target="_blank">
+                                                <span class="title">{!tile.title} &gt;</span>
+                                            </a> <br></br>
+                                          
+                                            <aura:set attribute="else">
+                                                <a href="{!tile.url}" name="{!tile.sObjectField}" onclick="{!c.onClickTile}">
+                                                    <span class="title">{!tile.title} &gt;</span>
+                                                </a> <br></br>
+                                            </aura:set>
+                                        
+                                        </aura:if>
+                                        <span class="description">{!tile.description}</span> <br></br>
+                                    </span>                 
+                                </button>
+                            <!--</a>-->
+                            <aura:set attribute="else">
+                                <button class="{!tile.isClicked ? 'clickedClass' : 'noClickedClass'}">
+                                    <span>
+                                        <span class="title">{!tile.title}</span> <br></br>
+                                        <span class="description">{!tile.description}</span> <br></br>
+                                    </span>                 
+                                </button>
+                            </aura:set>
+                        </aura:if>
+                    </aura:set>
+                </aura:if>
+            </aura:iteration>
+        </div>
+    </div>
+    <aura:if isTrue="{!v.materialListVisible}">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <div class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.hideModal}">
+                        <lightning:icon iconName="utility:close" size="medium" variant="bare"/>
+                        <span class="slds-assistive-text">Close</span>
+                    </div>
+                    <p>{!$Label.c.CLP_Material_List}</p>
+                </header>
+                <div class="content">
+                    <c:customPreview recordId="{!v.recordId}" tileClicked="{!v.tileClicked}"/>
+                </div>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+</aura:component>

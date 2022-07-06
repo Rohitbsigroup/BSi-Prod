@@ -1,0 +1,23 @@
+/*Custom related list view*/
+.THIS .slds-icon.slds-icon-text-default.slds-icon_x-small {
+    border: 1px solid;
+}
+
+.THIS .slds-p-top_medium{
+    max-height: 600px;
+    margin-bottom: 50px;
+}
+
+.THIS .slds-scrollable_y{
+    max-height: 30vh;
+}
+
+.THIS .tableClass tr > th a{
+    color:#00a3ad;
+    text-decoration: underline;
+}
+
+.THIS .slds-button_icon-bare{
+    display: none;
+}
+/**/

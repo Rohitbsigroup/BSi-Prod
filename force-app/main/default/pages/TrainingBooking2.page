@@ -1,0 +1,742 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+            <apex:outputPanel rendered="{!pageShowSelection}">
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                </h2>
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                </h2>
+            </apex:outputPanel>          
+            <apex:outputPanel rendered="{!selectedCountry.portalLogin}"> <!--JS added additional render condition 04/03-->
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingCurrentUser}"/>:&nbsp;
+                    <apex:outputText value="{!portalUser.Username}" rendered="{!isAuthenticated}"/>
+                    <apex:outputText value="{!$Label.TrainingBookingGuestUser}" rendered="{!NOT(isAuthenticated)}"/>
+                </h2>
+            </apex:outputPanel>
+        </apex:define>
+
+        <!-- *** Introduction *** -->
+        <apex:define name="introduction">
+            <p class="intro">{!$Label.TrainingBookingStep2Intro}</p>
+        </apex:define>
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <apex:form >
+                <div class="two-thirds">
+
+                    <!-- Number or delegates -->
+                    <fieldset class="form-fields">
+                        <div class="field-item">
+                            <apex:outputLabel for="NoDelegates" value="{!$Label.TrainingBookingDelegates} *"/>
+                            <apex:selectList id="NoDelegates" size="1" multiselect="false" value="{!selectedDelegates}" required="true" >
+                                <apex:selectOptions value="{!delegateOptions}"/>
+                                <!--14 Nov 2016 Vim added code to retain value of Number of delegates Selected on Online booking form -->
+                                <apex:actionSupport event="onchange" action="{!checkValue}" rerender="NoDelegates" />
+                                <!-- Vim code ends here -->
+                            </apex:selectList>
+                            <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                                <a href="#" class="tooltip-button" onclick="divOnOff('{!$Component.DelegatesTooltip}');return false;">
+                                    <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'info.gif')}"/>
+                                </a>
+                                <apex:outputText id="DelegatesTooltip" style="display: none;" styleClass="tooltip-below" value="{!$Label.TrainingBookingDelegatesTooltip}" />
+                            </apex:outputPanel> 
+                        </div>
+                    </fieldset>
+                        
+                    <!-- Contact details -->
+                    <p class="notes">{!$Label.TrainingBookingContactFormIntro}</p>
+                    <fieldset class="form-fields">
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('HideSalutation', selectedCountry.Flags)=0}">
+                            <apex:outputLabel for="Salutation" value="{!$ObjectType.TrainingBooking__c.fields.Salutation__c.label}"/>
+                            <apex:inputField id="Salutation" value="{!objBooking.Salutation__c}"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                            <apex:outputLabel for="FirstNameWest" value="{!$ObjectType.TrainingBooking__c.fields.First_Name__c.label} *"/>
+                            <apex:inputField id="FirstNameWest" value="{!objBooking.First_Name__c}" required="true"/>
+                        </apex:outputPanel>
+                        <div class="field-item">
+                            <apex:outputLabel for="LastName" value="{!$ObjectType.TrainingBooking__c.fields.Last_Name__c.label} *"/>
+                            <apex:inputField id="LastName" value="{!objBooking.Last_Name__c}" required="true"/>
+                        </div>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="FirstNameEast" value="{!$ObjectType.TrainingBooking__c.fields.First_Name__c.label} *"/>
+                            <apex:inputField id="FirstNameEast" value="{!objBooking.First_Name__c}" required="true"/>
+                        </apex:outputPanel>
+                        <!-- PK(NEB) 10 Sep 2018 - Added classes for js script to replace the types from text to email -->
+                        <div class="field-item">
+                            <apex:outputLabel for="EmailAddress" value="{!$ObjectType.TrainingBooking__c.fields.Email_Address__c.label} *"/>
+                            <apex:inputField styleClass="js-email" id="EmailAddress" value="{!objBooking.Email_Address__c}" required="true"/>
+                        </div>
+                        <div class="field-item">
+                            <apex:outputLabel for="EmailConfirmation" value="{!$ObjectType.TrainingBooking__c.fields.Email_Confirmation__c.label} *"/>
+                            <apex:inputField styleClass="js-email" id="EmailConfirmation" value="{!objBooking.Email_Confirmation__c}" required="true"/>
+                        </div>
+
+                        <!-- JS 20180810 Making jobtitle required for Korea using flag -->
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('koreaFormat', selectedCountry.Flags)=0}">
+                            <apex:outputLabel for="JobTitle" value="{!$ObjectType.TrainingBooking__c.fields.Job_Title__c.label}"/>
+                            <apex:inputField id="JobTitle" value="{!objBooking.Job_Title__c}"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('koreaFormat', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="JobTitleReq" value="{!$ObjectType.TrainingBooking__c.fields.Job_Title__c.label} *"/>
+                            <apex:inputField id="JobTitleReq" value="{!objBooking.Job_Title__c}" required="true"/>
+                        </apex:outputPanel>
+
+                        <div class="field-item">
+                            <apex:outputLabel for="Attending" value="{!$ObjectType.TrainingBooking__c.fields.Attending_Course__c.label}"/>
+                            <apex:inputField id="Attending" value="{!objBooking.Attending_Course__c}"/>
+                            <apex:outputText styleClass="tooltip-inline" value="{!$Label.TrainingBookingAttendingTooltip}" />
+                        </div>
+                        <!--JS 20180810 added in new field for Spain to be managed by flag-->
+                        <apex:outputPanel layout="none" rendered="{!OR(FIND('GovFund', selectedCountry.Flags)>0,FIND('ESFormat', selectedCountry.Flags)>0)}">
+                             <div class="field-item">
+                                <apex:outputLabel for="ManageIncentive" value="{!$Label.TrainingBookingManageGovIncentive}"/>
+                                <apex:actionRegion >
+                                    <apex:inputField id="ManageIncentive" value="{!objBooking.Manage_Government_Incentive__c}">
+                                        <apex:actionSupport event="onchange" reRender="HDRFfunding"/>
+                                    </apex:inputField>
+                                 </apex:actionRegion> 
+                            </div>                                                  
+                                                       
+                        </apex:outputPanel>
+
+                        <!-- PK(NEB) 10 Sep 2018 - Added classes for js script to replace the types from text to tel -->
+                        <!-- PC 20200720 added prefix to phone numbers JS 20201118 removed prefix as not working as expected - descope-->
+                        <div class="field-item">
+                            <apex:outputLabel for="ContactPhonePrefix" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Phone__c.label} *"/>
+                            <!--<apex:inputText styleClass="js-phone" id="ContactPhonePrefix" value="{!selectedCountry.countryCodePhonePrefix}" style="width:80px;margin-right:5px" required="true"/>-->
+                            <!-- JE 25/01/2021 - included phone country code field for cross border booking validation -->
+                            <apex:selectList id="phoneCountryCodeDrop" value="{!objBooking.Phone_Country_Code__c}" multiselect="false" size="1" style="width:80px;margin-right:5px" required="true">
+                                <apex:selectOptions value="{!phoneCountryCodeOptions}" />
+                            </apex:selectList>
+                            <apex:inputField styleClass="js-phone" id="ContactPhone" value="{!objBooking.Contact_Phone__c}" style="width:215px" required="true"/>
+                        </div>
+                        
+                        
+                        <!-- MD Changed Jan 2018 to make Mobile Number required if flag set -->
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('BookerMobReqd', selectedCountry.Flags)=0}">
+                            <apex:outputLabel for="ContactMobileOptPrefix" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Mobile__c.label}"/>
+                            <!--<apex:inputText styleClass="js-phone" id="ContactMobileOptPrefix" value="{!selectedCountry.countryCodeMobilePrefix}" style="width:80px;margin-right:5px"/>-->
+                            <!-- JE 25/01/2021 - included mobile country code field -->
+                            <apex:selectList id="mobileCountryCodeDrop" value="{!objBooking.Mobile_Country_Code__c}" multiselect="false" size="1" style="width:80px;margin-right:5px">
+                                <apex:selectOptions value="{!phoneCountryCodeOptions}" />
+                            </apex:selectList>
+                            <apex:inputField styleClass="js-phone" id="ContactMobileOpt" value="{!objBooking.Contact_Mobile__c}" style="width:215px"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('BookerMobReqd', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="ContactMobileReqPrefix" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Mobile__c.label} *"/>
+                            <!--<apex:inputText styleClass="js-phone" id="ContactMobileReqPrefix" value="{!selectedCountry.countryCodeMobilePrefix}" style="width:80px;margin-right:5px" required="true"/>-->
+                            <!-- JE 25/01/2021 - included mobile country code field -->
+                            <apex:selectList id="mobileCountryCodeReqDrop" value="{!objBooking.Mobile_Country_Code__c}" multiselect="false" size="1" style="width:80px;margin-right:5px" required="true">
+                                <apex:selectOptions value="{!phoneCountryCodeOptions}" />
+                            </apex:selectList>
+                            <apex:inputField styleClass="js-phone" id="ContactMobileReq" value="{!objBooking.Contact_Mobile__c}" style="width:215px" required="true"/>
+                        </apex:outputPanel>
+                        <div class="field-item">
+                            <apex:outputLabel for="ContactFaxPrefix" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Fax__c.label}"/>
+                            <!-- <apex:inputText styleClass="js-phone" id="ContactFaxPrefix" value="{!selectedCountry.countryCodeFaxPrefix}" style="width:80px;margin-right:5px"/>-->
+                            <apex:inputField styleClass="js-phone" id="ContactFax" value="{!objBooking.Contact_Fax__c}" style="width:215px"/>
+                        </div>
+                    </fieldset>
+
+                    <!-- Address details -->
+                    <p class="notes"><apex:outputText escape="false" value="{!$Label.TrainingBookingAddressFormIntro}"/></p>
+                    <fieldset class="form-fields">
+                        <div class="field-item">
+                            <apex:outputLabel for="CompanyName" value="{!$ObjectType.TrainingBooking__c.fields.Company_Name__c.label} *"/>
+                            <apex:inputField id="CompanyName" value="{!objBooking.Company_Name__c}" required="true"/>
+                        </div>
+
+                        <!-- Korean fields -->
+                        <apex:outputPanel layout="none" rendered="{!FIND('koreaFormat', selectedCountry.Flags)>0}">
+                          <div class="field-item">  
+                            <apex:outputLabel for="CompanyNameEnKR" value="{!$ObjectType.TrainingBooking__c.fields.Company_Name_English__c.label} *"/>
+                            <apex:inputField id="CompanyNameEnKR" value="{!objBooking.Company_Name_English__c}" required="true"/>
+                          </div>
+                          <div class="field-item">
+                            <apex:outputLabel for="KoreanIndustry" value="{!$ObjectType.TrainingBooking__c.fields.Type_Of_Industry__c.label} *"/>
+                            <apex:inputField id="KoreanIndustry" value="{!objBooking.Type_Of_Industry__c}" required="true"/>
+                          </div>
+                          <div class="field-item">
+                            <apex:outputLabel for="KoreanBusinessNo" value="{!$ObjectType.TrainingBooking__c.fields.Business_Number__c.label} *"/>
+                            <apex:inputField id="KoreanBusinessNo" value="{!objBooking.Business_Number__c}" required="true"/>
+                          </div>
+                          <div class="field-item">
+                            <apex:outputLabel for="KoreanRep" value="{!$ObjectType.TrainingBooking__c.fields.Representatives__c.label} *"/>
+                            <apex:inputField id="KoreanRep" value="{!objBooking.Representatives__c}" required="true"/>
+                          </div>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('japanFormat', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="CompanyNameEn" value="{!$ObjectType.TrainingBooking__c.fields.Company_Name_English__c.label} *"/>
+                            <apex:inputField id="CompanyNameEn" value="{!objBooking.Company_Name_English__c}" required="true"/>
+                        </apex:outputPanel>
+                        
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('cnEnglish', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="CompanyNameEnTW" value="{!$ObjectType.TrainingBooking__c.fields.Company_Name_English__c.label} *"/>
+                            <apex:inputField id="CompanyNameEnTW" value="{!objBooking.Company_Name_English__c}" required="true"/>
+                        </apex:outputPanel>
+
+                        <!-- Western address -->
+                        <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                            <div class="field-item">
+                                <apex:outputLabel for="CompanyStreetWest" value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label} *"/>
+                                <apex:inputField id="CompanyStreetWest" value="{!objBooking.Company_Street__c}" required="true"/>
+                            </div>
+                            <div class="field-item">
+                                <apex:outputLabel for="CompanyCityWest" value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label} *"/>
+                                <apex:inputField id="CompanyCityWest" value="{!objBooking.Company_City__c}" required="true"/>
+                            </div>
+
+                            <!-- Region fields -->
+                            <apex:outputPanel id="CompanyRegionWest" layout="block" styleClass="field-item">
+                                <!-- Region will be locked if there is a country selector but no country has been selected -->
+                                <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, objBooking.Company_Country__c='')}">
+                                    <apex:outputLabel for="CompanyRegionWestLocked" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                    <apex:inputText id="CompanyRegionWestLocked" title="{!$Label.TrainingBookingSelectCountry}" disabled="true" />
+                                </apex:outputPanel>
+                                <!-- Region will be free if there is no country selector -->
+                                <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptions.size=0}">
+                                    <apex:outputLabel for="CompanyRegionWestFree1" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                    <apex:inputField id="CompanyRegionWestFree1" value="{!objBooking.Company_Region__c}"/>
+                                </apex:outputPanel>
+                                <!-- Region will be free or drop-down if there is a country selector and a country has been selected -->
+                                <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, NOT(objBooking.Company_Country__c=''))}">
+                                    <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions.size=0}">
+                                        <apex:outputLabel for="CompanyRegionWestFree2" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                        <apex:inputField id="CompanyRegionWestFree2" value="{!objBooking.Company_Region__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions.size>0}">
+                                        <apex:outputLabel for="CompanyRegionWestSelect" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label }{!IF(selectedCountry.countryOptionsMap[objBooking.Company_Country__c].rgRequired,' *','')}"/>
+                                        <apex:selectList id="CompanyRegionWestSelect" value="{!objBooking.Company_Region__c}" size="1" required="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].rgRequired}">
+                                            <apex:selectOptions value="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions}" />
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+
+                            <!-- JE 24/02/2022 - updated the postcode to always be required unless the noPostcode flag is included in the country settings -->
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)>0}">
+                                <apex:outputLabel for="CompanyPostcodeWest" value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}"/>
+                                <apex:inputField id="CompanyPostcodeWest" value="{!objBooking.Company_Postcode__c}"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)=0}">
+                                <apex:outputLabel for="CompanyPostcodeWestReq" value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label} *"/>
+                                <apex:inputField id="CompanyPostcodeWestReq" value="{!objBooking.Company_Postcode__c}" required="true"/>
+                            </apex:outputPanel>
+
+
+                            <!-- Country can be free or from drop-down (depending on country configuration) -->
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size=0}">
+                                <apex:outputLabel for="CompanyCountryWestFree" value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label} *"/>
+                                <apex:inputField id="CompanyCountryWestFree" value="{!objBooking.Company_Country__c}" required="true"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size>0}">
+                                <apex:outputLabel for="CompanyCountryWestDrop" value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label} *"/>
+                                <apex:actionRegion >
+                                    <apex:selectList id="CompanyCountryWestDrop" value="{!objBooking.Company_Country__c}" size="1" required="true">
+                                        <apex:selectOptions value="{!selectedCountry.countryOptions}" />
+                                        <apex:actionSupport event="onchange" reRender="CompanyRegionWest"/>
+                                    </apex:selectList>
+                                </apex:actionRegion>
+                            </apex:outputPanel>
+
+                        </apex:outputPanel>
+
+                        <!-- Eastern address -->
+                        <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+
+                            <!-- Country can be free or from drop-down (depending on country configuration) -->
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size=0}">
+                                <apex:outputLabel for="CompanyCountryEastFree" value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label} *"/>
+                                <apex:inputField id="CompanyCountryEastFree" value="{!objBooking.Company_Country__c}" required="true"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size>0}">
+                                <apex:outputLabel for="CompanyCountryEastDrop" value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label} *"/>
+                                <apex:actionRegion >
+                                    <apex:selectList id="CompanyCountryEastDrop" value="{!objBooking.Company_Country__c}" size="1" required="true">
+                                        <apex:selectOptions value="{!selectedCountry.countryOptions}" />
+                                        <apex:actionSupport event="onchange" reRender="CompanyRegionEast"/>
+                                    </apex:selectList>
+                                </apex:actionRegion>
+                            </apex:outputPanel>
+
+                            <!-- JS Changed Feb 2018 (project 67) to make Post code for Asianformat required if flag set -->
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)>0}">
+                                <apex:outputLabel for="CompanyPostcodeEastOpt" value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}"/>
+                                <apex:inputField id="CompanyPostcodeEastOpt" value="{!objBooking.Company_Postcode__c}"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)=0}">
+                                <apex:outputLabel for="CompanyPostcodeEastReq" value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label} *"/>
+                                <apex:inputField id="CompanyPostcodeEastReq" value="{!objBooking.Company_Postcode__c}" required="true"/>
+                            </apex:outputPanel>
+                            <!-- End JS -->
+
+                            <!-- Region fields -->
+                            <apex:outputPanel id="CompanyRegionEast" layout="block" styleClass="field-item">
+                                <!-- Region will be locked if there is a country selector but no country has been selected -->
+                                <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, objBooking.Company_Country__c='')}">
+                                    <apex:outputLabel for="CompanyRegionEastLocked" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                    <apex:inputText id="CompanyRegionEastLocked" title="{!$Label.TrainingBookingSelectCountry}" disabled="true" />
+                                </apex:outputPanel>
+                                <!-- Region will be free if there is no country selector -->
+                                <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size=0,FIND('RegionReqd',selectedCountry.Flags)=0)}">
+                                    <apex:outputLabel for="CompanyRegionEastFree" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                    <apex:inputField id="CompanyRegionEastFree" value="{!objBooking.Company_Region__c}"/>
+                                </apex:outputPanel>
+
+                                <!-- Region will be free or drop-down if there is a country selector and a country has been selected -->
+                                <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, NOT(objBooking.Company_Country__c=''))}">
+                                <!-- JS added Feb 2018 - make region/state a required field where flag selected - currently just JP who don't have region selector - code will need updated if this changes-->
+                                    <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions.size=0,FIND('RegionReqd', selectedCountry.Flags)=0)}">
+                                        <apex:outputLabel for="CompanyRegionEastFree2Opt" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}"/>
+                                        <apex:inputField id="CompanyRegionEastFree2Opt" value="{!objBooking.Company_Region__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions.size=0,FIND('RegionReqd', selectedCountry.Flags)>0)}">
+                                        <apex:outputLabel for="CompanyRegionEastFree2Req" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label} *"/>
+                                        <apex:inputField id="CompanyRegionEastFree2Req" value="{!objBooking.Company_Region__c}" required="true"/>
+                                    </apex:outputPanel>
+                                <!--End JS-->
+                                    <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions.size>0}">
+                                        <apex:outputLabel for="CompanyRegionEastSelect" value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}{!IF(selectedCountry.countryOptionsMap[objBooking.Company_Country__c].rgRequired,' *','')}"/>
+                                        <apex:selectList id="CompanyRegionEastSelect" value="{!objBooking.Company_Region__c}" size="1" required="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].rgRequired}">
+                                            <apex:selectOptions value="{!selectedCountry.countryOptionsMap[objBooking.Company_Country__c].regionOptions}" />
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+
+                            <div class="field-item">
+                                <apex:outputLabel for="CompanyCityEast" value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label} *"/>
+                                <apex:inputField id="CompanyCityEast" value="{!objBooking.Company_City__c}" required="true"/>
+                            </div>
+                            <div class="field-item">
+                                <apex:outputLabel for="CompanyStreetEast" value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label} *"/>
+                                <apex:inputField id="CompanyStreetEast" value="{!objBooking.Company_Street__c}" required="true"/>
+                            </div>
+                        </apex:outputPanel>
+
+                        <!-- Other details -->
+
+                        <!-- VAT for EU, ASIA except Italy -->
+                        <apex:outputPanel layout="block" rendered="{!AND(selectedCountry.displayVat, FIND('italyFormat', selectedCountry.Flags)<=0)}" styleClass="field-item">
+
+                            <!-- 23 Feb 2017 Vim added code to make VAT Field Number mandatory for Poland -->
+                            <apex:outputPanel layout="none" rendered="{!FIND('VATRequired', selectedCountry.Flags)>0}">
+                                <apex:outputLabel for="VatNumber1" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number__c.label} *"/>
+                                <apex:inputField id="VatNumber1" value="{!objBooking.VAT_Number__c}" required="true"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!FIND('VATRequired', selectedCountry.Flags)<=0}">
+                                <apex:outputLabel for="VatNumber" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number__c.label}"/>
+                                <apex:inputField id="VatNumber" value="{!objBooking.VAT_Number__c}"/>
+                            </apex:outputPanel>
+                            <!-- Vim code ends here -->
+                             <a href="#" class="tooltip-button" onclick="divOnOff('{!$Component.VatTooltip}');return false;">
+                                 <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'info.gif')}"/>
+                             </a>
+                            <apex:outputText id="VatTooltip" style="display: none;" styleClass="tooltip-below" value="{!$Label.TrainingBookingVatTooltip}" />
+                        </apex:outputPanel>
+                    
+                        <!-- VAT for Italy / italyFormat -->
+                        <!-- 27/05/2019 PC added support for IT VAT -->
+                        <apex:outputPanel layout="block" rendered="{!FIND('italyFormat', selectedCountry.Flags)>0}" styleClass="field-item">
+                        
+                            <p class="notes"><apex:outputText escape="false" value="{!$Label.TrainingBookingBillingInformation}"/></p> <!-- 25/06/2019 JS added extra text for Italy-->
+                            <apex:outputPanel layout="block" styleClass="field-item">
+                                <apex:outputLabel for="CompanyProfessional" value="{!$ObjectType.TrainingBooking__c.fields.Company_Professional__c.label} *"/>
+                                <apex:actionRegion >
+                                    <apex:inputField id="CompanyProfessional" value="{!objBooking.Company_Professional__c}" required="true">
+                                        <apex:actionSupport event="onchange" reRender="ItalyFormatVat"/>
+                                    </apex:inputField>
+                                </apex:actionRegion>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel id="ItalyFormatVat">
+                                <apex:outputPanel rendered="{!objBooking.Company_Professional__c='Company'}">
+                                    <apex:outputPanel layout="block" styleClass="field-item">
+                                        <apex:outputLabel for="VatNumberIT" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number__c.label} *"/>
+                                        <apex:inputField id="VatNumberIT" value="{!objBooking.VAT_Number__c}" required="true"/>
+                                        <!--JS commenting this out as formatting not working - should be added back in later
+                                        <a href="#" class="tooltip-button" onclick="divOnOff('{!$Component.VatTooltip}');return false;">
+                                             <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'info.gif')}"/>
+                                         </a>
+                                        <apex:outputText id="VatTooltip" style="display: none;" styleClass="tooltip-below" value="{!$Label.TrainingBookingVatTooltip}" />
+                                        -->    
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item">
+                                        <apex:outputLabel for="InvoiceRecipientcode" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Recipient_Code__c.label} **"/>
+                                        <apex:inputField id="InvoiceRecipientcode" value="{!objBooking.Invoice_Recipient_Code__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item">
+                                        <apex:outputLabel for="RegisteredEmailForInvoice" value="{!$ObjectType.TrainingBooking__c.fields.Registered_Email_for_Invoice__c.label} **"/>
+                                        <apex:inputField id="RegisteredEmailForInvoice" value="{!objBooking.Registered_Email_for_Invoice__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel >
+                                        **{!$Label.TrainingBookingItalyInvoiceRecipientCodeRegisteredEmailInvoice}
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <apex:outputPanel rendered="{!objBooking.Company_Professional__c='Professional'}">
+                                    <apex:outputPanel layout="block" styleClass="field-item">
+                                        <apex:outputLabel for="CodiceFiscale" value="{!$ObjectType.TrainingBooking__c.fields.Codice_Fiscale__c.label} *"/>
+                                        <apex:inputField id="CodiceFiscale" value="{!objBooking.Codice_Fiscale__c}" required="true"/>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+
+                        <!-- VAT2 required for other countries -->
+                        <apex:outputPanel layout="block" rendered="{!AND(FIND('Vat2Display', selectedCountry.Flags)>0, FIND('chinaFormat', selectedCountry.Flags)=0)}" styleClass="field-item">
+                            <apex:outputLabel for="VATNumber2" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number2__c.label}"/>
+                            <apex:inputField id="VATNumber2ZA" value="{!objBooking.VAT_Number2__c}"/>
+                        </apex:outputPanel>
+                        <!-- VAT2 labelled TIN for PH -->
+                        <apex:outputPanel layout="block" rendered="{!FIND('PHVAT', selectedCountry.Flags)>0}" styleClass="field-item">
+                            <apex:outputLabel for="TINPH" value="TIN*"/>
+                            <apex:inputField id="TINPH" value="{!objBooking.VAT_Number2__c}" required="true"/>
+                        </apex:outputPanel>                                            
+                        
+                        
+                        <!--  25/06/2019 JS added code to allow VAT Number2 for TH and Branch number - based on flag THVAT  -->
+                        <apex:outputPanel layout="block" rendered="{!FIND('THVAT', selectedCountry.Flags)>0}" styleClass="field-item">
+                            <apex:outputLabel for="VATNumberTH" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number2__c.label}"/>
+                            <apex:inputField id="VATNumberTH" value="{!objBooking.VAT_Number2__c}"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" rendered="{!FIND('THVAT', selectedCountry.Flags)>0}" styleClass="field-item">
+                            <apex:outputLabel for="BranchTH" value="{!$ObjectType.TrainingBooking__c.fields.Branch_Number__c.label}"/>
+                            <apex:inputField id="BranchTH" value="{!objBooking.Branch_Number__c}"/>
+                        </apex:outputPanel>  
+                        <!--JS additions for PH 11122019 - Business Style add * to label and required="true" to inputfield if required fields-->
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('businessStyle', selectedCountry.Flags)>0}">
+                             <apex:outputLabel for="BusinessStyle" value="{!$ObjectType.TrainingBooking__c.fields.Business_Style__c.label}"/>
+                             <apex:inputField id="BusinessStyle" value="{!objBooking.Business_Style__c}" />
+                        </apex:outputPanel>                      
+                        
+                        <!--  END TH Tax -->
+
+                        <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Start -->
+                        <!-- MD COMMENTING OUT FOR NOW - FIELDS NOT READY FOR USE
+                        <apex:outputPanel layout="block" styleClass="field-item">
+                            <apex:outputLabel for="CompanySector" value="{!$ObjectType.TrainingBooking__c.fields.Company_Sector__c.label} *"/>
+                            <apex:inputField id="CompanySector" value="{!objBooking.Company_Sector__c}" required="true"/>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="block" styleClass="field-item">
+                            <apex:outputLabel for="CompanySubSector" value="{!$ObjectType.TrainingBooking__c.fields.Company_Sub_Sector__c.label} *"/>
+                            <apex:inputField id="CompanySubSector" value="{!objBooking.Company_Sub_Sector__c}" required="true"/>
+                        </apex:outputPanel>
+                            MD END OF COMMENTED OUT SECTION -->
+                        <!--28/07/2017 ADS - SoW034 - Online Exam Enhancements - Finish -->
+
+                        <!-- chinaFormat - Invoicing Field for China -->
+                        <apex:outputPanel layout="block" rendered="{!FIND('chinaFormat', selectedCountry.Flags)>0}" styleClass="field-item">
+                            <p class="notes"><apex:outputText escape="false" value="{!$Label.TrainingBookingBillingInformation}" /></p>
+                            <div class="field-item">
+                                <apex:outputLabel for="InvoiceCategory" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Category__c.Label} *" />
+                                <apex:actionRegion >
+                                    <apex:inputField id="InvoiceCategory" value="{!objBooking.Invoice_Category__c}" required="true">
+                                        <apex:actionSupport event="onchange" reRender="ChinaFormatInvoice"/>
+                                    </apex:inputField>
+                                 </apex:actionRegion>                                    
+                            </div>
+                            <apex:outputPanel id="ChinaFormatInvoice">
+                                <apex:outputPanel rendered="{!OR(objBooking.Invoice_Category__c='Special', objBooking.Invoice_Category__c='General',objBooking.Invoice_Category__c='Proforma Invoice')}">
+                                    <div class="field-item">
+                                            <apex:outputLabel for="CNRegCompanyName" value="{!$ObjectType.TrainingBooking__c.fields.Business_Style__c.label} *"/>
+                                            <apex:inputField id="CNRegCompanyName" value="{!objBooking.Business_Style__c}" required="true" />
+                                    </div>
+                                </apex:outputPanel> 
+                                <apex:outputPanel rendered="{!OR(objBooking.Invoice_Category__c='Special', objBooking.Invoice_Category__c='General')}">   
+                                    <div class="field-item">
+                                        <apex:outputLabel for="CompanyTaxcode" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number2__c.label} *"/>
+                                        <apex:inputField id="CompanyTaxcode" value="{!objBooking.VAT_Number2__c}" required="true"/>
+                                    </div> 
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!objBooking.Invoice_Category__c='Special'}">                                 
+                                    <div class="field-item">
+                                        <apex:outputLabel for="InvoiceRecipientAdd" value="{!$ObjectType.TrainingBooking__c.fields.Registered_Address_for_Invoice__c.Label} *" />
+                                        <apex:inputField id="InvoiceRecipientAdd" value="{!objBooking.Registered_Address_for_Invoice__c}" required="true"/>
+                                    </div>                                                                                                                                                                                   
+                                    <div class="field-item">
+                                        <apex:outputLabel for="RegInvoicePhone" value="{!$ObjectType.TrainingBooking__c.fields.Registered_Phone_for_Invoice__c.Label} *" />
+                                        <apex:inputField id="RegInvoicePhone" value="{!objBooking.Registered_Phone_for_Invoice__c}" required="true"/>
+                                    </div>                            
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BankName" value="{!$ObjectType.TrainingBooking__c.fields.Bank_Name__c.Label} *" />
+                                        <apex:inputField id="BankName" value="{!objBooking.Bank_Name__c}" required="true"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BankAccount" value="{!$ObjectType.TrainingBooking__c.fields.Bank_Account__c.Label} *" />
+                                        <apex:inputField id="BankAccount" value="{!objBooking.Bank_Account__c}" required="true"/>
+                                    </div>
+                                 </apex:outputPanel>   
+                                <div class="field-item">
+                                    <apex:outputLabel for="InvoiceNotes" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Notes__c.Label}" />
+                                    <apex:inputField id="InvoiceNotes" value="{!objBooking.Invoice_Notes__c}" />
+                                </div>                                                                                                                                                                                  
+                             </apex:outputPanel>
+                        </apex:outputPanel>
+                        
+                    <!-- taiwanFormat - Invoicing Fields for Taiwan Company/Professional -->
+                        <apex:outputPanel layout="block" rendered="{!FIND('taiwanFormat', selectedCountry.Flags)>0}" styleClass="field-item">                                                                                             
+                            <p class="notes"><apex:outputText escape="false" value="{!$Label.TrainingBookingBillingInformation}" /></p>
+                            <div class="field-item">
+                                <apex:outputLabel for="InvoiceCategorytw" value="{!$ObjectType.TrainingBooking__c.fields.Company_Professional__c.Label} *" />
+                                <apex:actionRegion >
+                                    <apex:inputField id="InvoiceCategorytw" value="{!objBooking.Company_Professional__c}" required="true">
+                                        <apex:actionSupport event="onchange" reRender="TaiwanFormatInvoice"/>
+                                    </apex:inputField>
+                                 </apex:actionRegion>                                    
+                            </div>
+                            <apex:outputPanel id="TaiwanFormatInvoice">
+                                <apex:outputPanel rendered="{!objBooking.Company_Professional__c='Company'}">   
+                                    <div class="field-item">
+                                        <apex:outputLabel for="CompanyTaxcodeTW" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number2__c.label} *"/>
+                                        <apex:inputField id="CompanyTaxcodeTW" value="{!objBooking.VAT_Number2__c}" required="true"/>
+                                    </div> 
+                                </apex:outputPanel>  
+                                <div class="field-item">
+                                    <apex:outputLabel for="InvoiceNotesTW" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Notes__c.Label}" />
+                                    <apex:inputField id="InvoiceNotesTW" value="{!objBooking.Invoice_Notes__c}" />
+                                </div>                                                                                                                                                                                  
+                             </apex:outputPanel>
+                        </apex:outputPanel>    
+                        
+                        <apex:outputPanel id="HDRFfunding">
+                            <apex:outputPanel layout="block" rendered="{!AND(FIND('GovFund', selectedCountry.Flags)>0,objBooking.Manage_Government_Incentive__c='Yes')}" styleClass="field-item">                          
+                                  <p class="notes"><apex:outputText escape="false" value="Please add relevant billing details below if HRDF funding has requested." /></p>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                    <!-- Billing Address checkbox -->
+                        <div class="field-item">
+                            <apex:outputLabel for="BillingAddress" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Address__c.label}"/>
+                            <apex:actionRegion >
+                                <apex:inputField id="BillingAddress" value="{!objBooking.Billing_Address__c}">
+                                    <apex:actionSupport event="onclick" reRender="BillingWrapper" status="loader"/>
+                                </apex:inputField>
+                                <apex:outputPanel >
+                                    <apex:actionStatus id="loader" layout="inline">
+                                        <apex:facet name="start">
+                                            <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'ajax-loader.gif')}"/>
+                                        </apex:facet>
+                                    </apex:actionStatus>
+                                </apex:outputPanel>
+                            </apex:actionRegion>
+                        </div>
+                    </fieldset>
+
+                    <!-- Billing details -->
+                    <apex:outputPanel id="BillingWrapper">
+                        <apex:outputPanel layout="none" rendered="{!objBooking.Billing_Address__c}">
+                            <p class="notes">{!$Label.TrainingBookingBillingFormIntro}</p>
+                            <fieldset class="form-fields">
+                                <div class="field-item">
+                                    <apex:outputLabel for="BillingName" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Name__c.label} *"/>
+                                    <apex:inputField id="BillingName" value="{!objBooking.Billing_Name__c}" required="true"/>                                    
+                                </div>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('japanFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="BillingNameEn" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Name_English__c.label} *"/>
+                                    <apex:inputField id="BillingNameEn" value="{!objBooking.Billing_Name_English__c}" required="true"/>
+                                </apex:outputPanel>
+                                <!-- BILLING EMAIL  add * to label and required="true" to inputfield if required fields-->                                
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('billingEmail', selectedCountry.Flags)>0}">    
+                                    <apex:outputLabel for="BillingEmail" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Email_Address__c.label}"/>
+                                    <apex:inputField id="BillingEmail" value="{!objBooking.Billing_Email_Address__c}" />
+                                </apex:outputPanel>
+
+                                <!--JS China Billing Phone-->                                
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!OR(FIND('chinaFormat', selectedCountry.Flags)>0,FIND('billingPhone', selectedCountry.Flags)>0)}">    
+                                    <apex:outputLabel for="BillingPhone" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Phone__c.label} *"/>
+                                    <apex:inputField id="BillingPhone" value="{!objBooking.Billing_Phone__c}" required="true"/>
+                                </apex:outputPanel>                                
+
+                                <!-- Western address -->
+                                <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BillingStreetWest" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label} *"/>
+                                        <apex:inputField id="BillingStreetWest" value="{!objBooking.Billing_Street__c}" required="true"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BillingCityWest" value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label} *"/>
+                                        <apex:inputField id="BillingCityWest" value="{!objBooking.Billing_City__c}" required="true"/>
+                                    </div>
+
+                                    <!-- Region fields -->
+                                    <apex:outputPanel id="BillingRegionWest" layout="block" styleClass="field-item">
+                                        <!-- Region will be locked if there is a country selector but no country has been selected -->
+                                        <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, objBooking.Billing_Country__c='')}">
+                                            <apex:outputLabel for="BillingRegionWestLocked" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                            <apex:inputText id="BillingRegionWestLocked" title="{!$Label.TrainingBookingSelectCountry}" disabled="true" />
+                                        </apex:outputPanel>
+                                        <!-- Region will be free if there is no country selector -->
+                                        <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptions.size=0}">
+                                            <apex:outputLabel for="BillingRegionWestFree1" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                            <apex:inputField id="BillingRegionWestFree1" value="{!objBooking.Billing_Region__c}"/>
+                                        </apex:outputPanel>
+                                        <!-- Region will be free or drop-down if there is a country selector and a country has been selected -->
+                                        <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, NOT(objBooking.Billing_Country__c=''))}">
+                                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size=0}">
+                                                <apex:outputLabel for="BillingRegionFreeWest2" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                                <apex:inputField id="BillingRegionFreeWest2" value="{!objBooking.Billing_Region__c}"/>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size>0}">
+                                                <apex:outputLabel for="BillingRegionWestSelect" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}{!IF(selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].rgRequired,' *','')}"/>
+                                                <apex:selectList id="BillingRegionWestSelect" value="{!objBooking.Billing_Region__c}" size="1" required="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].rgRequired}">
+                                                    <apex:selectOptions value="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions}" />
+                                                </apex:selectList>
+                                            </apex:outputPanel>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    <!-- JE 24/02/2022 - updated the postcode to always be required unless the noPostcode flag is included in the country settings -->
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)>0}">
+                                        <apex:outputLabel for="BillingPostcodeWest" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}"/>
+                                        <apex:inputField id="BillingPostcodeWest" value="{!objBooking.Billing_Postcode__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)=0}">
+                                        <apex:outputLabel for="BillingPostcodeWestReq" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label} *"/>
+                                        <apex:inputField id="BillingPostcodeWestReq" value="{!objBooking.Billing_Postcode__c}" required="true"/>
+                                    </apex:outputPanel>
+
+                                    <!-- Country can be free or from drop-down (depending on country configuration) -->
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size=0}">
+                                        <apex:outputLabel for="BillingCountryWestFree" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label} *"/>
+                                        <apex:inputField id="BillingCountryWestFree" value="{!objBooking.Billing_Country__c}" required="true"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size>0}">
+                                        <apex:outputLabel for="BillingCountryWestDrop" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label} *"/>
+                                        <apex:actionRegion >
+                                            <apex:selectList id="BillingCountryWestDrop" value="{!objBooking.Billing_Country__c}" size="1" required="true">
+                                                <apex:selectOptions value="{!selectedCountry.countryOptions}" />
+                                                <apex:actionSupport event="onchange" reRender="BillingRegionWest"/>
+                                            </apex:selectList>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+
+                                </apex:outputPanel>
+
+                                <!-- Eastern address -->
+                                <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+
+                                    <!-- Country can be free or from drop-down (depending on country configuration) -->
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size=0}">
+                                        <apex:outputLabel for="BillingCountryEastFree" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label} *"/>
+                                        <apex:inputField id="BillingCountryEastFree" value="{!objBooking.Billing_Country__c}" required="true"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.countryOptions.size>0}">
+                                        <apex:outputLabel for="BillingCountryEastDrop" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label} *"/>
+                                        <apex:actionRegion >
+                                            <apex:selectList id="BillingCountryEastDrop" value="{!objBooking.Billing_Country__c}" size="1" required="true">
+                                                <apex:selectOptions value="{!selectedCountry.countryOptions}" />
+                                                <apex:actionSupport event="onchange" reRender="BillingRegionEast"/>
+                                            </apex:selectList>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+
+                                    <!-- JS Changed Feb 2018 (project 67) to make Post code for Asianformat required if flag set -->
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)>0}">
+                                        <apex:outputLabel for="BillingPostcodeEastOpt" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}"/>
+                                        <apex:inputField id="BillingPostcodeEastOpt" value="{!objBooking.Billing_Postcode__c}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('noPostcode', selectedCountry.Flags)=0}">
+                                        <apex:outputLabel for="BillingPostcodeEastReq" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label} *"/>
+                                        <apex:inputField id="BillingPostcodeEastReq" value="{!objBooking.Billing_Postcode__c}" required="true"/>
+                                    </apex:outputPanel>
+                                    <!-- End JS -->
+                                    <!-- Region fields -->
+                                    <apex:outputPanel id="BillingRegionEast" layout="block" styleClass="field-item">
+                                        <!-- Region will be locked if there is a country selector but no country has been selected -->
+                                        <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, objBooking.Billing_Country__c='')}">
+                                            <apex:outputLabel for="BillingRegionEastLocked" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                            <apex:inputText id="BillingRegionEastLocked" title="{!$Label.TrainingBookingSelectCountry}" disabled="true" />
+                                        </apex:outputPanel>
+                                        <!-- Region will be free if there is no country selector -->
+                                        <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptions.size=0}">
+                                            <apex:outputLabel for="BillingRegionEastFree" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                            <apex:inputField id="BillingRegionEastFree" value="{!objBooking.Billing_Region__c}"/>
+                                        </apex:outputPanel>
+                                        <!-- Region will be free or drop-down if there is a country selector and a country has been selected -->
+                                        <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptions.size>0, NOT(objBooking.Billing_Country__c=''))}">
+
+                                            <!-- JS added Feb 2018 - make region/state a required field where flag selected - currently just JP who don't have region selector - code will need updated if this changes-->
+                                            <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size=0,FIND('RegionReqd', selectedCountry.Flags)=0)}">
+                                                <apex:outputLabel for="BillingRegionEastFree2Opt" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                                <apex:inputField id="BillingRegionEastFree2Opt" value="{!objBooking.Billing_Region__c}"/>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel layout="none" rendered="{!AND(selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size=0,FIND('RegionReqd', selectedCountry.Flags)>0)}">
+                                                <apex:outputLabel for="BillingRegionEastFree2Req" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label} *"/>
+                                                <apex:inputField id="BillingRegionEastFree2Req" value="{!objBooking.Billing_Region__c}" required="true"/>
+                                            </apex:outputPanel>
+                                            <!--commenting out previous
+                                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size=0}">
+                                                <apex:outputLabel for="BillingRegionEastFree2" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}"/>
+                                                <apex:inputField id="BillingRegionEastFree2" value="{!objBooking.Billing_Region__c}"/>
+                                            </apex:outputPanel>-->
+                                            <!--End JS-->
+                                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions.size>0}">
+                                                <apex:outputLabel for="BillingRegionEastSelect" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}{!IF(selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].rgRequired,' *','')}"/>
+                                                <apex:selectList id="BillingRegionEastSelect" value="{!objBooking.Billing_Region__c}" size="1" required="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].rgRequired}">
+                                                    <apex:selectOptions value="{!selectedCountry.countryOptionsMap[objBooking.Billing_Country__c].regionOptions}" />
+                                                </apex:selectList>
+                                            </apex:outputPanel>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BillingCityEast" value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label} *"/>
+                                        <apex:inputField id="BillingCityEast" value="{!objBooking.Billing_City__c}" required="true"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BillingStreetEast" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label} *"/>
+                                        <apex:inputField id="BillingStreetEast" value="{!objBooking.Billing_Street__c}" required="true"/>
+                                    </div>
+                                <!--JS China Billing Notes-->                                
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('chinaFormat', selectedCountry.Flags)>0}">    
+                                    <apex:outputLabel for="BillingNotes" value="{!$ObjectType.TrainingBooking__c.fields.Billing_Notes__c.label}"/>
+                                    <apex:inputField id="BillingNotes" value="{!objBooking.Billing_Notes__c}" />
+                                </apex:outputPanel>  
+
+                                </apex:outputPanel>
+                            </fieldset>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+
+                    <div style="float: left; width: auto;">
+                        <apex:commandButton value="{!$Label.TrainingBookingContinueButton}" action="{!forwardToStep3}" rendered="{!NOT(pageShowSelection)}"/>
+                        <apex:commandButton value="{!$Label.TrainingBookingContinueButton}" action="{!forwardToStep3}" style="float: right; margin-left: 20px;" rendered="{!pageShowSelection}"/>
+                        <apex:commandButton value="{!$Label.TrainingBookingPreviousButton}" action="{!backToStep1}" immediate="true" html-formnovalidate="formnovalidate" style="float: right;" rendered="{!AND(pageShowSelection,isAuthenticated) || AND(pageShowSelection,NOT(selectedCountry.portalLogin))}"/>
+                        <apex:commandButton value="{!$Label.TrainingBookingPreviousButton}" action="{!forwardToLogin}" immediate="true" html-formnovalidate="formnovalidate" style="float: right;" rendered="{!AND(pageShowSelection,NOT(isAuthenticated),selectedCountry.portalLogin)}"/>
+                    </div>
+                    <div style="clear:both;"></div>
+
+                </div>
+
+            </apex:form>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                <p>{!$Label.TrainingBookingStep2Notes}</p>
+            </apex:outputPanel>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,71 @@
+<apex:component controller="bg_FacetedSearchComponentController">
+
+<style type="text/css">
+
+.facetedSearchComponent
+{
+/*min-height: 150px; */
+margin-right: 10px;
+margin-bottom: 10px; 
+width: 250px; 
+max-width:250px;
+/*border-style: solid;
+border-width: 3px;
+border-color: red;*/
+padding: 4px 4px 4px 4px;
+}
+
+div.tag
+{
+float: left; 
+margin-left:0px;
+margin-top:4px;
+margin-right:10px;
+margin-bottom:4px;
+background-color:lightgray;
+border-radius: 15px;
+padding: 0px 4px 0px 4px;
+}
+.removeButton
+{
+background:transparent !important;
+border-style: none !important;
+font-size: 12px !important;
+}
+</style>
+
+<apex:attribute name="delegate" description="A reference to the " type="bg_FacetedSearchDelegate" required="true" assignTo="{!searchDelegate}"/>
+<apex:attribute name="object" description="The field that we are filtering by " type="String" required="true" assignTo="{!objectName}"/>
+<apex:attribute name="field" description="The field that we are filtering by " type="String" required="true" assignTo="{!paramKey}"/>
+
+	<!-- not currently used, name would need to be namespaced to continue to function if multiple components are on the page  
+	<apex:actionFunction action="{!removeTag}" name="removeTag" reRender="selectedItems, availableOptions">
+		<apex:param name="tag" value="{!selectedOption}" assignTo="{!tagToRemove}"/>
+	</apex:actionFunction>
+	-->
+
+	<div class="facetedSearchComponent">
+		<apex:outputPanel id="availableOptions">
+			<apex:selectList value="{!selectedOption}" multiselect="false" size="1" style="width: 80%">
+    			<apex:selectOptions value="{!availableOptions}"/>
+    			<apex:actionSupport event="onchange" action="{!addTag}" status="status" reRender="selectedItems, availableOptions"  /> 	
+			</apex:selectList>
+		</apex:outputPanel>
+	
+		<apex:outputPanel id="selectedItems" layout="block" styleClass="selectedOptions">
+			<apex:repeat var="selectedItem" value="{!selectedItems}" >
+				<div class="tag">
+					<apex:outputText value="{!selectedItem}"/>
+					<!-- command button used due to namespace issue
+					<apex:outputLink style="padding-left: 10px;" value="#" onclick="removeTag('{!selectedItem}');">
+					Remove
+					</apex:outputLink>
+					-->
+					<apex:commandButton action="{!removeTag}" value="X" status="status" reRender="selectedItems, availableOptions" styleClass="removeButton">
+						<apex:param name="tag" value="{!selectedItem}" assignTo="{!tagToRemove}"/>
+					</apex:commandButton>
+				</div>
+			</apex:repeat>
+		</apex:outputPanel>
+	</div>
+</apex:component>

@@ -1,0 +1,19 @@
+<apex:page standardController="Opportunity" extensions="OpportunityProductInterestExt">
+
+    <apex:outputField value="{!Opportunity.Product_Stream__c}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Portfolio_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Product_Area_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Product_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Training_Interests__c}" rendered="false" />
+
+    <apex:outputField value="{!Opportunity.Account.NumberOfEmployees}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Account.BillingCountry}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Account.Industry}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Readiness__c}" rendered="false" />
+    <apex:outputField value="{!Opportunity.Customer_Buying_Stage__c}" rendered="false" />
+
+    <apex:form >
+        <c:ProductInterest3 objectRecord="{!oppExt}" editModeParm="{!editMode}" companySizeParam="{!Opportunity.Account.NumberOfEmployees}" countryParam="{!Opportunity.Account.BillingCountry}" sectorParam="{!Opportunity.Account.Industry}" certStageParam="{!Opportunity.Readiness__c}" customerBuyingStageParam="{!Opportunity.Customer_Buying_Stage__c}" />
+    </apex:form>
+
+</apex:page>

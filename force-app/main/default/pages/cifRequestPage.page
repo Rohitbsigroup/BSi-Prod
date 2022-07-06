@@ -1,0 +1,202 @@
+<apex:page standardController="Opportunity" extensions="emq_CIFRequestController">
+    <apex:pageMessages />
+    <apex:form >
+        <div style="text-align:center;">
+            <apex:commandButton action="{!Cancel}" value="Back to Opportunity" rendered="{!backToOpp}" />
+        </div>
+        <apex:pageBlock rendered="{!cifForm}">
+            <table style="width:100%">
+                <tr>
+                    <td colspan="4">
+                        <br/>
+                        <h1>The following information will be pre-populated into the CIF. Once you click confirm, 
+                        an email will be sent to the client with this information:</h1><br/> <br/>   
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h1>Opportunity Information:</h1><br/>
+                        Opportunity ID:&nbsp;<apex:outputText value="{!opportunity.OpportunityID2__c}" /><br/>
+                        Opportunity Owner:&nbsp;<apex:outputText value="{!opportunity.Owner.Name}" /><br/>
+                        Expected Delivery Date:<apex:outputText value="{0, date, MMMM d','  yyyy}">
+                        <apex:param value="{!opportunity.DeliveryDateExpectations__c}" /> 
+                        </apex:outputText>       
+                    </td>
+                    <td>
+                        <h1>Account Information:</h1><br/>
+                        Account Name:&nbsp;<apex:outputText value="{!opportunity.Account.Name}" /><br/><br/>
+                        <strong>Billing Address:</strong> <br/>
+                        Street:&nbsp;<apex:outputText value="{!opportunity.Account.BillingStreet}" /><br/>
+                        City:&nbsp;<apex:outputText value="{!opportunity.Account.BillingCity}" /><br/>
+                        State:&nbsp;<apex:outputText value="{!opportunity.Account.BillingState}" /><br/>
+                        Postal/Zip Code:&nbsp;<apex:outputText value="{!opportunity.Account.BillingPostalCode}" /><br/>
+                        Country:&nbsp;<apex:outputText value="{!opportunity.Account.BillingCountry}" /><br/>                        
+                        Website:&nbsp;<apex:outputText value="{!opportunity.Account.Website}" /><br/><br/><br/>
+                        
+                        <h1>Local Account Information:</h1><br/>
+                        Local Account Name:&nbsp;<apex:outputText value="{!opportunity.Account.NameLocal}" /><br/><br/>
+                        <strong>Local Billing Address:</strong> <br/>
+                        Local City:&nbsp;<apex:outputText value="{!opportunity.Account.Local_City_c__c}" /><br/>
+                        Local Street:&nbsp;<apex:outputText value="{!opportunity.Account.Local_Street__c}" /><br/>
+                        Local State:&nbsp;<apex:outputText value="{!opportunity.Account.Local_State__c}" /><br/>
+                        Local PostalCode:&nbsp;<apex:outputText value="{!opportunity.Account.Local_Post_Code__c}" /><br/>                        
+                        Local Country:&nbsp;<apex:outputText value="{!opportunity.Account.Local_Country__c}" /><br/>
+                    </td>
+                    <td>
+                        <h1>Primary Contact:</h1><br/>
+                        Name:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.FirstName}" />&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.LastName}" /><br/>
+                        Mobile:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.MobilePhone}" /><br/>
+                        Email:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.Email}" /><br/><br/><br/>
+                        
+                        <h1>Local Primary Contact:</h1><br/>
+                        Local Name:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.FirstNameLocal}" />&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.LastNameLocal}" /><br/>
+                      </td>
+                    <td>
+                        <!--<h1>Consultant:</h1><br/>
+                        <apex:outputText value="{!opportunity.Consultant1__r.FirstName}" /> <apex:outputText value="{!opportunity.Consultant1__r.LastName}" /><br/>
+                        <apex:outputText value="{!opportunity.Consultant1__r.MobilePhone}" /><br/>
+                        <apex:outputText value="{!opportunity.Consultant1__r.Email}" /><br/>-->
+                    </td>
+                </tr>
+                <!--tr>
+                    <td colspan="4" class="secondaryContact">
+                        <h1>Choose Secondary Contact:</h1><br/>
+                        <apex:pageBlock >
+                            <apex:pageBlockTable value="{!contacts}" var="contact">
+                                <apex:column headerValue="Select" >
+                                    <apex:inputCheckbox value="{!contact.selected}" />
+                                </apex:column>
+                                <apex:column headerValue="First Name" value="{!contact.Contact.FirstName}" />
+                                <apex:column headerValue="Last Name" value="{!contact.Contact.LastName}" />
+                                <apex:column headerValue="Mobile Phone" value="{!contact.Contact.MobilePhone}" />
+                                <apex:column headerValue="Email" value="{!contact.Contact.Email}" />
+                            </apex:pageBlockTable>
+                        </apex:pageBlock>
+                    </td>
+                </tr-->
+                
+                
+                <tr>
+                    <td colspan="4" align="center">
+                        <br/>
+                        <apex:commandButton action="{!Cancel}" value="Cancel" rendered="{!!submissionSuccess}" />                        
+                        <apex:commandButton action="{!Send}" value="Confirm" rendered="{!!submissionSuccess}" onclick="this.onclick=function(){return false;}" />
+                        <apex:commandButton action="{!Cancel}" value="Back to Opportunity" rendered="{!submissionSuccess}" />
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+            <script>
+                /*function checkSecondaryContacts(){
+                    var selectObjects = document.getElementsByTagName("input");
+                    var count = 0;
+                    for(var i=0; i<selectObjects.length; i++){
+                        if(selectObjects[i].type == 'checkbox' && selectObjects[i].checked)
+                            count++;
+                    }
+                    
+                    if(count != 1) {
+                        alert('Please select one Secondary Contact');
+                        return false;
+                    }
+                }*/
+            </script>
+        </apex:pageBlock>
+        </apex:form>
+    
+ <!--   /* Contact and Account Update Section */ -->
+    <apex:form >
+        <apex:pageBlock >         
+                <apex:pageBlockSection title="Contact Information" columns="2" rendered="{!updateForm}">                     
+                    <apex:pageblocksectionitem >                         
+                        <apex:outputpanel >
+                            <h1> Contact Current Data </h1> <br/><br/>
+                First Name:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.FirstName}"/> <br/>
+                Last Name:&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.LastName}"/> <br/>
+                Mobile :&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.MobilePhone}"/>  <br/>                      
+                Email :&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.Email}"/> <br/>
+                Phone :&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.Phone}"/>  <br/><br/><br/>
+                        
+                        
+                        <h1> Local Contact Current Data </h1> <br/><br/>
+                First Name (Local):&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.FirstNameLocal}"/> <br/>
+                Last Name (Local):&nbsp;<apex:outputText value="{!opportunity.PrimaryContact__r.LastNameLocal}"/> <br/>
+                        </apex:outputpanel>
+                      </apex:pageblocksectionitem>
+                    
+                     <apex:pageblocksectionitem >                           
+                        <apex:outputpanel >
+                            
+                            <h1> Contact Previous Data </h1><br/><br/> 
+                           <apex:repeat value="{!conRec}" var="con"> 
+                First Name:&nbsp;<apex:outputText value="{!con.firstname}"/> <br/>
+                Last Name:&nbsp;<apex:outputText value="{!con.LastName}"/> <br/>
+                Mobile:&nbsp;<apex:outputText value="{!con.MobilePhone}"/>  <br/>                      
+                Email :&nbsp;<apex:outputText value="{!con.Email}"/> <br/>
+                Phone :&nbsp;<apex:outputText value="{!con.Phone}"/>  <br/><br/><br/>
+                        
+                                   
+                <h1> Local Contact Previous Data </h1><br/><br/> 
+                FirstName (Local):&nbsp;<apex:outputText value="{!con.localFirstName}"/> <br/>
+                LastName (Local):&nbsp;<apex:outputText value="{!con.localLastName}"/> <br/>
+                 </apex:repeat>           
+                         <div style="text-align:center;">
+                <apex:commandButton action="{!updateConButton}" value="Update Contact" rendered="{!!submissionSuccess}" onclick="this.onclick=function(){return false;}" />
+                <apex:commandButton action="{!Cancel}" value="Cancel" rendered="{!!submissionSuccess}" /> 
+                         </div>
+                         </apex:outputpanel>
+                    </apex:pageblocksectionitem>                   
+            </apex:pageBlockSection>            
+                                
+             <apex:pageBlockSection title="Account Information" columns="2" rendered="{!updateForm}"> 
+                  <apex:pageblocksectionitem >                        
+                        <apex:outputpanel >
+                             <h1> Account Current Data </h1><br/><br/>
+               Name :&nbsp; <apex:outputText value="{!opportunity.Account.Name}" /> <br/>
+               Billing Street :&nbsp; <apex:outputText value="{!opportunity.Account.BillingStreet}" /> <br/>
+               Billing City :&nbsp; <apex:outputText value="{!opportunity.Account.BillingCity}"/> <br/>
+               Billing State :&nbsp; <apex:outputText value="{!opportunity.Account.BillingState}"/> <br/>
+               Billing Postal Code :&nbsp;<apex:outputText value="{!opportunity.Account.BillingPostalCode}"/> <br/>
+               Billing Country :&nbsp;<apex:outputText value="{!opportunity.Account.BillingCountry}"/> <br/>
+               Website :&nbsp; <apex:outputText value="{!opportunity.Account.Website}"/> <br/><br/><br/>
+                            
+                            <h1>Local Account Current Data </h1><br/><br/>
+               Name (Local):&nbsp; <apex:outputText value="{!opportunity.Account.NameLocal}" /> <br/>
+               Billing Street (Local):&nbsp; <apex:outputText value="{!opportunity.Account.Local_Street__c}" /> <br/>
+               Billing City (Local):&nbsp; <apex:outputText value="{!opportunity.Account.Local_City_c__c}"/> <br/>
+               Billing State (Local):&nbsp; <apex:outputText value="{!opportunity.Account.Local_State__c}"/> <br/>
+               Billing Postal Code (Local):&nbsp;<apex:outputText value="{!opportunity.Account.Local_Post_Code__c}"/> <br/>
+               Billing Country (Local):&nbsp;<apex:outputText value="{!opportunity.Account.Local_Country__c}"/> <br/>
+                        </apex:outputpanel>
+                   </apex:pageblocksectionitem>
+                 
+                 <apex:pageblocksectionitem >                     
+                        <apex:outputpanel >
+                             <h1> Account Previous Data </h1><br/><br/>
+               Name :&nbsp; <apex:outputText value="{!accountRec.accountName}" /> <br/>
+               Billing Street :&nbsp; <apex:outputText value="{!preAccBillStreet}" /> <br/> 
+               Billing City :&nbsp; <apex:outputText value="{!accountRec.billingCity}"/> <br/>
+               Billing State :&nbsp; <apex:outputText value="{!accountRec.BillingState}"/> <br/>
+               Billing Postal Code :&nbsp;<apex:outputText value="{!accountRec.PostalCode}"/> <br/>
+               Billing Country :&nbsp;<apex:outputText value="{!accountRec.BillingCountryCode}"/> <br/>
+               Website :&nbsp; <apex:outputText value="{!accountRec.Website}"/> <br/><br/><br/>
+                            
+                             <h1> Local Account Previous Data </h1><br/><br/>
+               Name (Local):&nbsp; <apex:outputText value="{!accountRec.localAccountName}" /> <br/>
+               Billing Street (Local):&nbsp; <apex:outputText value="{!preLocalAccBillStreet}" /> <br/>
+               Billing City (Local):&nbsp; <apex:outputText value="{!accountRec.localCity}"/> <br/>
+               Billing State (Local):&nbsp; <apex:outputText value="{!accountRec.localState}"/> <br/>
+               Billing Postal Code (Local):&nbsp;<apex:outputText value="{!accountRec.localPostalCode}"/> <br/>
+               Billing Country (Local):&nbsp;<apex:outputText value="{!accountRec.localCountry}"/> <br/>
+                            
+                       <div style="text-align:center;">
+                  <apex:commandButton action="{!updateAccButton}" value="Update Account" rendered="{!!submissionSuccess}" onclick="this.onclick=function(){return false;}" />
+                  <apex:commandButton action="{!Cancel}" value="Cancel" rendered="{!!submissionSuccess}" />
+                       </div>
+                     </apex:outputpanel>
+                  </apex:pageblocksectionitem>
+                    
+            </apex:pageBlockSection>            
+        </apex:pageBlock>
+    </apex:form>    
+</apex:page>

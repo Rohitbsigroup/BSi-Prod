@@ -1,0 +1,444 @@
+<apex:page controller="AddOptySiteControllerV2" sidebar="false">
+<apex:sectionHeader subtitle="{!$Label.OpportunitySitesPageSubtitle}" title="{!$Label.OpportunitySitesPageTitle}"/>
+	
+    <!-- SCRIPT FOR POSTCODE ANYWHERE -->
+    <apex:includeScript value="{!$Resource.pca__LookupComponent}"/>
+    <apex:includeScript value="{!$Resource.pca__EditPageLauncher}"/>
+    <apex:includeScript value="{!$Page.pca__EditPageSettings}"/>
+    
+    <!-- CSS STYLE -->
+    <style type="text/css">
+        .banner {
+            position: absolute; 
+            margin-top: 11px;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }
+        .header {
+            position: absolute; 
+            margin-top: 8px;
+            margin-left: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }
+        .tabdisabled {
+            opacity:0.3;
+            filter:alpha(opacity=30);
+            font-size:13px;
+            font-weight:bold;
+        }
+        .tabenabled {
+            font-size:13px;
+            font-weight:bold;
+        }
+        .noteRow {
+            background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-middle.png')}');
+            background-repeat: repeat;
+            background-color:#f6f6f6;
+            color: black;
+            font-size: 12px;
+            padding-left: 5px;
+        }
+        .noteBottom {
+            background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-bottom-trsp.png')}');
+            background-repeat: repeat-x;
+            height: 20px;
+        }
+    </style>
+    
+    <!--<apex:includeScript value="{!$Resource.jquery}"/>
+    <!-- SCRIPT FOR HIDING-SHOWING WARNING ICON -->
+    <!--<script type="text/javascript">
+    $(document).ready(function(){ 
+        $("[id$=warningIcon]").hide();
+        
+        $("[id$=tcode]").change(
+            function(){
+                var idx = $('[id$=tcode]').index(this);
+                $("[id$=warningIcon]").eq(idx).show();
+            }
+        );
+    });
+    </script>-->
+        
+    <apex:actionStatus id="status">
+    <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="200px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+    </apex:actionStatus>
+    
+    <apex:form id="theForm">
+        <apex:pageMessages id="pageMessages"/>
+        <apex:pageBlock id="accSites" mode="edit" title="{!$Label.OpportunitySites}">
+        <apex:pageBlockButtons >    
+            <apex:commandButton action="{!back}" value="{!$Label.Cancel}" immediate="true"/>
+            <apex:commandButton action="{!saveAll}" value="{!$Label.Save}" />
+            <apex:commandButton action="{!saveAndQuote}" value="{!$Label.SaveAndQuote}" rendered="{!!returnToQuote}" />
+        </apex:pageBlockButtons>
+        <br/>   
+        <table width="100%">
+        <tr>
+        <td width="60%" valign="top">
+            <!-- NEW SECTION HERE-->
+            <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+                <apex:outputPanel >
+                <apex:image value="{!$Resource.icon_markeradd}" height="30"/>
+                <apex:outputText value="{!$Label.NewSite}" styleclass="header"/>
+                </apex:outputPanel>
+                <apex:outputPanel style="float:right;">
+                    <apex:commandButton action="{!cancelNewSite}" value="{!$Label.Cancel}"  reRender="theForm" status="status" rendered="{!showNewSection}"/>               
+                    <apex:commandButton action="{!addNewSite}" value="{!$Label.AddNewSite}"  oncomplete="pca_Controls[0].bind()" reRender="theForm" status="status"/>
+                </apex:outputPanel>
+            </apex:panelGrid>
+            <apex:outputPanel id="newSection" rendered="{!showNewSection}">
+            <apex:outputPanel >
+                <table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+                <td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="20"/></td>
+                <td style="vertical-align:middle;">
+                <apex:outputText value="{!$Label.NamedSite}" rendered="{!IF(siteType == 'NAMED',true,false)}" style="font-weight:bold;font-size:11px"/>
+                <apex:outputText value="{!$Label.NetworkSite}" rendered="{!IF(siteType == 'NETWORK',true,false)}" style="font-weight:bold;font-size:11px"/>
+                <apex:outputText value="{!$Label.TransientSite}" rendered="{!IF(siteType == 'TRANSIENT',true,false)}" style="font-weight:bold;font-size:11px"/>
+                </td> 
+                </tr></table>
+                </apex:outputPanel>
+            <table width="100%">
+            <tr>
+            <td colspan="2">
+                <!-- RECORDTYPE TYPE SELECTION -->
+                <table width="100%" style="border-collapse:collapse;">
+                <tr>
+                    <td align="center" class="{!IF(siteType != 'NAMED','','tabborderE')}"> 
+                        <apex:commandLink action="{!siteDefault}" reRender="newSection" status="status" immediate="true">
+                        <apex:image value="{!$Resource.icon_named}" width="30" styleclass="{!IF(siteType != 'NAMED','tabdisabled','tabenabled')}"/>
+                        <apex:param name="st" value="NAMED" assignTo="{!siteType}"/>
+                        <apex:param name="er" value="false" assignTo="{!showError}"/>
+                        </apex:commandLink>
+                    </td>
+                    <td align="center" class="{!IF(siteType != 'TRANSIENT','','tabborderE')}"> 
+                        <apex:commandLink action="{!siteDefault}" reRender="newSection" status="status" immediate="true">
+                        <apex:image value="{!$Resource.icon_transient}" width="30" styleclass="{!IF(siteType != 'TRANSIENT','tabdisabled','tabenabled')}"/>
+                        <apex:param name="st" value="TRANSIENT" assignTo="{!siteType}"/>
+                        <apex:param name="er" value="false" assignTo="{!showError}"/>
+                        </apex:commandLink>
+                    </td>
+                    <td align="center" class="{!IF(siteType != 'NETWORK','','tabborderE')}"> 
+                        <apex:commandLink action="{!siteDefault}" reRender="newSection" status="status" immediate="true">
+                        <apex:image value="{!$Resource.icon_network}" width="30" styleclass="{!IF(siteType != 'NETWORK','tabdisabled','tabenabled')}"/>
+                        <apex:param name="st" value="NETWORK" assignTo="{!siteType}"/>
+                        <apex:param name="er" value="false" assignTo="{!showError}"/>
+                        </apex:commandLink>
+                    </td>
+                </tr>
+                <tr >
+                    <td align="center" class="{!IF(siteType != 'NAMED','tabdisabled','tabenabled')}">Named</td>
+                    <td align="center" class="{!IF(siteType != 'TRANSIENT','tabdisabled','tabenabled')}">Transient</td>
+                    <td align="center" class="{!IF(siteType != 'NETWORK','tabdisabled','tabenabled')}">Network</td>
+                </tr>
+                </table>
+                <br/>
+            </td>   
+            </tr>
+            <tr>
+            <td>
+            
+            <apex:pageBlockSection columns="1" rendered="{!IF(siteType == 'TRANSIENT',true,false)}">    
+                <apex:inputText value="{!newSite.Name}" style="font-weight:bold;height:20px;font-size:13px;width:300px;"/>
+                <apex:inputField value="{!newSite.GeographicIssue__c}"/>
+                <apex:inputField value="{!newSite.SecurityIssue__c}"/>
+				<apex:inputField value="{!newSite.S_Code__c}"/>
+                <apex:inputField value="{!newSite.Risk_Level__c}"/>                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.TransientDescription}"/>
+                    <apex:inputField value="{!newSite.Description__c}" style="width:100%;height:100px;"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>    
+            <apex:pageBlockSection columns="1" rendered="{!IF(siteType == 'NETWORK',true,false)}">  
+                <apex:inputText value="{!newSite.Name}"  style="font-weight:bold;height:20px;font-size:13px;width:300px;"/>
+                <apex:inputField value="{!newSite.GeographicIssue__c}"/>
+                <apex:inputField value="{!newSite.SecurityIssue__c}"/>
+				<apex:inputField value="{!newSite.S_Code__c}"/>
+                <apex:inputField value="{!newSite.Risk_Level__c}"/>                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.NetworkDescription}"/>
+                    <apex:inputField value="{!newSite.Description__c}" style="width:100%;height:100px;"/>
+                </apex:pageBlockSectionItem>    
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!IF(siteType == 'NAMED',true,false)}">
+                <apex:inputText value="{!newSite.Name}" style="font-weight:bold;height:20px;font-size:13px;width:300px;"/>      
+                <apex:inputField value="{!newSite.Industry__c}"/>
+                <apex:inputField value="{!newSite.TCodeDescr__c}"/>
+                <apex:inputField value="{!newSite.Type__c}"/>
+                <apex:inputField value="{!newSite.S_Code__c}"/>
+                <apex:inputField value="{!newSite.Risk_Level__c}"/>
+                <apex:inputField value="{!newSite.EMS_Risk_Level__c}"/>
+				<apex:inputField value="{!newSite.H_S_Risk_Level__c}"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Site__c.fields.PrimaryContact__c.label}"/>
+                    <apex:selectList value="{!newSite.PrimaryContact__c}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!AccContacts}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!newSite.SkipDupeChecker__c}"/>
+            </apex:pageBlockSection>
+            </td>
+            <td>
+            <apex:pageBlockSection columns="1" rendered="{!IF(siteType == 'NAMED',true,false)}">
+		        <pca:Address id="postcodeAny" License="WD73-WW63-JC22-AP27"
+					Country="{!newSite.Country__c}"
+					Street="{!newSite.Street__c}"
+					City="{!newSite.City__c}" 
+					State="{!newSite.State__c}" 
+					Zip="{!newSite.Postcode__c}" />
+		                                           
+<!--                <apex:inputField value="{!newSite.Country_Code__c}" id="als_countryiso2" required="true" />-->
+<!--                <apex:inputField value="{!newSite.Country__c}" id="als_country"/>-->
+<!--                <apex:inputField value="{!newSite.Postcode__c}" id="als_postalcode"/>-->
+<!--                <apex:inputField value="{!newSite.Street__c}" id="als_street"/>-->
+<!--                <apex:inputField value="{!newSite.City__c}" id="als_city"/>    -->
+<!--                <apex:inputField value="{!newSite.State__c}" id="als_state"/>-->
+		        <script type="text/javascript">pca_Load();</script>            
+            </apex:pageBlockSection>
+            </td>
+            </tr></table>
+            </apex:outputPanel>
+            <apex:outputPanel id="customError">
+            <apex:pageMessage summary="{!errorMessage}" severity="warning" strength="2" rendered="{!showError}"/>
+            </apex:outputPanel>
+            <br/>
+            <!-- ACCOUNT SECTION HERE-->
+            <apex:actionRegion >
+            <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+                <apex:outputPanel >
+                <table width="100%">
+                <tr>
+                    <td rowspan="2" width="35px"><apex:image value="{!$Resource.icon_account}" height="30"/></td>   
+                    <td align="left"><apex:outputText value="{!$Label.AccountSites}" style="font-size:14px;font-weight:bold;"/></td>
+                </tr>
+                <tr>
+                    <td align="left"><apex:outputText value="{!mainOpty.Account.Name}" style="color:grey;font-weight:bold;"/></td>
+                </tr>
+                </table>
+                </apex:outputPanel>
+                
+                <apex:commandButton action="{!linkToOpty}" value="{!$Label.LinkSite}" style="float:right;" reRender="linkedaccount,newlinkedopty,croles,customError" status="status" rendered="{!!noAccSite}"/>
+                
+                <apex:outputText value="{!$Label.NoAccountSite}" style="color:grey;font-weight:bold;float:right;" rendered="{!noAccSite}"/>
+            </apex:panelGrid>
+            
+            <apex:outputPanel id="linkedaccount">
+            <apex:pageBlockTable value="{!accSites}" var="as" rendered="{!!noAccSite}">
+                <apex:column width="25">
+                    <apex:facet name="header">
+                        <apex:outputPanel >
+                            <apex:commandLink action="{!selectAll}" reRender="linkedaccount" status="status" rendered="{!!allCheck}">
+                                <apex:image value="{!$Resource.icon_selected}" width="20" title="{!$Label.SelectAll}"/>
+                            </apex:commandLink>
+                            <apex:commandLink action="{!deselectAll}" reRender="linkedaccount" status="status" rendered="{!allCheck}">
+                                <apex:image value="{!$Resource.icon_deselected}" width="20" title="{!$Label.Deselectall}"/>
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:inputCheckbox value="{!as.selected}" disabled="{!!as.show}"/>
+                </apex:column>
+                <apex:column width="25">
+                    <apex:outputText value="{!as.site.TypeIcon__c}" escape="false"/>
+                </apex:column>
+                <apex:column value="{!as.site.Name}" style="color:{!IF(as.show,'black','grey')}"/>
+                <apex:column headerValue="{!$Label.TypeandTCode}">
+                    <apex:inputField value="{!as.site.Type__c}" style="color:{!IF(as.show,'black','grey')}" />
+                    <apex:image value="{!$Resource.icon_warning}" id="warningIcon" width="20" rendered="{!ISBLANK(as.site.Type__c)}"/>                    
+                    <apex:inputField value="{!as.site.Industry__c}" style="color:{!IF(as.show,'black','grey')}" />
+                    <br/>
+                    <apex:inputField value="{!as.site.TCodeDescr__c}" style="color:{!IF(as.show,'black','grey')}" id="tcode" />
+<!--                    <apex:image value="{!$Resource.icon_warning}" id="warningIcon" width="20" rendered="{!ISBLANK(as.site.TCodeDescr__c)}"/>-->
+                </apex:column>
+                <apex:column headerValue="{!$Label.Address}">
+                    <apex:outputText value="{!as.site.Street__c}" style="font: 11px 'American Typewriter';color:{!IF(as.show,'black','grey')}"/><br/>
+                    <apex:outputText value="{!as.site.City__c} {!as.site.Postcode__c}" style="font: 11px 'American Typewriter';color:{!IF(as.show,'black','grey')}"/><br/>
+                    <apex:outputText value="{!as.site.State__c} {!as.site.Country__c}" style="font: 11px 'American Typewriter';color:{!IF(as.show,'black','grey')}"/>
+                </apex:column>
+                <apex:column headerValue="{!$ObjectType.Site__c.fields.PrimaryContact__c.label}">
+                    <apex:selectList value="{!as.site.PrimaryContact__c}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!AccContacts}"/>
+                    </apex:selectList>
+                </apex:column>
+                <apex:column width="30">
+	           		<apex:facet name="header">
+						<apex:outputText escape="false" value="{!$Label.ControllingSite}" />
+        	   		</apex:facet>
+                    <apex:inputCheckbox value="{!as.quoteHQ}" disabled="{!!as.show}"/>
+                </apex:column>              
+            </apex:pageBlockTable>
+            </apex:outputPanel>
+            </apex:actionRegion>
+        </td>
+        <td width="40%" valign="top">
+        <!-- CONTACT ROLES SECTION -->
+        <apex:outputPanel id="croles" rendered="false">
+            <table width="100%" style="background-color: #F6EDC9;padding:2px">
+            <tr>
+            <td width="50px"><apex:image value="{!$Resource.icon_userred}" height="30"/></td>
+            <td style="font-weight:bold;text-align:left;vertical-align:middle;">Primary Contact: <b style="color:#A23233;"> 
+                <apex:selectList value="{!mainOpty.PrimaryContact__c}" size="1" multiselect="false">
+                    <apex:selectOptions value="{!AccContacts}"/>
+                </apex:selectList>
+            </b></td>
+            </tr>
+            </table>        
+            <div class="noteRow">
+            <table style="padding:5px" width="100%">
+                <th colspan="3" height="30px" style="text-align:center"><apex:outputText value="{!$Label.ContactRoles}" style="font-weight:bold;height:20px"/></th>
+                <tr colspan="3">
+                    <td style="vertical-align:middle;text-align:center"><apex:image value="{!$Resource.icon_warning}" width="25" rendered="{!noExisting}"/>
+                    <apex:outputText value="{!$Label.NoContactRoledefined}" rendered="{!noExisting}"/></td>
+                </tr>
+                <apex:repeat value="{!existingRoles}" var="r">
+                    <tr>
+                    <td style="vertical-align:middle;text-align:center">
+                    <apex:image value="{!$Resource.icon_usergreen}" width="25" rendered="{!!r.OppPrimary__c}"/>
+                    <apex:image value="{!$Resource.icon_userred}" width="25" rendered="{!r.OppPrimary__c}"/>
+                    </td>
+                    <td align="center" ><apex:outputField value="{!r.Contact__c}"/></td>
+                    <td align="center"><apex:inputField value="{!r.OppRole__c}"/></td>
+                    </tr>
+                </apex:repeat>
+                <apex:repeat value="{!externalRoles}" var="er">
+                    <tr>
+                    <td style="vertical-align:middle;text-align:center">
+                    <apex:image value="{!$Resource.icon_usergreen}" width="25" rendered="{!!er.OppPrimary__c}"/>
+                    </td>
+                    <td align="center" ><apex:inputField value="{!er.Contact__c}"/></td>
+                    <td align="center"><apex:inputField value="{!er.OppRole__c}"/></td>
+                    </tr>
+                </apex:repeat>
+            </table>
+            <center>
+                <apex:commandLink action="{!addExtContactRole}" reRender="croles" status="status">
+                    <apex:image value="{!$Resource.icon_add}" width="20"/>
+                </apex:commandLink>
+            </center>
+            <br/>
+            </div>
+            <div class="noteBottom" style="margin-top:-11px">
+            </div>
+        </apex:outputPanel>
+        <!-- LINKED SECTION -->
+        <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#F6EDC9">
+            <apex:outputPanel >
+            <table width="100%">
+                <tr>
+                    <td rowspan="2" width="35px"><apex:image value="{!$Resource.icon_basket}" height="30"/></td>    
+                    <td align="left"><apex:outputText value="{!$Label.OpportunitySites}" style="font-size:14px;font-weight:bold;"/></td>
+                </tr>
+                <tr>
+                    <td align="left"><apex:outputText value="{!mainOpty.Name}" style="color:grey;font-weight:bold;"/></td>
+                </tr>
+            </table>
+            </apex:outputPanel>
+        </apex:panelGrid>
+        <!-- NEW LINKED SITE -->
+        <apex:outputPanel id="newlinkedopty">
+        <apex:pageBlockTable id="toLink" value="{!optySitesNew}" var="osn" rendered="{!showList}">
+            <apex:column width="30">
+                <apex:image value="{!$Resource.icon_namedhq}" width="25" rendered="{!IF(osn.site.Type__c == setting.HQLabel__c,true,false)}"/>
+                <apex:image value="{!$Resource.icon_named}" width="25" rendered="{!IF(osn.rtype == 'NAMED' && osn.site.Type__c != setting.HQLabel__c,true,false)}"/>
+                <apex:image value="{!$Resource.icon_transient}" width="25" rendered="{!IF(osn.rtype == 'TRANSIENT',true,false)}"/>
+                <apex:image value="{!$Resource.icon_network}" width="25" rendered="{!IF(osn.rtype == 'NETWORK',true,false)}"/>
+                </apex:column>
+            <apex:column width="150" value="{!osn.site.Name}"/>
+            <!--<apex:column headerValue="{!$ObjectType.OpportunitySite__c.fields.ProposedScope__c.label}">
+                <apex:outputText value="{!osn.scope}"/>
+            </apex:column>-->
+            <apex:column headerValue="{!$Label.Address}">
+                <apex:outputText value="{!osn.site.Street__c}" style="font: 11px 'American Typewriter'"/><br/>
+                <apex:outputText value="{!osn.site.City__c} {!osn.site.Postcode__c}" style="font: 11px 'American Typewriter'"/><br/>
+                <apex:outputText value="{!osn.site.State__c} {!osn.site.Country__c}" style="font: 11px 'American Typewriter'"/>
+            </apex:column>
+            <apex:column width="30">
+           		<apex:facet name="header">
+					<apex:outputText escape="false" value="{!$Label.ControllingSite}" />
+           		</apex:facet>
+                <apex:inputCheckbox value="{!osn.quoteHQ}"/>
+            </apex:column>
+<!-- ## REMOVE Number of employees ## 
+            <apex:column width="30">
+                <apex:facet name="header">
+                    <apex:image value="{!$Resource.icon_employees}" title="{!$ObjectType.Site__c.fields.NumberEmployees__c.label}" width="25"/>
+                </apex:facet>
+                <apex:outputText value="{!TEXT(osn.site.NumberEmployees__c)}" style="font-size:12px;font-weight:bold;"/>
+            </apex:column>
+-->         
+            <apex:column width="50">
+<!--                <apex:actionRegion >-->
+                <apex:commandButton action="{!removeLink}" value="{!$Label.Remove}" reRender="linkedaccount,newlinkedopty" status="status" immediate="true">
+                    <apex:param value="{!osn.index}" assignTo="{!toRemove}" name="del"/>
+                </apex:commandButton>
+<!--                </apex:actionRegion>-->
+            </apex:column>
+        </apex:pageBlockTable>
+        </apex:outputPanel>
+        <!-- OLD LINKED SITE -->
+        <apex:outputPanel >
+            <table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+            <td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="20"/></td>
+            <td style="vertical-align:middle;">
+            <apex:outputText value="{!$Label.DoubleClickonthecheckbox}" style="font-weight:bold;font-size:11px"/>
+            </td> 
+            </tr></table>
+        </apex:outputPanel>
+        <apex:outputPanel id="oldlinkedopty">
+        <apex:pageBlockTable value="{!optySites}" var="os" rendered="{!!noOptySite}">
+            <apex:column width="30">
+                <!--<apex:image value="{!$Resource.icon_marker}" width="25"/>-->
+                <apex:outputText value="{!os.Site__r.TypeIcon__c}" escape="false"/>
+            </apex:column>
+            <apex:column width="150" value="{!os.Site__r.Name}"/>
+            <!--<apex:column headervalue="{!$ObjectType.OpportunitySite__c.fields.ProposedScope__c.label}">
+                <apex:outputField value="{!os.ProposedScope__c}">
+                    <apex:inlineEditSupport event="ondblclick" resetFunction="resetInlineEdit"/>
+                </apex:outputField>
+            </apex:column>-->
+            <apex:column headerValue="{!$Label.Address}">
+                <apex:outputText value="{!os.Site__r.Street__c}" style="font: 11px 'American Typewriter'"/><br/>
+                <apex:outputText value="{!os.Site__r.City__c} {!os.Site__r.Postcode__c}" style="font: 11px 'American Typewriter'"/><br/>
+                <apex:outputText value="{!os.Site__r.State__c} {!os.Site__r.Country__c}" style="font: 11px 'American Typewriter'"/>
+            </apex:column>
+            <apex:column width="30">
+           		<apex:facet name="header">
+					<apex:outputText escape="false" value="{!$Label.ControllingSite}" />
+           		</apex:facet>
+                <apex:outputField value="{!os.HQ__c}">
+                    <apex:inlineEditSupport event="ondblclick" resetFunction="resetInlineEdit"/>
+                </apex:outputField>
+            </apex:column>
+<!-- ## REMOVE Number of employees ## 
+            <apex:column width="30">
+                <apex:facet name="header">
+                    <apex:image value="{!$Resource.icon_employees}" title="{!$ObjectType.Site__c.fields.NumberEmployees__c.label}" width="25"/>
+                </apex:facet>
+                <apex:outputText value="{!TEXT(os.Site__r.NumberEmployees__c)}" style="font-size:12px;font-weight:bold;"/>
+            </apex:column>
+-->         
+            <apex:column width="50">
+                <apex:commandButton action="{!removeOptySite}" value="{!$Label.Remove}" reRender="oldlinkedopty,linkedaccount" status="status" immediate="true">
+                    <apex:param value="{!os.Id}" assignTo="{!toRemove}" name="delex"/>
+                </apex:commandButton>
+            </apex:column>
+        </apex:pageBlockTable>
+        </apex:outputPanel>
+        
+        <br/>
+        </td>
+        </tr>   
+        </table>    
+            
+        </apex:pageBlock>
+    
+    </apex:form>
+    
+</apex:page>

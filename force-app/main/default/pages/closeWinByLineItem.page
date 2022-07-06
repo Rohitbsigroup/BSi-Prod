@@ -1,0 +1,29 @@
+<apex:page standardController="Fulfillment_Status__c" extensions="emq_CloseWinByLineItem">
+	<apex:sectionHeader title="Fulfillment Status" />
+    <apex:form >
+    <apex:pageBlock >
+		<apex:pageBlockButtons >        
+            <apex:commandButton value="Save" action="{!save}" rendered="{!canEdit}"/>
+            <apex:commandButton value="Cancel" action="{!cancel}"/>
+        </apex:pageBlockButtons>
+        <apex:pageMessages ></apex:pageMessages>
+        <apex:pageBlockSection columns="1">
+        	<apex:outputField value="{!item.Name}" />
+        	<apex:outputField value="{!item.Account__c}" />
+        	<apex:outputField value="{!item.Opportunity__c}" />
+        	<apex:outputField value="{!item.Quotes_Orders__c}" />
+        	<apex:outputField value="{!item.Product_Name__c}" />
+        	<apex:outputField value="{!item.Amount__c}" />
+        	<apex:outputField value="{!item.Modified_Date__c}" />
+        	<apex:outputField value="{!item.Group_Number__c}" />
+        	<apex:outputField value="{!item.Status__c}"  rendered="{!!canEdit}" />
+        	<apex:outputField value="{!item.Forecast_Date__c}" rendered="{!!canEdit}" />
+        	
+        	<apex:selectList value="{!item.Status__c}" size="1" rendered="{!canEdit}"> 
+			    <apex:selectOptions value="{!statuses}" /> 
+			</apex:selectList>
+        	<apex:inputField value="{!item.Forecast_Date__c}"  rendered="{!canEdit}" />
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>

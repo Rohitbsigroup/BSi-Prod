@@ -1,0 +1,120 @@
+<apex:component controller="ProductInterestComponentController" allowDML="true" >
+
+<!--	<apex:outputField value="{!objRecord['Product_Interests__c']}" rendered="false"/>-->
+<!--	<apex:outputField value="{!objRecord['Portfolio_Interests__c']}" rendered="false"/>-->
+	
+	<apex:attribute name="objectRecord" description="Object Reference" assignTo="{!objRecord}" required="true" type="sobject"/>
+	<apex:attribute name="editModeParm" description="Edit Mode" assignTo="{!editMode}" required="true" type="boolean"/>
+		
+	<apex:pageMessages id="pageMessages" />
+    
+	<apex:actionStatus id="busyStatus">
+		<apex:facet name="start">
+			<apex:image url="/img/loading32.gif" width="20px" height="20px" />                       
+		</apex:facet>
+		<apex:facet name="stop"><div style="height:20px;" /></apex:facet>
+	</apex:actionStatus>
+
+    	<apex:pageBlock mode="maindetail">
+
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton rendered="{!editMode}" action="{!save}" id="editSaveButton" value="{!$Label.UpdateProducts}" rerender="pageMessages" status="busyStatus" />
+	            <apex:commandButton rendered="{!editMode}" action="{!cancel}" id="editCancelButton" value="{!$Label.Cancel}" rerender="selectedProducts,selectionSummary" status="busyStatus" />
+	        </apex:pageBlockButtons>
+        
+	        <apex:panelGrid columns="5">
+	        	  <apex:outputPanel id="allSelectLists">
+	        	  <apex:pageBlockSection columns="1" rendered="{!editMode}">
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:250px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.PortfolioInterestArea__c.label}" for="portfolioSelectList"/>
+						<apex:selectList id="portfolioSelectList" value="{!selectedPortfolio}" multiselect="false" size="1">
+			                <apex:selectOptions value="{!PortfolioOptions}" />
+			                <apex:actionSupport event="onchange" action="{!SelectPortfolio}" rerender="productAreaSelectList,productSelectList,productBundleSelectList,listButtons" status="busyStatus" />
+						</apex:selectList>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:250px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.ProductArea__c.label}"/>
+						<apex:selectList id="productAreaSelectList" value="{!selectedProductArea}" multiselect="false" size="1">
+			                <apex:selectOptions value="{!ProductAreaOptions}" />
+			                <apex:actionSupport event="onchange" action="{!SelectProductArea}" rerender="productSelectList,productBundleSelectList,listButtons" status="busyStatus" />
+						</apex:selectList>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:250px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Standards__c.label}"/>
+						<apex:outputPanel >
+							<apex:selectList id="productSelectList" value="{!selectedProduct}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!ProductOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectProduct}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							
+							<apex:image value="/img/func_icons/util/ileUndo16.gif" rendered="{!selectedProduct!=''}">
+								<apex:actionSupport event="onclick" action="{!ClearProduct}" rerender="allSelectLists,listButtons,pageMessages" />
+							</apex:image>
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:250px;">
+						<apex:outputLabel value="{!$Label.ProductBundle}"/>
+						<apex:outputPanel id="productBundleSelectList">
+							<apex:selectList value="{!selectedProductBundle}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!ProductBundleOptions}" />
+								<apex:actionSupport event="onchange" action="{!SelectProductBundle}" rerender="productBundleSelectList,listButtons" status="busyStatus" />
+							</apex:selectList>
+							<apex:image rendered="{!bundleProducts.size>0}" url="/img/msg_icons/info16.png" title="{!bundleProducts}" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>					
+				</apex:pageBlockSection>
+				</apex:outputPanel>	
+				<apex:panelGroup id="listButtons" rendered="{!editMode}">
+                    <br/>
+                    <apex:commandbutton value ="{!$Label.AddProduct} >" disabled="{!selectedProduct=''}" action="{!AddProduct}" rerender="selectedProducts,selectionSummary" style="width:100px" status="busyStatus" />
+                    <br/><br/>
+					<apex:commandbutton value ="{!$Label.AddBundle} >" disabled="{!bundleProducts.size=0}" action="{!AddBundle}" rerender="selectedProducts,selectionSummary" style="width:100px" status="busyStatus" />
+                    <br/><br/>
+                    <apex:commandbutton value="< {!$Label.Remove}" disabled="{!unselectProducts.size=0}" action="{!RemoveProduct}" rerender="selectedProducts,selectionSummary,listButtons" style="width:100px" status="busyStatus" /> 
+                </apex:panelGroup>
+
+				<apex:panelGroup rendered="{!editMode}"> 
+		            <apex:selectList id="selectedProducts" value="{!unselectProducts}" multiselect="true" style="width:200px;" size="7">
+		                <apex:selectOptions value="{!SelectedProductsList}" />
+		                <apex:actionSupport event="onchange" rerender="listButtons" status="busyStatus" />
+		            </apex:selectList>
+				</apex:panelGroup>
+
+				<div style="width:10px;" />
+				
+				<apex:panelGroup id="selectionSummary">
+					<apex:outputPanel >
+					<div style="margin:0;padding:0;border-collapse:collapse;height:140px;overflow:auto;">
+					<apex:outputPanel >
+					<table style="border-collapse:collapse;table-layout:fixed;width:375px;" class="list" border="0" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr class="headerRow">
+								<th style="width:70px;" class="headerRow">{!$label.portfolio}</th>
+								<th style="width:110px;" class="headerRow">{!$ObjectType.Lead.fields.ProductArea__c.label}</th>
+								<th class="headerRow">{!$ObjectType.Lead.fields.Standards__c.label}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<apex:repeat value="{!piwMap}" var="portfolioTable">
+								<apex:repeat value="{!piwMap[portfolioTable]}" var="productAreaTable">
+									<apex:repeat value="{!piwMap[portfolioTable][productAreaTable]}" var="productTable">
+										<apex:outputPanel layout="none" rendered="{!piwMap[portfolioTable][productAreaTable][productTable].Selected}" >
+											<tr class="datarow">
+												<td class="datacell" style="font-size:11px;">{!portfolioTable}</td>
+												<td class="datacell" style="font-size:11px;">{!productAreaTable}</td>								
+												<td class="datacell" style="font-size:11px;">{!productTable}</td>
+											</tr>
+										</apex:outputPanel>
+									</apex:repeat>
+								</apex:repeat>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+					</div>
+					</apex:outputPanel>
+				</apex:panelGroup>
+	        </apex:panelGrid>
+	    </apex:pageBlock>    
+
+</apex:component>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>application/x-zip-compressed</contentType>
+    <description>Stylesheets and images for training bookings.  
+Vimlesh (17 Aug 2016)  - Added file Espion_BSI_Logo1.png and added style logoEspion to “Cutdown.css”.</description>
+</StaticResource>

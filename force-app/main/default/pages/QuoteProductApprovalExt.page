@@ -1,0 +1,149 @@
+<apex:page id="thePage" standardController="Quote_Product_Approval__c" tabStyle="Quote__c" extensions="QuoteProductApprovalExt">
+
+	<script type="text/javascript">
+     	function openConfigurePopup(url, windowName, product)  {
+			var win = window.open(url, windowName, "width=1200,height=700,scrollbars=yes");
+			var timer = setInterval(
+				function() {
+					if(win.closed) {  
+	    				clearInterval(timer);
+						window.focus();
+						RefreshGrid();
+    				}
+    			}, 1000);							
+		}		
+	</script>
+	
+	<style>
+		tr.datarow { font-size: 90%; padding: 1px; }
+		select { font-family: inherit; font-size: inherit; }
+		option { font-size: 90%; }
+		th.productCol { width: 100px; } 
+		td.productCol { width: 100px; vertical-align:top;}
+		th.productConfigureCol { width: 40px; }
+		td.productConfigureCol { width: 40px; vertical-align:top;}
+		th.cCodeCol { width: 70px; }
+		td.cCodeCol { width: 70px; vertical-align:top;}
+		th.imsCol { width: 42px; }
+		td.imsCol { width: 42px; vertical-align:top;}
+		th.sampAllowedCol { width: 42px; }		
+		td.sampAllowedCol { width: 42px; vertical-align:top;}
+		th.sampAppliedCol { width: 42px; } 
+		td.sampAppliedCol { width: 42px; vertical-align:top;} 
+		th.siteCol { width: 120px; }
+		td.siteCol { width: 125px; }
+		th.siteTypeCol { width: 100px; }
+		td.siteTypeCol { width: 105px; }
+		th.regPathCol { width: 100px; }
+		td.regPathCol { width: 105px; }
+		th.tCodeCol { width: 40px; }
+		td.tCodeCol { width: 42px; }
+		th.sCodeCol { width: 50px; }
+		td.sCodeCol { width: 53px; }						
+		th.countryCol { width: 42px; }
+		td.countryCol { width: 45px; }
+		th.currencyCol { width: 50px; }
+		td.currencyCol { width: 53px; }		
+		th.pricebookCol { width: 150px; }
+		td.pricebookCol { width: 159px; }
+		th.detailsCompleteCol { width: 42px; }
+		td.detailsCompleteCol { width: 42px; } 					
+	</style>
+	
+	<apex:outputField rendered="false" value="{!Quote_Product_Approval__c.Quote__c}" />
+	<apex:outputField rendered="false" value="{!Quote_Product_Approval__c.Product__r.Name}" />	
+	<apex:outputField rendered="false" value="{!Quote_Product_Approval__c.Quote__r.Opportunity_Name__c}" />
+
+	<apex:form id="theForm">
+		<apex:pageMessages id="pageMessages" />
+		<apex:actionFunction name="RefreshGrid" rerender="productSiteGrid" />
+		
+		<apex:pageBlock id="prodSites" mode="edit" title="{!Quote_Product_Approval__c.Product__r.Name}">
+			<apex:outputPanel id="productSiteGrid">
+				<table style="border-collapse:collapse;width:1305px;" class="list" border="0" cellpadding="0" cellspacing="0" >
+					<!-- Column Headers -->			
+					<thead class="rich-table-thead">
+						<tr class="headerRow" >
+							<th class="headerRow productCol">Product</th>
+							<th class="headerRow productConfigureCol">&nbsp;</th>							
+							<th class="headerRow cCodeCol">C-Code</th>
+							<th class="headerRow imsCol">Combi / <br /> IMS</th>
+							<th class="headerRow sampAllowedCol">Sampling<br />Allowed</th>
+							<th class="headerRow sampAppliedCol">Sampling<br />Applied</th>
+							<th class="headerRow siteCol">Site</th>
+							<th class="headerRow siteTypeCol">Type</th>
+							<th class="headerRow regPathCol">Registration<br />Path</th>							
+							<th class="headerRow tCodeCol">T-Code</th>
+							<th class="headerRow sCodeCol">S-Code</th>												
+							<th class="headerRow countryCol">Country</th>
+							<th class="headerRow currencyCol">Currency</th>
+							<th class="headerRow pricebookCol">Pricebook</th>						
+							<th class="headerRow detailsCompleteCol" >Complete?</th>
+						</tr>
+					</thead>
+					<!-- Categories & Products -->				
+					<tbody>
+						<apex:repeat value="{!Products}" var="product">
+							<tr class="datarow">
+								<td class="datacell productCol"><apex:outputText value="{!product.name}" /></td>
+	
+								<td class="datacell productConfigureCol" style="text-align:center;">
+									<apex:commandButton id="configureProduct" rerender="pageMessages" action="{!ConfigureProduct}" value="View Configuration" onclick="return openConfigurePopup('{!product.ConfigureUrl}','Blueprint - Configure {!product.name}','{!product.name}')" />
+								</td>
+	
+								<td class="datacell cCodeCol" ><apex:outputText value="{!product.CCode}" /></td>
+								
+								<td class="datacell imsCol" style="text-align:center;">
+									<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.IMS}" />
+								</td>
+	
+								<td class="datacell sampAllowedCol" style="text-align:center;">
+									<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.VerifiedForSampling}" />
+								</td>
+		
+								<td class="datacell sampAppliedCol" style="text-align:center;">
+									<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.ValidForSampling}" />
+								</td>
+															
+								<td colspan="9" style="padding:0px;margin:0px;"> 							
+									<table style="border-collapse:collapse;" border="1" class="list" cellpadding="0" cellspacing="0">
+										<apex:repeat value="{!Sites}" var="site">
+											<apex:repeat value="{!product.SitesMap[site.Index]}" var="productSite">
+												<apex:outputPanel layout="none" rendered="{!productSite.Selected}" >
+													<tr class="datarow">
+														<td class="datacell siteCol"><apex:outputText value="{!productSite.Site.Name}" /></td>
+														<td class="datacell siteTypeCol"><apex:outputText value="{!productSite.Site.Type}" /></td>
+														<td class="datacell regPathCol"><apex:outputText value="{!productSite.RegistrationPath}" /></td>
+														<td class="datacell tCodeCol"><apex:outputText value="{!productSite.Site.TCodePrefix}" style="cursor:help;" title="{!productSite.Site.TCode}" /></td>
+														<td class="datacell sCodeCol"><apex:outputText value="{!productSite.Site.SCode}" /></td>
+	<!--													<td class="datacell pCodeCol"><apex:outputText value="{!productSite.Site.PCode}" /></td>-->																													
+														<td class="datacell countryCol" style="text-align:center;">
+															<apex:outputText value="{!productSite.Site.Country}" />
+														</td>
+														
+														<td class="datacell currencyCol" style="text-align:center;">
+															<apex:outputText value="{!productSite.CurrencyCode}" />
+														</td>
+														<td class="datacell pricebookCol" style="text-align:center;">
+															<apex:outputText value="{!productSite.PricebookName}" />														
+														</td>
+			
+														<td class="datacell detailsCompletedCol" style="text-align:center;">
+															<apex:image value="/img/msg_icons/info16.png" style="cursor:help;" rendered="{!!productSite.Completed}" title="Configuration incomplete. Click the 'Configure' button." />
+															<apex:image value="/img/msg_icons/confirm16.png" style="cursor:help;" rendered="{!productSite.Completed}" title="Configuration Completed."/>
+														</td>
+													</tr>
+												</apex:outputPanel>
+											</apex:repeat>
+		 									
+										</apex:repeat>										
+									</table>
+								</td>
+							</tr>
+						</apex:repeat>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+		</apex:pageBlock>
+	</apex:form>		
+</apex:page>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>36.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Page used to clone Conga templates and their queries</description>
+    <label>CongaTemplateClone</label>
+    <packageVersions>
+        <majorNumber>8</majorNumber>
+        <minorNumber>2</minorNumber>
+        <namespace>APXTConga4</namespace>
+    </packageVersions>
+</ApexPage>

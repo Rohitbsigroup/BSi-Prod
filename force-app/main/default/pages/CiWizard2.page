@@ -1,0 +1,55 @@
+<apex:page standardController="CI_Account__c" extensions="CiWizardController">
+    <script type="text/javascript">
+        function checkAll(cb, cbid)
+        {
+            var inputElem = document.getElementsByTagName("input");                     
+            for(var i = 0; i < inputElem.length; i++)
+            {             
+                if(inputElem[i].id.indexOf(cbid) != -1 && !inputElem[i].disabled) inputElem[i].checked = cb.checked;
+            }
+            redraw();
+        }
+    </script>
+    <apex:form >
+        <apex:actionFunction name="redraw" reRender="list"/>
+        <apex:sectionHeader title="CI Account" subtitle="Create Sales Copy" />
+        <apex:pageMessages />
+        <apex:pageBlock Title="Step 2 of 3 - Site options">
+            <apex:PageBlockButtons style="text-align: right;">
+                <apex:commandButton action="{!backToStep1}" value="Previous" immediate="true"/>&nbsp;
+                <apex:commandButton action="{!forwardToStep3}" value="Next"/>&nbsp;
+                <apex:commandLink action="{!cancel}" value="Cancel" immediate="true"/>
+            </apex:PageBlockButtons>
+            <p style="font-weight: bold;">Select the CI Sites that you want to include:</p>
+            <apex:outputPanel id="list">
+                <apex:pageBlockTable value="{!sourceSites}" var="site" rendered="{!AND(NOT(ISNULL(sourceSites)),sourceSites.size>0)}" style="margin-top: 20px;">
+                    <apex:column headerValue="Action" headerClass="actionColumn">
+                        <apex:facet name="header">
+                            <apex:inputCheckbox onclick="checkAll(this,'checkedone')" />
+                        </apex:facet>
+                        <apex:inputCheckbox selected="true" disabled="true" rendered="{!NOT(site.matchingSite=null)}" />
+                        <apex:inputCheckbox id="checkedone" value="{!site.isPicked}" rendered="{!site.matchingSite=null}">
+                            <apex:actionSupport event="onclick" action="{!ok}" reRender="options"/>
+                        </apex:inputCheckbox>
+                    </apex:column>
+                    <apex:column headerValue="Name"><apex:OutputField value="{!site.ciSite.Name}" /></apex:column>
+                    <apex:column headerValue="City"><apex:OutputField value="{!site.ciSite.City__c}" /></apex:column>
+                    <apex:column headerValue="Region"><apex:OutputField value="{!site.ciSite.Region__c}" /></apex:column>
+                    <apex:column headerValue="Postcode"><apex:OutputField value="{!site.ciSite.Postcode__c}" /></apex:column>
+                    <apex:column headerValue="Country"><apex:OutputField value="{!site.ciSite.Country__c}" /></apex:column>
+                    <apex:column headerValue="Options">
+                        <apex:outputPanel id="options">
+                            <apex:outputText value="Site already exists" rendered="{!NOT(site.matchingSite=null)}" />
+                            <apex:outputText value="Create new site" rendered="{!site.matchingSite=null}" />
+                            <!--<apex:outputText value="Create new site" rendered="{!AND(site.matchingSite=null,unlinkedSites.size=0)}" />
+                            <apex:selectList rendered="{!AND(site.matchingSite=null,unlinkedSites.size>0)}" size="1" disabled="{!NOT(site.IsPicked)}">
+                                <apex:selectOption itemValue="new" itemLabel="Create new site" />
+                                <apex:selectOptions value="{!unlinkedSites}" />
+                            </apex:selectList>-->
+                        </apex:outputPanel>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

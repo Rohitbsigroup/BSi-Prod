@@ -1,0 +1,156 @@
+.THIS {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.THIS .container {
+    max-width: 1170px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.THIS .mainBody {
+    width: 100% !important;
+    height: 100% !important;
+    text-align: center;
+}
+
+.THIS .bodyContainer{
+    max-width: 300px !important;
+    width: 100% !important;
+    text-align: center;
+    display: inline-block;
+    padding-top: 100px;
+}
+
+/* Beginning of.themefooter */
+
+/*Beginning Logo Footer Theme*/
+.THIS .logo-image-footer{
+    min-width: 70px;
+    min-height: 20px;
+    margin-left: auto;
+  	margin-right: auto;
+}
+
+@media (min-width: 767px) {
+    .THIS .logo-image-footer{
+        width: auto;
+        height: auto;
+        margin-left: 0;
+  		margin-right: 0;
+	}
+}
+
+.THIS .left-footer{
+    display: flex;
+    text-align: center;
+    margin-left: auto;
+  	margin-right: auto;
+    margin-bottom: 20px;
+    padding-top: 5px;
+    height: 35px;
+}
+
+@media (min-width: 767px) {
+    .THIS .left-footer {
+        border-bottom-color: #353d42;
+        border-bottom-style: solid;
+        border-bottom-width: 2px;
+        text-align: left;
+        max-width: 1170px;
+        height: 75px;
+        padding: 20px;
+        margin-bottom: 0;
+    }  
+}
+/*End of Logo Footer Theme*/
+
+.THIS .themefooter {
+    width: 100%;
+    background-color: #283136;
+    color: #ffffff;
+    text-align: center;
+    margin: auto;
+    position: fixed;
+    bottom: 0;
+}
+
+@media (min-width: 768px) {
+    .THIS .themefooter .inner {
+        height: 56px;
+        padding: 10px;
+    }
+}
+
+.THIS .themefooter .slds-grid {
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+    .THIS .themefooter .inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }  
+}
+.THIS .copyright {
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .THIS .copyright {
+        margin-bottom: 0;   
+    }
+}
+
+.THIS .nav {
+    margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+    .THIS .nav {
+        margin-top: 0;
+    }
+}
+
+.THIS .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .THIS .nav ul {
+        justify-content: normal;
+    }
+}
+
+.THIS .nav ul li a {
+    color: #ffffff;
+    text-transform: capitalize;
+    margin: 0 5px;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.THIS .nav ul li:last-child {
+    border-right: none;
+}
+
+/* End of.themefooter */
+
+/* SOCIAL MEDIA */
+.THIS .social-media ul {
+    display: flex;
+}
+
+.THIS .social-media ul li {
+    margin-right: 10px;
+}
+
+.THIS .themefooter .social-media ul {
+    justify-content: center;
+}
+
+/*.themefooter end */

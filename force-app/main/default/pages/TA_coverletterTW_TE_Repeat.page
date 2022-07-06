@@ -1,0 +1,321 @@
+<apex:page renderAs="pdf" standardController="Training_Event__c" showHeader="false">
+
+<!-- TA_coverletter23_TE_Repeat check out NAME  DATE  -->
+
+<head>
+<style type="text/css" media="print">
+
+@page{
+    @bottom-left {                  
+    content: element(footer);      
+    }   
+    size: A4 portrait;
+    margin-top:0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;  
+}
+
+body
+{
+color:#000000;
+font-family:"Arial Unicode MS";
+}
+
+p
+{
+color:#000000;
+font-family:"Arial Unicode MS";
+font-size:10pt;
+}
+
+h3
+{
+color:#E52013;
+font-family:"Arial Unicode MS";
+font-size:11pt;
+font-style:bold;
+}
+
+footer
+{
+color:#A9A9A9;
+font-family:"Arial Unicode MS";
+font-size:7.5pt;
+}
+
+</style>
+</head>
+<body>
+<img src="{!URLFOR($Resource.BSI_Letter_New_Brand)}" style="position: fixed; left: 0cm; top: 0cm;  z-index:-1" width="21cm" height="29.7"/>
+
+<!-- displays the footer-->
+<footer>
+        <table width="18cm" valign="top" style="position: fixed; left: 1.5cm; top: 27.1cm;" >
+          <colgroup>
+            <col span="4" width="4.5cm" />
+          </colgroup>
+        <tr valign="top">
+        <td>BSI Taiwan<br/>
+        5th floor, No.39, Ji-Hu Rd.<br/>
+        Nei-Hu Dist., Taipei 114, Taiwan<br/>
+        台北市內湖區基湖路39號5樓<br/></td>
+        <td>
+        T: +886(2)2656-0333<br/>
+        F: +886(2)2656-0222<br/>
+        training.taiwan@bsigroup.com<br/>
+        bsigroup.tw</td>
+        <td></td>
+        <td></td>
+        </tr>
+        </table>
+</footer>
+
+<!--------  Displays the course dates and name and list of delegates for up to 44 delegates. ------>
+
+<apex:panelGroup rendered="{!IF((Training_Event__c.Enrollment_Count__c <= 44),true,false)}">
+
+    <table align="left" width="19.3cm" valign="top" style="position: absolute; left: 1.5cm; top: 6.5cm; line-height: 12pt;">
+    
+     <tr> <td> <apex:outputText escape="false" value=" {!Training_Event__c.Course_Name_for_Certificate__c}"></apex:outputText></td>
+     </tr>       
+     <tr> <td>        
+    <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c, false,true)}">
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=1,true,false)}" value="{0,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                      </apex:outputText>
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c>1,true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                          <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                      </apex:outputText>
+                                </apex:outputpanel>
+                                
+                                <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c,true,false)}">
+                                
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy} - {3,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c =0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c =0)),true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy} - {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                
+                                   <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=2,true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=1,true,false)}" value="{0,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                    </Apex:outputText>
+                                
+                                </apex:outputpanel>
+                                </td></tr>
+                                <tr><td><br/></td></tr> 
+    </table>
+ 
+                  
+    <table  align="left" cellpadding="2" cellspacing="0" styleclass="table"  border="0.1"  style="position: absolute; top: 8cm; text-align: center; font-size:6pt;">
+            <THEAD>
+                <tr>
+                    <th width="1.5cm" style="border:0px solid #000000;border-right:0;"> </th>
+                    <th style="border:1px solid #000000;border-right:0;">Enrolment ID</th>
+                    <th style="border:1px solid #000000;border-right:0;">Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Local Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Booking Status</th>
+                    <th style="border:1px solid #000000;">Exam Results</th>
+                </tr>
+            </THEAD>
+                <apex:repeat value="{!Training_Event__c.Enrollments__r}" var="cx">
+            <TBODY>
+                <tr >
+                    <td width="1.5cm" style="border:0px solid #000000;border-right:0;"> </td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.Name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.LastNameLocal}{!cx.delegate_name__r.FirstNameLocal}</td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.Booking_status__c}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;">{!cx.Exam_results__c}</td>
+                </tr>
+            </TBODY>
+            </apex:repeat>
+    </table>
+
+</apex:panelGroup>
+
+<!--------  For 44+ delegates a message is shown to state a table can't be produced. ------>
+
+<apex:panelGroup rendered="{!IF((Training_Event__c.Enrollment_Count__c <= 44),false, true)}">
+
+     <table valign="middle" style="position: absolute; left: 1.2cm; top: 10cm; line-height: 12pt;">
+         <tr><td><apex:outputText value="A list cannot be displayed for more than 44 delegates, but you can still see all the certificates on the following pages."/></td></tr>
+      </table>
+</apex:panelGroup>
+
+
+
+
+
+<!-- This sets it so that the code is repeated and a cover letter is displayed for each enrolment-->
+<apex:repeat value="{!Training_Event__c.Enrollments__r}" var="enr">
+
+
+<!--Here may restricts for when that the cover letter is shown e.g. if the booking status contains booked so No Shows and Cancelled enrollments are excluded -->
+
+<!--<apex:panelGroup rendered="{!OR((CONTAINS('Booked',enr.Booking_status__c)), (CONTAINS('Booked - BSI Employee',enr.Booking_status__c)), (CONTAINS('Booked - Resit',enr.Booking_status__c))  )}"> -->
+<apex:panelGroup > 
+ 
+<!--This creates a page break between each certificate -->                    
+        <table height="0">
+              <tr><td>
+                  <div style="page-break-before:always"></div>
+              </td></tr>
+        </table>
+
+    <div>
+        <table width="18cm" valign="top" style="position: relative; width: 15.92cm; left: 2.54cm; right: 2.54cm; top: 6.25cm;" >
+            <tr><td>
+            
+            Dear Delegate,<br/>
+            <br/>
+            Congratulations!! <br/>
+            <apex:outputPanel rendered="{!IF(AND(NOT(OR(CONTAINS(enr.Exam_results__c,'Fail'),CONTAINS(enr.Exam_results__c,'fail'))),NOT(ISBLANK(enr.Exam_results__c))),true, false)}">   
+            Enclosed please find <apex:outputText escape="false" value=" {!enr.Training_Event__r.Course_Name_for_Certificate__c}"></apex:outputText> Certificate upon successful completion.<br/><br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!IF(OR(CONTAINS(enr.Exam_results__c,'Fail'),CONTAINS(enr.Exam_results__c,'fail'),ISBLANK(enr.Exam_results__c)),true,false)}">   
+            Enclosed please find <apex:outputText escape="false" value=" {!enr.Training_Event__r.Course_Name_for_Certificate__c}"></apex:outputText> Certificate for attendance.<br/><br/>
+            </apex:outputPanel>
+            
+            We hope you will find BSI Training to be both benficial and knowledgably.<br/><br/>
+            BSI is fully committed to continuous improvement of providing integrated services to our clients.  We welcome any suggestions and comments, in order to satisfy your further needs and to offer you the most desirable training services.<br/>
+            <br/>
+            Looking forward to serving you again in the future.<br/>
+            <br/>
+            <br/>
+            BSI Training Service<br/>
+            
+            <br/>
+            <br/>
+            <br/>
+            親愛的學員:<br/>
+            <apex:outputPanel rendered="{!IF(AND(NOT(OR(CONTAINS(enr.Exam_results__c,'Fail'),CONTAINS(enr.Exam_results__c,'fail'))),NOT(ISBLANK(enr.Exam_results__c))),true, false)}">   
+            恭喜您成功取得 
+            <apex:outputText rendered="{!IF(enr.Training_Event__r.Course__r.Bespoke_Event__c=TRUE, true, false)}" escape="false" value="{!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} "/>
+            <apex:outputText rendered="{!IF(enr.Training_Event__r.Course__r.Bespoke_Event__c=FALSE, true, false)}" escape="false" value="{!enr.Training_Event__r.Course__r.Product_Name_Local__c} "/> 證書，現附上合格證書，敬請查收。<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!IF(OR(CONTAINS(enr.Exam_results__c,'Fail'),CONTAINS(enr.Exam_results__c,'fail'),ISBLANK(enr.Exam_results__c)),true,false)}">   
+            恭喜您成功取得 
+            <apex:outputText rendered="{!IF(enr.Training_Event__r.Course__r.Bespoke_Event__c=TRUE, true, false)}" escape="false" value="{!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} "/>
+            <apex:outputText rendered="{!IF(enr.Training_Event__r.Course__r.Bespoke_Event__c=FALSE, true, false)}" escape="false" value="{!enr.Training_Event__r.Course__r.Product_Name_Local__c} "/>證書，現附出席格證書，敬請查收。<br/>
+            </apex:outputPanel>
+            
+            
+            我們衷心希望 BSI的訓練課程能帶給您期望的效益，並增進您對此系統的知識。<br/>
+            BSI 以不斷改進服務為承諾，期許為顧客提供最完整的服務。<br/>
+            歡迎您提供任何寶貴的建議，以幫助我們提供更符合您所需要的服務。<br/>
+            <br/>
+            期待將來能有再為您服務的機會！<br/>
+            <br/>
+            <br/>
+            BSI教育訓練服務 謹啟<br/>
+            
+            </td>
+            </tr>
+        </table>
+    
+    </div>
+    
+    
+    <div style="page-break-before:always">
+    
+        <table style="position: relative; left: 2.54cm; width: 15.92cm; top: 6.25cm;">
+            <tr>
+            <td width="20%">To      :   </td><td><b>{!enr.Delegate_name__r.Account_Name_Local_Language__c}</b></td>
+            </tr>
+            <tr>
+            <td>            </td><td>{!enr.Delegate_Name__r.LastNameLocal}{!enr.Delegate_Name__r.FirstNameLocal} 先生/小姐</td>
+            </tr>
+            <tr>
+            <td>From :      </td><td>Training Department (BSI Taiwan)</td>
+            </tr>
+            <tr>
+            <td>Date  :  </td><td><Apex:outputText value="{0,date}"><apex:param value="{!NOW()}" /></Apex:outputText></td>
+            </tr>
+            <tr>
+            <td>Re     :        </td><td>{!enr.Training_Event__r.Course_Name_for_Certificate__c}</td>
+            </tr>
+        </table>
+        <br/>
+    
+        <table style="position: relative; width: 15.92cm; left: 2.54cm; top: 7cm;">
+            <tr><td>
+            <Apex:outputText rendered="{!IF(enr.Training_Event__r.Split_Date_Event__c,false,true)}"  value="Enclosed please find the certificate(s) for {0} on {1,date,MMM,dd yyyy} to {2,date, MMM,dd yyyy}.">
+                <apex:param value="{!enr.Training_Event__r.Course_Name_for_Certificate__c}"/>
+                <apex:param value="{!enr.Training_Event__r.Start_date__c}"/>
+                <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/>
+            </Apex:outputText>
+            
+            <apex:outputText rendered="{!IF(enr.Training_Event__r.Split_Date_Event__c,true,false)}" value="Enclosed please find the certificate(s) for {0} on {1,date, MMM,dd yyyy} - {2,date, MMM,dd yyyy} & {3,date, MMM,dd yyyy} - {4,date, MMM,dd yyyy}.">
+                    <apex:param value="{!enr.Training_Event__r.Course_Name_for_Certificate__c}"/>
+                <apex:param value="{!enr.Training_Event__r.Start_date__c}"/>
+                <apex:param value="{!enr.Training_Event__r.End_Date_of_Section_1__c}"/>
+                <apex:param value="{!enr.Training_Event__r.Start_Date_of_Section_2__c}"/>
+                <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/>
+            </apex:outputText> 
+            
+            
+            
+            <br/>
+            <br/>
+            Please sign this letter and fax back to us at (02) 2656-0222 upon receipt.<br/>
+            <br/>
+            Should you have any enquiries, please feel free to contact me at <br/>
+            (02) 2656-0333.<br/>
+            <br/>
+            <br/>
+            Thanks and regards,<br/>
+            <br/>
+            <br/>
+            <br/>
+            
+            </td></tr>
+        </table>
+    
+    
+        <table style="position: relative; left: 2.54cm; top: 7cm;">
+            <tr>
+            <td width="65%">     </td><td>Acknowledged receipt by:</td>
+            </tr>
+            <tr><td height="2cm"></td></tr>
+            <tr><td></td></tr>
+            <tr><td></td></tr>
+            <tr>
+            <td> </td><td> ________________________</td>
+            </tr>
+            <tr>
+            <td>訓練部專員 </td><td> Date :</td>
+            </tr>
+            <tr>
+            <td>Encl. </td><td></td>
+            </tr>
+        </table>
+    </div>
+
+
+
+</apex:panelGroup>
+</apex:repeat>
+
+</body>
+
+</apex:page>

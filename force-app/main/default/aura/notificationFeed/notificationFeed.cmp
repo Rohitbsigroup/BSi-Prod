@@ -1,0 +1,76 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" extends="c:lightningUtility" access="global" description="BSI Custom Notifications Feed" controller="NotificationFeedController">  
+    
+    <aura:attribute name="recordId"         type="String"      access="global"    default=""/>
+    <aura:attribute name="notificationItems"        type="Object[]" />
+    <aura:attribute name="hasLoaded"        type="Boolean"      default="false"/>
+    
+    
+    
+    <aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+    
+    <div>
+        <ui:outputRichText class="notificationTitle" value="{!$Label.c.CLP_MyNotifications}"/>    
+    </div>
+    
+    <div class="container">
+        <div class="body">
+            <aura:if isTrue="{!v.hasLoaded}">
+                <aura:if isTrue="{!not(empty(v.notificationItems))}">
+                    <aura:iteration items="{!v.notificationItems}" var="item" indexVar="index">
+                        
+                        <aura:if isTrue="{!not(item.isClicked)}">
+                            <div class="notificationClass notificationNotClicked">
+                                <div class="itemNotification" >
+                                    <p id="{!item.title}" name="{!item.url}" onclick="{!c.openNotification}">
+                                        <ui:outputRichText class="slds-text-longform" value="{!item.description}"/>
+                                    </p>
+                                </div>
+                                    <div class="closeClass">
+                                        <span>{!item.createdDate}</span>
+                                    </div>
+                                <div class="closeClass">
+                                    <button name="{!item.title}" onclick="{!c.closeNotification}">X</button> 
+                                </div>
+                            </div>
+                            <aura:set attribute="else">
+                                <div class="notificationClass notificationClicked">
+                                    <div class="itemNotification">
+                                        <p id="{!item.title}" name="{!item.url}" onclick="{!c.openNotification}">
+                                            <ui:outputRichText class="slds-text-longform" value="{!item.description}"/>
+                                        </p>
+                                    </div>
+                                    <div class="closeClass">
+                                        <span>{!item.createdDate}</span>
+                                    </div>
+                                    <div class="closeClass">
+                                        <button name="{!item.title}" onclick="{!c.closeNotification}">X</button>
+                                    </div>
+                                </div>
+                            </aura:set>
+                        </aura:if>
+                        
+                    </aura:iteration>
+                    
+                    <aura:set attribute="else">
+                        <div class="notificationClass">
+                            <div class="itemNotification">
+                                <ui:outputRichText value="{!$Label.c.CLP_MyNotifications_None}"/>
+                            </div>
+                        </div>
+                    </aura:set>
+                </aura:if>
+                <aura:set attribute="else">
+                    <p>{!$Label.c.CLP_LoadingMessage}</p>
+                </aura:set>
+            </aura:if>
+            
+        </div>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</aura:component>

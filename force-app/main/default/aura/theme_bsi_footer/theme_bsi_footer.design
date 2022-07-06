@@ -1,0 +1,5 @@
+<design:component label="Theme - BSI - Footer">
+    <design:attribute name="logoName"    label="Logo name (Static Resource)" default="" description="To specify the logo of the theme"/>
+    <design:attribute name="mediaChannels" label="mediaChannels" default="" description="To specify the media"/>
+    <design:attribute name="footerLinks"   label="footerLinks"   default="" description="To specify the footer links"/>
+</design:component>

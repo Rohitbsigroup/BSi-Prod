@@ -1,0 +1,43 @@
+<apex:component >
+    <apex:actionStatus onstart="startLoading();" onstop="endLoading();" id="loadStatus"/>
+    <style>
+        .overlay {
+            display: none;
+            height: 100%;
+            left: 0;
+            position: fixed;
+            top: 0;
+            opacity: 0.3;
+            -moz-opacity: 0.3;
+            width: 100%;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+            filter: alpha(opacity=30);
+            background: #000;
+            -khtml-opacity: 0.3;
+            z-index: 1000;
+        }
+        .loader {
+            background: url('/img/loading32.gif') scroll no-repeat 0 0;
+            width: 32px;
+            height: 32px;
+            position: absolute;
+            left: 50%;
+            top: 100px;
+            z-index: 15;
+        }
+    </style>
+ 
+    <div id="load_scrl" class="loadingBox loader" style="display:none"> </div>
+    <div id="contentLoaded" class="loadingBox overlay"> </div>
+
+    <script type="text/javascript">
+        function startLoading(){
+            document.getElementById('load_scrl').style.display = 'block';
+            document.getElementById('contentLoaded').style.display = 'block';
+        }
+        function endLoading(){
+            document.getElementById('contentLoaded').style.display = 'none';
+             document.getElementById('load_scrl').style.display = 'none';
+        }
+    </script>
+</apex:component>

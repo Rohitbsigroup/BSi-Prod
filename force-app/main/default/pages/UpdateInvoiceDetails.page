@@ -1,0 +1,57 @@
+<apex:page standardController="Enrollment__c" recordSetVar="Enrollments" sidebar="false" extensions="UpdateInvoiceDetailsController">
+    <apex:sectionHeader title="Update Invoice Details"/>
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+                <apex:commandButton action="{!quicksave}" value="Update"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Selected Enrollments" columns="1" collapsible="False">
+                <apex:pageBlockTable value="{!selected}" var="Enrollment">
+                    <apex:column value="{!Enrollment.name}"/>
+                    <apex:column value="{!Enrollment.Delegate_name__c}"/>
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="Invoice Status" for="invoiceStatusMaster"/>
+                                <apex:inputField onchange="massUpdateRecords(event, 'invoiceStatus')" value="{!dummyEnrollment.Invoice_status__c}" id="invoiceStatusMaster" style="margin-left:10px;"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputField id="invoiceStatus" value="{!Enrollment.Invoice_status__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="Invoice Number"><apex:inputField value="{!Enrollment.Invoice_Number__c}"/></apex:column>
+                    <apex:column headerValue="Invoice Number for Subsidiser"><apex:inputField value="{!Enrollment.Invoice_Number_for_Subsidiser__c}"/></apex:column>
+                    <apex:column headerValue="SAP Contract Number"><apex:inputField value="{!Enrollment.Contract_Number__c}"/></apex:column>
+                    <apex:column headerValue="SAP Contract Number for Subsidiser"><apex:inputField value="{!Enrollment.Contract_Number_for_Subsidiser__c}"/></apex:column>
+                    <apex:column headerValue="Booking Status"><apex:inputField value="{!Enrollment.Booking_status__c}"/></apex:column>
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="Exam Results" for="examResultMaster"/>
+                                <apex:inputField onchange="massUpdateRecords(event, 'examResult')" value="{!dummyEnrollment.Exam_results__c}" id="examResultMaster" style="margin-left:10px;"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputField id="examResult" value="{!Enrollment.Exam_results__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="Exam %"><apex:inputField value="{!Enrollment.Exam_percentage__c}"/></apex:column>
+                    <apex:column headerValue="Hold Certificate?"><apex:inputField value="{!Enrollment.Hold_Certificate__c}"/></apex:column>
+                    <apex:column headerValue="Hold Certificate Reason"><apex:inputField value="{!Enrollment.Hold_Cerificate_Reason__c}"/></apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+
+  <!-- 06/07/2018 Pawel Chrzanowski - mass update records -->
+  <script type="text/javascript"> 
+    function massUpdateRecords(e, childName){
+        var elements = document.getElementsByTagName('select');
+        for(var i=0; i<elements.length; i++){
+            if(elements[i].id.indexOf(childName) != -1){
+                elements[i].value = e.currentTarget.value;
+            }
+        }
+    }
+  </script>
+</apex:page>

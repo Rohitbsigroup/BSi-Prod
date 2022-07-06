@@ -1,0 +1,58 @@
+.THIS .notificationTitle{
+    font-size: large;
+    padding: 10px;
+}
+
+.THIS .body {
+    /*border: 1px solid;*/
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.THIS .body::-webkit-scrollbar {
+    /*-webkit-appearance: none;*/
+}
+
+.THIS .notificationClass{
+    width: 99%!important;
+    border-top: 1px solid rgba(166, 166, 166, 0.6);
+    box-shadow: 0 1px 4px 1px rgba(166, 166, 166, 0.6);
+    display: inline-flex;
+    border-left: 8px solid #00A3AD;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background: #ECECEC;
+}
+
+.THIS .notificationClicked{
+    border-left: 8px solid grey;
+}
+
+.THIS .notificationNotClicked{
+    border-left: 8px solid #00A3AD;
+    font-weight: bold;/*JS added*/
+}
+
+.THIS .itemNotification{
+    width: 100% !important;
+    padding: 10px;
+}
+
+.THIS .itemNotification p:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    color: #00a3ad;
+}
+
+.THIS .closeClass{
+    padding: 10px 5px;
+    display: inline-flex;
+    height: 100%;
+}
+
+.THIS button{
+    background: transparent;
+    border: none;
+    height: 50%;
+    outline: none;
+}

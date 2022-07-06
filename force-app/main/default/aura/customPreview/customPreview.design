@@ -1,0 +1,12 @@
+<design:component>
+    <design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!recordId}"
+                      description="Record Id of current Enrollment"/>
+
+    <design:attribute name="tileClicked"
+                      label="Name of the tile clicked"
+                      default=""
+                      description="Tile Clicked on the Enrollment Tiles Component"/>
+	
+</design:component>

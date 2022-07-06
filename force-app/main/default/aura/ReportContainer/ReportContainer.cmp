@@ -1,0 +1,116 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" controller="ReportComponentController">
+    <!-- on page load get the report  -->
+    <aura:handler name="init" value="{!this}" action="{!c.getReport}"/>
+
+	<!-- Attributes passed in -->    
+    <aura:attribute name="reportIdAttribute" type="String" description="Id for the report to display"/>
+    <aura:attribute name="reportParameterOption" type="String" description="Whether and which parameter to pass to the report as the value for its final filter"/>
+    <aura:attribute name="reportEditUrl" type="String" description="Use the URL or an appropriate Object home page corresponding to the object records being displayed"/>
+    <aura:attribute name="verticalColumnHeaders" type="String" description="Whether to display column header labels vertically rather than the usual L to R"/>
+    <aura:attribute name="colourRows" type="String" description="Stacked data row(s) of a Matrix report to which conditional formatting is to be applied according to the 'Key values' below"/>
+    <aura:attribute name="colourKey" type="String" description="Label, lowest value, RGB colour, Label, next lowest value, RGB colour..."/>
+    <aura:attribute name="colourKeyTitle" type="String" description="Title for the colour key table"/>
+    
+    <!-- Attributes calculated by the controller -->
+    <aura:attribute name="groupingsDown" type="String[]" description="Holds grouping hierarchy by level and label"/>
+    <aura:attribute name="groupingsAcross" type="String[]" description="Holds matrix report data columns, else empty" />
+    <aura:attribute name="tableHeaders" type="String[]" description="Labels for table column headers"/>
+    <aura:attribute name="stackedDataLabels" type="String[]" description="Data columns in a stacked data Matrix report. Null for a Tabular or Summary report"/>
+    <aura:attribute name="reportName" type="String" description="Name of the report"/>
+    <aura:attribute name="factMap" type="Map" description="Holds row detail data for easier access in controller"/>
+    <aura:attribute name="colourKeyMap" type="Map" description="Holds colour rows, colourKey entries and colourKey title"/>
+    <aura:attribute name="numColumns" type="Integer" description="Number of columns"/>
+    <aura:attribute name="linkQueryString" type="String" description="Query string for report link to ensure filters set correctly"/>
+                                              
+    <div class="slds-theme--default slds-is-relative">
+        <!-- Show spinner while loading data -->
+        <div aura:id="loading" class="slds-spinner_container">
+            <div role="status" class="slds-spinner slds-spinner--small">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+        
+        <div aura:id="report-error" style="height: 4rem;">
+            <div class="slds-notify_container slds-is-relative">
+                <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+                    <span class="slds-assistive-text">error</span>                  
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">The report did not return any results. Please make sure you have created Contact User / Relationship correctly or contact System Administrator.</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- holds report data -->
+        <div class="slds-grid slds-gutters">
+          	<div class="slds-col">
+           		<h1 class="slds-section__title">
+                    <a href="{!'/lightning/r/report/'+v.reportIdAttribute+'/view'+v.linkQueryString}" target="_blank"> {! v.reportName}</a>
+           	  		<!-- display title and button to refresh component -->
+                	<aura:if isTrue="{! v.reportEditUrl.length>0}">
+                		&nbsp;&nbsp;&nbsp;<a href="{!v.reportEditUrl}" target="blank">Edit</a>
+                	</aura:if>
+                	&nbsp;&nbsp;&nbsp;<lightning:buttonIcon iconName="utility:refresh" variant="bare" onclick="{!c.getReport}" alternativeText="Refresh Report" />
+            </h1>
+          </div>
+          <div class="slds-col"></div>
+          <div class="slds-col"></div>
+          <div class="slds-col"></div>
+          <div class="slds-col"></div>
+          <div class="slds-col">
+            <aura:if isTrue="{!v.colourKeyTitle.length>0}">
+	            <table class="slds-table slds-table--bordered">
+                    <thead>
+	                    <th colspan="2">Key: {! v.colourKeyTitle}</th>
+                    </thead>
+                	<tbody>
+                    <aura:iteration items="{!v.colourKeyMap.key}" var="keyMap">
+		            	<tr class="slds-hint-parent">
+                            <td class="slds-text-body_small">{!keyMap.label}</td>
+                            <td class ="slds-text-body_small" style="{! 'background-color:#'+keyMap.colour}">{!keyMap.value}</td>
+    	                </tr>
+                    </aura:iteration>
+                    </tbody>
+                </table>
+            </aura:if>
+          </div>
+        </div>
+           
+       	<div aura:id="report" class="report-container slds-hide slds-p-around_small">
+            <table class="slds-table slds-table--bordered">
+                
+                <!-- Display header row(s) -->
+                <thead>
+                    <tr class="slds-text-title--caps" style="height:40px;align:left;vertical-align:bottom">
+                        <aura:iteration items="{!v.tableHeaders}" var="header">
+                            <th rowspan="{!header.rowspan}" colspan="{!header.colspan}"><span class="slds-cell-wrap" style="{!header.style}">{!header.label}</span></th>
+                        </aura:iteration>
+                    </tr>
+                    <aura:if isTrue="{!v.tableHeaders[0].rowspan>0}">
+	                    <tr class="slds-text-title--caps" style="height:40px;align:left;vertical-align:bottom">
+	                        <aura:iteration items="{!v.tableHeaders}" var="header">
+                               	<aura:iteration items="{!header.groupings}" var="subheader">
+    	                        	<th rowspan="{!subheader.rowspan}" colspan="{subheader.colspan}"><span style="{!subheader.style}">{!subheader.label}</span></th>
+                                </aura:iteration>
+        	                </aura:iteration>
+	                    </tr>
+                    </aura:if>
+                </thead>
+                
+                <!-- Display groupings down, recursing into any subgroups -->
+                <tbody>
+                    <aura:if isTrue="{!v.groupingsDown.length > 0}">
+                        <!-- if there are groupings, display first grouping -->
+                        <c:ReportGrouping numColumns="{!v.numColumns}" groupingsDown="{!v.groupingsDown}" groupingsAcross="{!v.groupingsAcross}" stackedDataLabels="{!v.stackedDataLabels}" level="0" factMap="{!v.factMap}"  colourKeyMap="{!v.colourKeyMap}"/>
+                        <!-- else if there are no groupings, just display row data -->
+                        <aura:set attribute="else">
+                            <c:GroupingDataCells groupingKey="T" factMap="{!v.factMap}"/>
+                        </aura:set>
+                    </aura:if>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</aura:component>

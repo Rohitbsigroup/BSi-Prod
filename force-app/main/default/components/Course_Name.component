@@ -1,0 +1,140 @@
+<apex:component access="global">
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+    
+    <!--IRCA incl TR-->
+        <apex:panelGroup rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'}">
+        
+            <!--Resit-->
+                <apex:panelGroup rendered="{!AND(enrollment.Booking_status__c='Booked - Resit', enrollment.Exam_results__c = 'IRCA - Pass exam & pass CA')}" styleClass="size22">
+                    <apex:outputText value="{!enrollment.Original_IRCA_Course_Enrollment__r.Training_Event__r.Course_Name_for_Certificate__c}" styleClass="size22"/>                    
+                </apex:panelGroup>  
+                
+            <!--Normal 20181003 removing the PRINT AS IRCA
+                <apex:panelGroup rendered="{!AND(NOT(enrollment.Booking_status__c='Booked - Resit'),NOT(CONTAINS(enrollment.Comments__c,'PRINT AS IRCA')))}"> --> 
+                <apex:panelGroup rendered="{!NOT(enrollment.Booking_status__c='Booked - Resit')}">                  
+                    <apex:outputText value="{!enrollment.Training_Event__r.Course_Name_for_Certificate__c}" styleClass="size22" escape="false" />                    
+                </apex:panelGroup>
+                
+            <!-- TEMPORARY FIX FOR OCTOBER 2015 TRANSITION COURSES - PRINT AS IRCA  20181003 JS removed and no comments with the below      
+                <apex:panelGroup rendered="{!AND(enrollment.Comments__c!=null,CONTAINS(enrollment.Comments__c,'PRINT AS IRCA'))}">                    
+                    <apex:outputText styleClass="size22" escape="false" rendered="{!CONTAINS(enrollment.Training_Event__r.Taxonomy__c,'QMS')}" value="IRCA Certified ISO 9001:2015 Auditor Transition Training Course"/>
+                    <apex:outputText styleClass="size22" escape="false" rendered="{!CONTAINS(enrollment.Training_Event__r.Taxonomy__c,'EMS')}" value="IRCA Certified ISO 14001:2015 Auditor Transition Training Course"/>                    
+                </apex:panelGroup>
+            -->  
+
+        </apex:panelGroup>
+        
+    <!--NOT IRCA-->
+        <apex:panelGroup rendered="{!NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}">
+             
+            <!--Japan - course name in Japanese.  
+            The Japanese is taken from the field on Product (Japanese course name). Except for bespoke courses which show only the Training Event field. -->   
+            <apex:panelGroup rendered="{!AND(enrollment.Translation_Formula__c = 'Japan (Japanese)',enrollment.Certificate_Language__c = 'Local')}"> 
+                <apex:outputText styleClass="size22" escape="false" rendered="{!NOT(enrollment.Training_Event__r.Course__r.Bespoke_Event__c)}" value="{!enrollment.Training_Event__r.Course__r.Japanese_Course_Name_for_Certificates__c}<br/>"/>
+                <!--JS 20180823 If name not showing as expected check product has no "Course Name English"-->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!(enrollment.Training_Event__r.Course__r.Bespoke_Event__c)}"    value="{!enrollment.Training_Event__r.Course_Name_for_Certificate__c}<br/>"/>
+                <!-- adds in an extra line for JRCA approved courses -->
+                <apex:panelGroup rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c='JRCA', OR(enrollment.Training_Event__r.Course__r.Training_Taxonomy_Code__c='ISM10901JAJP', enrollment.Training_Event__r.Course__r.Training_Taxonomy_Code__c='ISM11101JAJP'))}">
+                    <apex:outputText styleClass="size22" escape="false" value="JRCA登録 継続的専門能力開発(CPD)コース<br/>(ISO/IEC 27001の新旧規格の差分の内容を含んだ研修） "/> 
+                </apex:panelGroup>
+            </apex:panelGroup>
+
+            <apex:panelGroup rendered="{!AND(enrollment.Translation_Formula__c = 'Japan (Japanese)',enrollment.Certificate_Language__c = 'English')}">
+                <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>
+            </apex:panelGroup>
+            
+            
+            <!--Turkey-->
+            <apex:panelGroup rendered="{!enrollment.Translation_Formula__c = 'Turkey (Türkçe)'}">
+                <apex:outputText styleClass="size16tall" escape="false" value="BSI - British Standards Institution tarafından düzenlenmiş olan {!enrollment.Training_Event__r.Course_Name_for_Certificate__c}'ne " />
+                <!-- this brings in the correct text dependant on exam results for Turkey-->
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = null}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Fail exam'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Pass exam'}" value="{!enrollment.Training_Translations__r.Text_box_3__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Fail exam & pass CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Pass exam & fail CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Pass exam & pass CA'}" value="{!enrollment.Training_Translations__r.Text_box_3__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'NON - Fail exam & fail CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'Fail exam & pass CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'Pass exam & fail CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'Pass exam & pass CA'}" value="{!enrollment.Training_Translations__r.Text_box_3__c}"/>
+                <apex:outputText styleClass="size16tall" rendered="{!enrollment.Exam_results__c = 'Fail exam & fail CA'}" value="{!enrollment.Training_Translations__r.Text_Box_2__c}"/>
+            </apex:panelGroup>
+            
+            <!-- Korea & Vietnam-->
+            <apex:panelGroup rendered="{!OR(enrollment.Translation_Formula__c='Korea (Korean)', enrollment.Translation_Formula__c='Vietnam (Vietnamese)')}">
+                <!-- English -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Certificate_Language__c='English'}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>      
+                <!-- Local --  takes the bespoke name if poulated, if not the product name local from the course-->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c=null)}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c,enrollment.Training_Event__r.Course__r.Product_Name_Local__c)}"/>        
+                <!-- Both -->
+                <apex:panelGroup rendered="{!enrollment.Certificate_Language__c='Both'}">
+                    <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>
+                    <br/>
+                    <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c,enrollment.Training_Event__r.Course__r.Product_Name_Local__c)}"/>
+                </apex:panelGroup>
+            </apex:panelGroup>
+            
+            <!--China-->
+            <apex:panelGroup rendered="{!enrollment.Translation_Formula__c='China (Chinese)'}">
+                <!-- English -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Certificate_Language__c='English'}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>      
+                <!-- Local --  takes the bespoke name if poulated, if not the normal course name used (usually english as Course Name English on Course is populated)-->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c=null)}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c,enrollment.Training_Event__r.Course_Name_for_Certificate__c)}"/>        
+                <!-- Both -->
+                <apex:panelGroup rendered="{!enrollment.Certificate_Language__c='Both'}">
+                    <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>
+                    <br/>
+                    <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c,enrollment.Training_Event__r.Course__r.Product_Name_Local__c)}"/>
+                </apex:panelGroup>
+            </apex:panelGroup>
+            
+            <!--Taiwan name only in english ever, even if both-->
+            <apex:panelGroup rendered="{!enrollment.Translation_Formula__c='Taiwan (Chinese)'}">
+                <!-- English -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Certificate_Language__c='English'}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>      
+                <!-- Local --  takes the bespoke name if poulated, if not the normal course name used (usually english as Course Name English on Course is populated)-->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c=null)}" 
+                    value="{!BLANKVALUE(enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c,enrollment.Training_Event__r.Course_Name_for_Certificate__c)}"/>        
+                <!-- Both -->
+                <apex:panelGroup rendered="{!enrollment.Certificate_Language__c='Both'}">
+                    <apex:outputText styleClass="size22" escape="false" 
+                        value="{!BLANKVALUE(enrollment.Training_Event__r.English_Course_Name_for_Certificatetxt__c,enrollment.Training_Event__r.Course__r.Course_Name_English__c)}"/>                    
+                </apex:panelGroup>
+            </apex:panelGroup>
+            
+        
+            <!-- OTHER COUNTRIES (NOT JP TR KR VN CN) -->
+            <apex:panelGroup rendered="{!NOT(OR(enrollment.Translation_Formula__c='Taiwan (Chinese)', enrollment.Translation_Formula__c='Japan (Japanese)', enrollment.Translation_Formula__c='Korea (Korean)', enrollment.Translation_Formula__c='Vietnam (Vietnamese)',enrollment.Translation_Formula__c = 'Turkey (Türkçe)',enrollment.Translation_Formula__c='China (Chinese)'))}">
+                <!-- English -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Certificate_Language__c='English'}" 
+                    value="{!enrollment.Training_Event__r.English_Course_Name_for_CertificateF__c}"/>
+                <!-- Local -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c='')}" 
+                    value="{!enrollment.Training_Event__r.Course_Name_for_Certificate__c}"/>
+                <!-- both -->
+                <apex:panelGroup rendered="{!enrollment.Certificate_Language__c='Both'}">
+                    <apex:outputText styleClass="size22" escape="false" rendered="{!NOT(enrollment.Training_Event__r.RecordType.Name='Global Training Event (Bespoke)')}" 
+                        value="{!enrollment.Training_Event__r.Course_Name_for_Certificate__c}"/>
+                    <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Training_Event__r.RecordType.Name='Global Training Event (Bespoke)'}" 
+                        value="{!enrollment.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}"/>
+                    <br/>
+                    <apex:outputText styleClass="size22" escape="false" value="{!enrollment.Training_Event__r.English_Course_Name_for_CertificateF__c}" />
+                </apex:panelGroup>        
+                <!-- Special option Course Name -->
+                <apex:outputText styleClass="size22" escape="false" rendered="{!enrollment.Certificate_Language__c='Special'}" 
+                value="{!enrollment.Training_Event__r.Special_Course_Name_for_Certificate__c}"/>
+            </apex:panelGroup>
+  
+    </apex:panelGroup>
+</apex:component>

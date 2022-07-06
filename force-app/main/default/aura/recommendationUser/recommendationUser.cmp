@@ -1,0 +1,45 @@
+<aura:component implements="force:hasRecordId,forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes" access="global" extends="c:lightningUtility" description="BSI Custom Recommendation Component" controller="RecommendationUserController">
+    
+    <aura:attribute name="recordId"      	type="String"       default="{!v.recordId}"/>
+
+    <aura:attribute name="coursesToDisplay"                     type="Object[]"/>
+    <aura:attribute name="qualificationsToDisplay"              type="Object[]"/>
+
+    <aura:attribute name="recommendedTiles"                     type="Object[]"/>
+    <aura:attribute name="trainingTranslation"                  type="Object"/>
+
+    <aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+
+    
+    <aura:if isTrue="{!not(empty(v.recommendedTiles))}">
+        <div class="titleRecommendationsComponent">
+            <span class="titleStyle">
+            	<a href="{!v.trainingTranslation.Recommended_Courses__c}" target="_blank">{!$Label.c.CLP_Recommendations}</a> &gt;
+            </span>
+        </div>
+    </aura:if>
+    
+    <div class="container">
+        <div class="body">
+            <aura:iteration items="{!v.recommendedTiles}" var="tile" indexVar="index">
+                <div class="tileClass">
+                    <div class="title">
+                        <p>{!tile.title}</p>
+                    </div>
+                    <br></br>
+                    <div class="tileFooter">
+                        <a href="{!tile.url}" target="_blank">
+                            <button class="buttonTile">
+                                <span>
+                                    {!$Label.c.CLP_Recommendations_Learn_More}
+                                </span>                 
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </aura:iteration>
+        </div>
+</div>
+
+
+</aura:component>

@@ -1,0 +1,21 @@
+<template>
+    
+    <!-- LOADING SPINNER -->
+    <template if:true={isLoading}>
+        <div class="slds-grid slds-gutters slds-grid_align-center">
+          <div class="slds-col">
+            <div class="spinnerContainer ">
+              <lightning-spinner alternative-text="Loading" size="medium"> </lightning-spinner>
+            </div>
+          </div>
+        </div>
+      </template>
+    
+    <template if:false={isLoading}>
+        <div class="slds-grid slds-gutters slds-grid_align-center">
+          <div class="slds-col">
+            {errorMessage}
+          </div>
+        </div>
+      </template>
+</template>

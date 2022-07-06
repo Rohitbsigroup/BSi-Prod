@@ -1,0 +1,24 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes,force:hasRecordId" access="global" controller="ShowingCertificationCmpController">
+    
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="isValidUser" type="Boolean" default="false" access="public" />
+    <aura:attribute name="isShareCert" type="Boolean" access="public" />
+    <aura:attribute name="objectApiName" type="String"/>
+    
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:if isTrue="{!v.isValidUser}">
+        
+        <ui:inputCheckbox aura:id="checkbox" class="share_certificate-input" label="{!$Label.c.CLP_Share_Certificate_tickbox}" change="{!c.shareCertClicked}" value="{!v.isShareCert}"/>
+        <aura:if isTrue="{!v.objectApiName == 'Personal_Qualification__c'}">
+            <div class="certValue">{!$Label.c.CLP_PQ_Certificate_Sharing}</div>
+            <aura:set attribute="else">
+                <aura:if isTrue="{!v.objectApiName == 'Enrollment__c'}">
+                    <div class="certValue">{!$Label.c.CLP_Enrolment_Certificate_Sharing}</div>
+                </aura:if>
+            </aura:set>
+        </aura:if>
+    </aura:if>
+
+</aura:component>

@@ -1,0 +1,23 @@
+<apex:page controller="MainQuoteController" id="thePage" tabstyle="Opportunity">
+	<apex:pageMessages rendered="true" id="theMessage"/>
+	
+	<apex:form id="theForm">
+		<apex:actionFunction name="makeMain" action="{!makeMainQuote}" rerender="thePage:theMessage,thePage:theForm" status="status"/>
+		
+		<apex:outputPanel id="out">
+		    <apex:actionStatus id="status">
+    			<apex:facet name="start">
+	        		<c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+				</apex:facet>
+		    	<apex:facet name="stop">
+					<apex:commandButton rendered="{!showBack}" action="{!back}" value="{!$Label.Back}"/>		
+		    	</apex:facet>
+		    </apex:actionStatus>
+	  </apex:outputPanel>
+
+	</apex:form>
+	
+	<script>window.setTimeout(makeMain,20)</script>
+	
+
+</apex:page>

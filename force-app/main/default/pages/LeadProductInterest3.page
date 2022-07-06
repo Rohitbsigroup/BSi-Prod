@@ -1,0 +1,18 @@
+<apex:page standardController="Lead" extensions="LeadProductInterestExt">
+
+    <apex:outputField value="{!Lead.Product_Stream__c}" rendered="false" />
+    <apex:outputField value="{!Lead.Portfolio_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Lead.Product_Area_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Lead.Product_Interests__c}" rendered="false" />
+    <apex:outputField value="{!Lead.Training_Interests__c}" rendered="false" />
+    
+    <apex:outputField value="{!Lead.TotalEmployees__c}" rendered="false" />
+    <apex:outputField value="{!Lead.Country}" rendered="false" />
+    <apex:outputField value="{!Lead.Industry}" rendered="false" />
+<!-- TBA    <apex:outputField value="{!Lead.Readiness__c}" rendered="false" /> -->
+    <apex:outputField value="{!Lead.Customer_Buying_Stage__c}" rendered="false" />
+
+    <apex:form >
+        <c:ProductInterest3 objectRecord="{!leadExt}" editModeParm="{!editMode}" companySizeParam="{!Lead.TotalEmployees__c}" countryParam="{!Lead.Country}" sectorParam="{!Lead.Industry}" certStageParam="" customerBuyingStageParam="{!Lead.Customer_Buying_Stage__c}" />
+    </apex:form>
+</apex:page>

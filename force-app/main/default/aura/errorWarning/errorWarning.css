@@ -1,0 +1,33 @@
+.THIS .icon {
+    cursor: pointer;
+ }
+
+ .THIS .icon svg {
+    fill: red;
+ }
+
+ .THIS .icon-close {
+     position: absolute;
+     right: 5px;
+     top: 10px;
+ }
+
+ .THIS .icon-close svg {
+    fill: white;
+ }
+
+ .THIS .pageErrorIcon {
+    padding-left: 1.3rem;
+    padding-top: 1rem;
+    position: relative; 
+    width: 100%
+ }
+
+ .THIS .popover-section {
+    position: absolute;
+    top: -4px;
+    left: 50px;
+    overflow: visible; 
+    color: white; 
+    background-color: red;
+ }

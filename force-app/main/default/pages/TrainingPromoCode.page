@@ -1,0 +1,12 @@
+<apex:page standardController="Training_Promo_Code__c" sidebar="false">
+
+<!--<flow:interview name="New_Training_Promotional_Code" finishLocation="{!URLFOR('/apex/trainingpromocode')}"   />  -->
+
+<apex:form >
+<apex:commandButton value="Add Promotional Code" action="/apex/TrainingPromoCodeWizard" />
+</apex:form>
+
+
+  <apex:sectionHeader title="Promotional Codes"/>
+  <apex:enhancedList type="Training_Promo_Code__c" height="500" rowsPerPage="25" id="AccountList" />
+</apex:page>

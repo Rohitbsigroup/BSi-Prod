@@ -1,0 +1,111 @@
+<apex:page standardController="Enrollment__c" showHeader="false" pageStyle="all" lightningStylesheets="true"  >
+    <apex:stylesheet value="{!$Resource.Aboutmycoursecss}"/>
+             
+<!--         
+16/07/2020 - MD - Initial Version
+-->
+    <div class="slds-grid slds-wrap">
+        <div class="slds-size_12-of-12">
+            
+
+
+    <!-- Custom CSS - NOT THE BEST SOLUTION HERE -->
+    <style>
+        <!--<apex:outputText value="#survey_container{margin: 10px; width: 800px}" escape="false"/>-->a
+        <apex:outputText escape="false"/>
+    </style>
+
+    <div id="survey_container" class="surveyforce">
+
+        <apex:form id="theForm"   >
+
+    <!-- Title -->
+            <apex:outputPanel id="seeSurvey" rendered="True">
+                <div class="slds-box slds-theme--shade slds-grid slds-wrap">
+                    <div class="slds-size_1-of-6"></div>
+                    <div class="slds-text-heading--large slds-size_4-of-6"><apex:outputText value="{!Enrollment__c.Training_Translations__r.PCQ_Title__c}" escape="false" /> </div>
+                	<div class="slds-size_1-of-6"></div>
+                </div>
+            </apex:outputPanel>
+
+            <apex:outputPanel rendered="true">
+                <div class="slds-form--stacked">
+
+                        <!-- Question 1 -->
+                         <div class="slds-box slds-theme--default">
+                            <div class="slds-form-element slds-grid slds-wrap">
+                                <div class="slds-size_1-of-6"></div>
+                                <label class="slds-form-element__label">
+                                    <div class="slds-size_4-of-6"> <apex:outputText escape="true" value="{!Enrollment__c.Training_Translations__r.PCQ_Question_1__c}"/></div>
+                                    <div class="slds-size_1-of-6"></div>
+                                </label>
+                            </div>
+                            <br/>
+                            <apex:outputPanel rendered="true">
+                                <apex:selectRadio styleClass="convertToLDS" rendered="true" value="{!Enrollment__c.PCQ_Question_1__c}" >
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-size_1-of-12"/>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="1" itemValue="1" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="2" itemValue="2" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="3" itemValue="3" /></div>
+                                        <div class="slds-size_1-of-12"><apex:selectOption itemLabel="4" itemValue="4" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="5" itemValue="5" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="6" itemValue="6" /></div>
+                                        <div class="slds-size_1-of-12"><apex:selectOption itemLabel="6" itemValue="6" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="7" itemValue="7" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="8" itemValue="8" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="9" itemValue="9" /></div>
+                                    	<div class="slds-size_1-of-12"><apex:selectOption itemLabel="10" itemValue="10" /></div>
+                                    </div>    
+                                </apex:selectRadio>
+                            </apex:outputPanel>
+                        </div>
+
+                        <!-- Question 2 -->
+                         <div class="slds-box slds-theme--default">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">
+                                    <apex:outputText escape="true" value="{!Enrollment__c.Training_Translations__r.PCQ_Question_2__c}"/>
+                                </label>
+                            </div>
+                            <br/>
+                            <apex:outputPanel rendered="true">
+                                <div class="slds-form-element">
+                                    <div class="slds-form-element__control" >
+                                        <apex:inputTextArea styleClass="slds-textarea" cols="" rows="5" rendered="true" value="{!Enrollment__c.PCQ_Question_2__c}"/>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </div>
+
+                        <!-- Question 3 -->
+                         <div class="slds-box slds-theme--default">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">
+                                    <apex:outputText escape="true" value="{!Enrollment__c.Training_Translations__r.PCQ_Question_3__c}"/>
+                                </label>
+                            </div>
+                            <br/>
+                            <apex:outputPanel rendered="true">
+                                <div class="slds-form-element">
+                                    <div class="slds-form-element__control" >
+                                        <apex:inputTextArea styleClass="slds-textarea" cols="" rows="5" rendered="true" value="{!Enrollment__c.PCQ_Question_3__c}"/>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </div>
+
+                </div>
+
+                <apex:commandButton styleClass="slds-button slds-button--brand" action="{!save}" value="Submit >" />
+
+            </apex:outputPanel>
+
+
+        </apex:form>      
+    
+</div> 
+
+                    </div>
+    </div>
+</apex:page>

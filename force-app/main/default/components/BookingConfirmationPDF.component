@@ -1,0 +1,965 @@
+<apex:component access="global" controller="PaymentDetailsController" language="{!lang}">
+    <apex:attribute name="bookingId" type="Id" description="Training Booking Id" required="true" access="global" assignTo="{!tbId}"/>   
+    <apex:attribute name="source" type="String" description="email or booking form" required="true" access="global"/>
+    <apex:attribute name="country" type="String" description="country" required="true" access="global"/>
+    <apex:attribute name="lang" type="String" description="language" required="false" access="global"/>
+
+
+<!--BSI Header repeated on each page -->
+        <div class="header">
+            <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+            <p class="phone-no">
+                <apex:outputText rendered="{!countrySetting=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                <apex:outputText rendered="{!NOT(countrySetting='')}" value="{!countrySetting.Phone_Number__c}" />
+            </p>
+        </div>
+
+        <!-- Footer repeated on each page -->
+        <div class="footer">&nbsp;</div>
+
+
+ <!-- *** Title and Course *** -->
+
+        <h1><apex:outputText value="{!booking.Training_Event__r.Course__r.Product_Name_Local__c}" /></h1>
+            <apex:outputPanel rendered="{!NOT(OR(booking.Training_Event__r.Course__r.Course_Format__c = 'Distance Learning', booking.Training_Event__r.Course__r.Course_Format__c = 'E-Learning'))}">
+                <h2>
+                      <apex:outputText value="{!$Label.TrainingBookingLocationHeader}" />:&nbsp;
+                      <apex:outputField value="{!booking.Training_Event__r.Training_Venue__r.Name}" />
+                </h2>
+                <h2>
+                      <apex:outputText value="{!booking.Training_Translations__r.Start_Date__c}" />:&nbsp;
+                      <apex:outputText value="{0,date, {!booking.Training_Translations__r.Date_Format__c}}">
+                           <apex:param value="{!booking.Training_Event__r.Start_date__c}" />
+                      </apex:outputText>
+                </h2><br/>
+             </apex:outputPanel>
+
+<!-- "Please check over the details below etc" text from Label-->
+
+        <h2>{!$Label.TrainingBookingConfirmationPrintIntro1}</h2>
+
+
+<!--  Booking Details Header and pricing details  -->
+        <h4 class="section-heading">{!$Label.TrainingBookingConfirmationPrintBooking}</h4>
+            <table class="full-width-2column">
+                <tr>
+                <!-- column A -->
+                <!-- column for obligatory fields and country-specific fields -->
+                    <td>
+                        <table class="internal">
+                            <tr>
+                                <td><apex:outputLabel for="Name" value="{!$ObjectType.TrainingBooking__c.fields.Name.Label}"/></td>
+                                <td><apex:outputField id="Name" value="{!booking.Name}"/></td>
+                            </tr>
+                            <tr>
+                                <td><apex:outputLabel for="PoNumber" value="{!$ObjectType.TrainingBooking__c.fields.PO_Number__c.Label}"/></td>
+                                <td><apex:outputField id="PoNumber" value="{!booking.PO_Number__c}"/></td>
+                            </tr>
+                            <!-- China-->
+                                     <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='CN'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="invoiceCategoryCN" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Category__c.Label}"/></td>
+                                                <td><apex:outputField id="invoiceCategoryCN" value="{!booking.Invoice_Category__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="CNRegCompanyName" value="{!$ObjectType.TrainingBooking__c.fields.Business_Style__c.label}"/></td>
+                                                <td><apex:outputField id="CNRegCompanyName" value="{!booking.Business_Style__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="invoicePhoneCN" value="{!$ObjectType.TrainingBooking__c.fields.Registered_Phone_for_Invoice__c.Label}"/></td>
+                                                <td><apex:outputField id="invoicePhoneCN" value="{!booking.Registered_Phone_for_Invoice__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="registeredEmailForInvoiceCN" value="{!$ObjectType.TrainingBooking__c.fields.Registered_Address_for_Invoice__c.Label}"/></td>
+                                                <td><apex:outputField id="registeredEmailForInvoiceCN" value="{!booking.Registered_Address_for_Invoice__c}"/></td>
+                                            </tr>   
+                                            <tr>
+                                                <td><apex:outputLabel for="invoiceNotesCN" value="{!$ObjectType.TrainingBooking__c.fields.Invoice_Notes__c.Label}"/></td>
+                                                <td><apex:outputField id="invoiceNotesCN" value="{!booking.Invoice_Notes__c}"/></td>
+                                            </tr>                          
+                                        </apex:outputPanel>       
+                                        
+
+                            <!-- India -->
+                                <apex:outputPanel layout="none"  rendered="{!booking.Training_Event__r.Event_Country__c='IN'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="bsiGstIN" value="BSI GST"/></td>
+                                                <td><apex:outputText id="bsiGstIN" value="{!booking.Training_Event__r.India_GST__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="INoffice" value="BSI Address"/></td>
+                                                <td><apex:outputField id="INoffice" value="{!booking.Training_Event__r.Indian_Office_Address__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="venueCityIN" value="{!$ObjectType.TrainingBooking__c.fields.Venue_City__c.Label}"/></td>
+                                                <td><apex:outputField id="venueCityIN" value="{!booking.Training_Event__r.Training_Venue__r.Venue_city__c}"/></td>
+                                            </tr>
+
+                                </apex:outputPanel>
+
+                            <!-- Italy -->
+                                <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='IT'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="CodiceFiscale" value="{!$ObjectType.TrainingBooking__c.fields.Codice_Fiscale__c.Label}" /></td>
+                                                <td><apex:outputField id="CodiceFiscale" value="{!booking.Codice_Fiscale__c}" /></td>
+                                            </tr>
+                                </apex:outputPanel>
+
+                            <!-- Japan -->
+                                <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='JP'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="createdDateJP" value="{!$ObjectType.TrainingBooking__c.fields.CreatedDate.Label}"/></td>
+                                                <!--<td><apex:outputField id="createdDateJP" value="{!booking.CreatedDate}"/></td>-->
+                                                <td><apex:outputText id="createdDateJP" value="{0,date, {!booking.Training_Translations__r.Date_Format__c}}">
+                                                        <apex:param value="{!booking.CreatedDate}" />
+                                                    </apex:outputText></td>
+                                            </tr>
+                                </apex:outputPanel>
+
+                            <!-- Malaysia -->
+                                <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='MY'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="createdDateMY" value="Invoice Issue Date"/></td>
+                                                <!--<td><apex:outputField id="createdDateMY" value="{!booking.CreatedDate}"/></td>-->
+                                                <td><apex:outputText id="createdDateMY" value="{0,date, {!booking.Training_Translations__r.Date_Format__c}}">
+                                                    <apex:param value="{!booking.CreatedDate}" />
+                                                </apex:outputText></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="registrationNumberMY" value="SST REG NO."/></td>
+                                                <td><apex:outputText id="registrationNumberMY" value="W10-1808-32000416"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+
+                            <!-- Thailand they asked to remove these fields
+                                <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='TH'}">
+                                            <tr>
+                                                <td><apex:outputLabel for="branchNumberTH" value="{!$ObjectType.TrainingBooking__c.fields.Branch_Number__c.Label}"/></td>
+                                                <td><apex:outputField id="branchNumberTH" value="{!booking.Branch_Number__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="bsiBranchNumberTH" value="BSI Branch No"/></td>
+                                                <td><apex:outputText id="bsiBranchNumberTH" value="please check"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="bsiTaxIdTH" value="BSI Tax ID"/></td>
+                                                <td><apex:outputText id="bsiTaxIdTH" value="0105544028248"/></td>
+                                            </tr>
+                                </apex:outputPanel> -->
+                        </table>
+                    </td>
+                        
+                <!-- column B -->
+                <!-- column for (mostly) optional/conditional fields -->
+                    <td>
+                        <table class="internal">
+                                <apex:outputPanel layout="none" rendered="{!NOT(booking.Number_of_Delegates__c=null)}">
+                                            <tr>
+                                                <td><apex:outputLabel for="NoDelegates" value="{!$ObjectType.TrainingBooking__c.fields.Number_of_Delegates__c.Label}"/></td>
+                                                <td><apex:outputField id="NoDelegates" value="{!booking.Number_of_Delegates__c}"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!NOT(booking.Delegates_Inc_Accommodation__c=null || booking.Delegates_Inc_Accommodation__c=0)}">
+                                            <tr>
+                                                <td><apex:outputLabel for="NoDelegatesInc" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_Inc_Accommodation__c.Label}"/></td>
+                                                <td><apex:outputField id="NoDelegatesInc" value="{!booking.Delegates_Inc_Accommodation__c}"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!NOT(booking.Delegates_inc_extra_night__c=null || booking.Delegates_inc_extra_night__c=0)}">
+                                            <tr>
+                                                <td><apex:outputLabel for="NoDelegatesEN" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_inc_extra_night__c.Label}"/></td>
+                                                <td><apex:outputField id="NoDelegatesEN" value="{!booking.Delegates_inc_extra_night__c}"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(booking.Delegates_inc_exam__c=null),NOT(booking.Training_Translations__r.Include_Exam_with_Course__c),booking.Delegates_inc_exam__c>0)}">
+                                            <tr>
+                                                <td><apex:outputLabel for="NoDelegateExams" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_inc_exam__c.Label}" /></td>
+                                                <td><apex:outputField id="NoDelegateExams" value="{!booking.Delegates_inc_exam__c}" /></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <!-- JE 24/02/21 - change to display total only, when the totalInclTaxOnly flag is used -->
+                                <apex:outputPanel layout="none" rendered="{!FIND('totalInclTaxOnly', countrySetting.Flags__c)=0}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="NetPrice" value="{!$ObjectType.TrainingBooking__c.fields.Net_Price__c.Label}" />
+                                                </td>
+                                                <td >
+                                                    <apex:outputText id="NetPrice" value="{0,number,{!booking.Training_Translations__r.Currency_Format__c}}">
+                                                        <apex:param value="{!booking.Net_Price__c}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!booking.Discount__c>0}">
+                                            <tr>
+                                                <td><apex:outputLabel for="Discount" value="{!$ObjectType.TrainingBooking__c.fields.Discount__c.Label}"/></td>
+                                                <td>
+                                                    <apex:outputText id="Discount" value="{0,number,{!booking.Training_Translations__r.Currency_Format__c}}">
+                                                        <apex:param value="{!booking.Discount__c}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                </apex:outputPanel>
+                               <apex:outputPanel layout="none"  rendered="{!AND(booking.Total_Price__c>0, FIND('totalInclTaxOnly', countrySetting.Flags__c)=0)}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel rendered="{!countrySetting.Tax_Name__c=''}" for="Tax" value="{!$ObjectType.TrainingBooking__c.fields.Tax__c.Label}"/>
+                                                    <apex:outputLabel rendered="{!NOT(countrySetting.Tax_Name__c='')}" for="Tax" value="{!countrySetting.Tax_Name__c}" />                                               
+                                                </td>
+                                                
+                                                <td>
+                                                    <apex:outputText id="Tax" value="{0,number,{!booking.Training_Translations__r.Currency_Format__c}}">
+                                                        <apex:param value="{!booking.Tax__c}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!booking.Total_Price__c>0}">
+                                            <tr>
+                                                <td><apex:outputLabel for="TotalPrice" value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.Label}"/></td>
+                                                <td align="right">
+                                                    <apex:outputText id="TotalPrice" value="{0,number,{!booking.Training_Translations__r.Currency_Format__c}}">
+                                                        <apex:param value="{!booking.Total_Price__c}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!NOT(booking.VAT_Number__c=null)}">
+                                            <tr>
+                                                <td><apex:outputLabel for="VatNumber" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number__c.Label}"/></td>
+                                                <td><apex:outputField id="VatNumber" value="{!booking.VAT_Number__c}"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!NOT(booking.VAT_Number2__c=null)}">
+                                            <tr>
+                                                <td><apex:outputLabel rendered="{!booking.Training_Event__r.Event_Country__c = 'PH'}"      for="TINPH" value="TIN"/>
+                                                    <apex:outputLabel rendered="{!NOT(booking.Training_Event__r.Event_Country__c = 'PH')}" for="VatNumber2" value="{!$ObjectType.TrainingBooking__c.fields.VAT_Number2__c.Label}"/></td>                                                
+                                                <td><apex:outputField id="VatNumber2" value="{!booking.VAT_Number2__c}"/></td>
+                                            </tr>
+                                </apex:outputPanel>
+                                <!--JS removing as it always shows method in english
+                                <apex:outputPanel layout="none" rendered="{!OR(booking.Payment_Method__c='Card',booking.Payment_Method__c='Bank Transfer')}">
+                                            <tr>
+                                                <td><apex:outputLabel for="PaymentMethod" value="{!$ObjectType.TrainingBooking__c.fields.Payment_Method__c.Label}" /></td>
+                                                <td><apex:outputText id="PaymentMethod" value="{!booking.Payment_Method__c}" /></td>
+                                            </tr>
+                                </apex:outputPanel>-->
+                                
+                                <!-- China-->
+                                <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='CN'}">                                       
+                                            <tr>
+                                                <td><apex:outputLabel for="bankNameCN" value="{!$ObjectType.TrainingBooking__c.fields.Bank_Name__c.Label}"/></td>
+                                                <td><apex:outputField id="bankNameCN" value="{!booking.Bank_Name__c}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><apex:outputLabel for="bankAccountCN" value="{!$ObjectType.TrainingBooking__c.fields.Bank_Account__c.Label}"/></td>
+                                                <td><apex:outputField id="bankAccountCN" value="{!booking.Bank_Account__c}"/></td>
+                                            </tr>    
+                                </apex:outputPanel>            
+                        </table>
+                    </td>
+                        </tr>
+
+                <!-- column A+B joined -->
+                <!-- Malaysia -->
+                        <apex:outputPanel layout="none" rendered="{!booking.Training_Event__r.Event_Country__c='MY'}">
+                                <tr>
+                                    <td>
+                                        <br/>
+                                        BSI Services Malaysia Sdn Bhd<br/>
+                                        Co. Reg 804473A/20080100318<br/>
+                                        Suite 29.01, Level 29,<br/>
+                                        The Gardens North Tower,<br/>
+                                        Mid Valley City, Lingkaran Syed Putra,<br/>
+                                        59200 Kuala Lumpur
+                                    </td>
+                                    <td>
+                                        <br/>
+                                        T: +603-9212 9638 (Kuala Lumpur)<br/>
+                                           +604-227 9651 (Penang)<br/>
+                                           +607-276 3506 (Johor)<br/>
+                                           +6082-232 003 (Kuching)<br/>
+                                        E: AREnquiry.MY@bsigroup.com<br/>
+                                        bsigroup.com.my
+                                    </td>
+                                </tr>
+                         </apex:outputPanel>                
+          </table>
+
+
+<!-- Contact details -->
+        <h4 class="section-heading">{!$Label.TrainingBookingConfirmationPrintContact}</h4>
+        <table class="full-width-2column">
+                <tr>
+                    <td>
+                             <table class="internal">
+                                        <apex:outputPanel layout="none" rendered="{!NOT(OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW' ,booking.Training_Event__r.Event_Country__c = 'KR'))}">
+                                            <tr>
+                                                <td><apex:outputLabel for="FirstNameWest" value="{!$ObjectType.TrainingBooking__c.fields.First_Name__c.label}" /></td>
+                                                <td><apex:outputField id="FirstNameWest" value="{!booking.First_Name__c}" /></td>
+                                            </tr>
+                                        </apex:outputPanel>
+                                            <tr>
+                                                <td><apex:outputLabel for="LastName" value="{!$ObjectType.TrainingBooking__c.fields.Last_Name__c.label}" /></td>
+                                                <td><apex:outputField id="LastName" value="{!booking.Last_Name__c}" /></td>
+                                            </tr>
+                                        <apex:outputPanel layout="none" rendered="{!OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW',booking.Training_Event__r.Event_Country__c = 'KR')}">
+                                            <tr>
+                                                <td><apex:outputLabel for="FirstNameEast" value="{!$ObjectType.TrainingBooking__c.fields.First_Name__c.label}" /></td>
+                                                <td><apex:outputField id="FirstNameEast" value="{!booking.First_Name__c}" /></td>
+                                            </tr>
+                                        </apex:outputPanel>
+                             </table>
+                    </td>
+                    <td>
+                             <table class="internal">
+                                        <tr>
+                                            <td><apex:outputLabel for="EmailAddress" value="{!$ObjectType.TrainingBooking__c.fields.Email_Address__c.label}" /></td>
+                                            <td><apex:outputField id="EmailAddress" value="{!booking.Email_Address__c}" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><apex:outputLabel for="ContactPhone" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Phone__c.label}" /></td>
+                                            <td><apex:outputText id="ContactPhone" value="{!booking.Phone_Country_Code__c + ' ' + booking.Contact_Phone__c}" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><apex:outputLabel for="ContactMobile" value="{!$ObjectType.TrainingBooking__c.fields.Contact_Mobile__c.label}" /></td>
+                                            <td><apex:outputText id="ContactMobile" value="{!booking.Mobile_Country_Code__c + ' ' + booking.Contact_Mobile__c}" /></td>
+                                        </tr>
+                             </table>
+                    </td>
+                </tr>
+        </table>
+
+
+    <!-- Address details -->
+         <h4 class="section-heading">{!$Label.TrainingBookingConfirmationPrintAddresses}</h4>
+         <table class="full-width-2column">
+                            <tr>
+                                <td>
+                     <!-- Company address -->
+                                    <table class="internal">
+                                        <tr>
+                                            <td>
+                                                <apex:outputLabel for="CompanyName"
+                                                    value="{!$ObjectType.TrainingBooking__c.fields.Company_Name__c.label}" />
+                                            </td>
+                                            <td>
+                                                <apex:outputField id="CompanyName"
+                                                    value="{!booking.Company_Name__c}" />
+                                            </td>
+                                        </tr>
+                            <!-- Western address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!NOT(OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW',booking.Training_Event__r.Event_Country__c = 'KR',booking.Training_Event__r.Event_Country__c = 'TH'))}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyStreetWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyStreetWest"
+                                                        value="{!booking.Company_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCityWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCityWest"
+                                                        value="{!booking.Company_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyRegionWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyRegionWest"
+                                                        value="{!booking.Company_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyPostcodeWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyPostcodeWest"
+                                                        value="{!booking.Company_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCountryWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCountryWest"
+                                                        value="{!booking.Company_Country__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                            <!-- Eastern address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW')}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCountryEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCountryEast"
+                                                        value="{!booking.Company_Country__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyPostcodeEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyPostcodeEast"
+                                                        value="{!booking.Company_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyRegionEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyRegionEast"
+                                                        value="{!booking.Company_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCityEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCityEast"
+                                                        value="{!booking.Company_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyStreetEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyStreetEast"
+                                                        value="{!booking.Company_Street__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                             <!-- Korea address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!booking.Training_Event__r.Event_Country__c = 'KR'}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCountryKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCountryKR"
+                                                        value="{!booking.Company_Country__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCityKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCityKR"
+                                                        value="{!booking.Company_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyStreetKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyStreetKR"
+                                                        value="{!booking.Company_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyPostcodeKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyPostcodeKR"
+                                                        value="{!booking.Company_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                             <!-- Thai address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyStreetThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyStreetTH"
+                                                        value="{!booking.Company_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCityThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCityTH"
+                                                        value="{!booking.Company_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyStateThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyStateTH"
+                                                        value="{!booking.Company_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyPostcodeThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyPostcodeTH"
+                                                        value="{!booking.Company_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="CompanyCountryThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Company_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="CompanyCountryTH"
+                                                        value="{!booking.Company_Country__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                                    </table>
+
+                                </td>
+                                <td>
+
+                    <!-- Billing address -->
+                                <table class="internal">
+                                        <tr>
+                                            <td>
+                                                <apex:outputLabel for="BillingName"
+                                                    value="{!$ObjectType.TrainingBooking__c.fields.Billing_Name__c.label}" />
+                                            </td>
+                                            <td>
+                                                <apex:outputField id="BillingName"
+                                                    value="{!booking.Billing_Name__c}" />
+                                            </td>
+                                        </tr>                                    
+                                        <tr>
+                                            <apex:outputPanel layout="none"
+                                                rendered="{!booking.Training_Event__r.Event_Country__c = 'PH'}">
+                                                <td>
+                                                    <apex:outputLabel for="BusinessStyle"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Business_Style__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BusinessStyle"
+                                                        value="{!booking.Business_Style__c}" />
+                                                </td>
+                                            </apex:outputPanel>
+                                        </tr>
+                                        <tr>
+                                            <apex:outputPanel layout="none"                                                
+                                                rendered="{!NOT(booking.Billing_Email_Address__c=null)}">
+                                                <td>
+                                                    <apex:outputLabel for="BillingEmail"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Email_Address__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingEmail"
+                                                        value="{!booking.Billing_Email_Address__c}" />
+                                                </td>
+                                            </apex:outputPanel>
+                                        </tr>
+                                        <tr>
+                                            <apex:outputPanel layout="none"                                                
+                                                rendered="{!NOT(booking.Billing_Phone__c=null)}">
+                                                <td>
+                                                    <apex:outputLabel for="BillingPhone"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Phone__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingPhone"
+                                                        value="{!booking.Billing_Phone__c}" />
+                                                </td>
+                                            </apex:outputPanel>
+                                         </tr>
+                             <!-- Western address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!NOT(OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW',booking.Training_Event__r.Event_Country__c = 'KR',booking.Training_Event__r.Event_Country__c = 'TH'))}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingStreetWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingStreetWest"
+                                                        value="{!booking.Billing_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCityWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCityWest"
+                                                        value="{!booking.Billing_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingRegionWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingRegionWest"
+                                                        value="{!booking.Billing_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingPostcodeWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingPostcodeWest"
+                                                        value="{!booking.Billing_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCountryWest"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCountryWest"
+                                                        value="{!booking.Billing_Country__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                            <!-- Eastern address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW')}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCountryEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCountryEast"
+                                                        value="{!booking.Billing_Country__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingPostcodeEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingPostcodeEast"
+                                                        value="{!booking.Billing_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingRegionEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingRegionEast"
+                                                        value="{!booking.Billing_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCityEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCityEast"
+                                                        value="{!booking.Billing_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingStreetEast"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingStreetEast"
+                                                        value="{!booking.Billing_Street__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                             <!-- Korea address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!booking.Training_Event__r.Event_Country__c = 'KR'}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCountryKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCountryKR"
+                                                        value="{!booking.Billing_Country__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCityKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCityKR"
+                                                        value="{!booking.Billing_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingStreetKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingStreetKR"
+                                                        value="{!booking.Billing_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingPostcodeKorea"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingPostcodeKR"
+                                                        value="{!booking.Billing_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                             <!-- Thai address -->
+                                        <apex:outputPanel layout="none"
+                                            rendered="{!booking.Training_Event__r.Event_Country__c = 'TH'}">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingStreetThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Street__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingStreetTH"
+                                                        value="{!booking.Billing_Street__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCityThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_City__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCityTH"
+                                                        value="{!booking.Billing_City__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingStateThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Region__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingStateTH"
+                                                        value="{!booking.Billing_Region__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingPostcodeThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Postcode__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingPostcodeTH"
+                                                        value="{!booking.Billing_Postcode__c}" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <apex:outputLabel for="BillingCountryThailand"
+                                                        value="{!$ObjectType.TrainingBooking__c.fields.Billing_Country__c.label}" />
+                                                </td>
+                                                <td>
+                                                    <apex:outputField id="BillingCountryTH"
+                                                        value="{!booking.Billing_Country__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                                    </table>
+                                </td>
+                            </tr>
+         </table>
+
+<!-- Delegate details in email template and on form page-->
+        <h4 class="section-heading">{!$Label.TrainingBookingConfirmationPrintDelegates}</h4>
+        <table class="multi-column">
+                            <tr>
+                                <apex:outputPanel layout="none"
+                                    rendered="{!NOT(OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW' ,booking.Training_Event__r.Event_Country__c = 'KR'))}">
+                                    <th>
+                                        <apex:outputLabel for="BookerFirstNameWest"
+                                            value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}" />
+                                    </th>
+                                </apex:outputPanel>
+                                <th>
+                                    <apex:outputLabel for="BookerLastName"
+                                        value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name__c.label}" />
+                                </th>
+                                <apex:outputPanel layout="none"
+                                    rendered="{!OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW' ,booking.Training_Event__r.Event_Country__c = 'KR')}">
+                                    <th>
+                                        <apex:outputLabel for="BookerFirstNameEast"
+                                            value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}" />
+                                    </th>
+                                </apex:outputPanel>
+                                <th>
+                                    <apex:outputLabel for="BookerEmailAddress"
+                                        value="{!$ObjectType.TrainingDelegate__c.fields.Email_Address__c.label}" />
+                                </th>
+                                
+                                <apex:outputPanel layout="none"
+                                    rendered="{!FIND('PersonalID', countrySetting.Flags__c)>0}">
+                                    <th>
+                                        <apex:outputLabel for="PersonalID"
+                                            value="{!$ObjectType.TrainingDelegate__c.fields.Social_Security_Number__c.label}" />
+                                    </th>
+                                </apex:outputPanel>
+                                
+                                <apex:outputPanel layout="none"
+                                    rendered="{!booking.Training_Event__r.Course__r.Training_Event_Residential__c}">
+                                    <th>
+                                        <apex:outputLabel for="BookerAccommodationReqd"
+                                            value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_Required__c.label}" />
+                                    </th>
+                                </apex:outputPanel>                                
+                                <apex:outputPanel layout="none"
+                                    rendered="{!booking.Training_Event__r.Accommodation_available_for_this_event__c}">
+                                    <th>
+                                        <apex:outputLabel for="DelegateIncExtraNight"
+                                            value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_night_before__c.label}" />
+                                    </th>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none"
+                                    rendered="{!AND(NOT(booking.Delegates_inc_exam__c = null),NOT(booking.Training_Translations__r.Include_Exam_with_Course__c),booking.Delegates_inc_exam__c>0)}">
+                                    <th>
+                                        <h3>
+                                            <apex:outputLabel for="DelegateIncludeOnlineExam"
+                                                value="{!$ObjectType.TrainingDelegate__c.fields.Online_Exam__c.label}" />
+                                        </h3>
+                                    </th>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none"
+                                    rendered="{!AND(NOT(booking.Delegates_inc_standard__c = null),booking.Delegates_inc_standard__c>0)}">
+                                    <th>
+                                        <h3>
+                                            <apex:outputLabel for="DelegateIncludeOnlineStandard"
+                                                value="{!$ObjectType.TrainingDelegate__c.fields.Standard__c.label}" />
+                                        </h3>
+                                    </th>
+                                </apex:outputPanel>                         
+                            </tr>
+                          
+                            <apex:repeat value="{!delegates}" var="d">
+                                <tr>
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!NOT(OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'KR',booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW'))}">
+                                        <td>
+                                            <apex:outputField id="BookerFirstNameWest" value="{!d.First_Name__c}" />
+                                        </td>
+                                    </apex:outputPanel>
+                                    <td>
+                                        <apex:outputField id="BookerLastName" value="{!d.Last_Name__c}" />
+                                    </td>
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!OR(booking.Training_Event__r.Event_Country__c = 'JP',booking.Training_Event__r.Event_Country__c = 'KR', booking.Training_Event__r.Event_Country__c = 'CN' ,booking.Training_Event__r.Event_Country__c = 'TW')}">
+                                        <td>
+                                            <apex:outputField id="BookerFirstNameEast" value="{!d.First_Name__c}" />
+                                        </td>
+                                    </apex:outputPanel>
+                                    <td>
+                                        <apex:outputField id="BookerEmailAddress" value="{!d.Email_Address__c}" />
+                                    </td>
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!FIND('PersonalID', countrySetting.Flags__c)>0}">
+                                    <th>
+                                        <apex:outputField id="PersonalID" 
+                                                value="{!d.Social_Security_Number__c}" />
+                                    </th>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!booking.Training_Event__r.Course__r.Training_Event_Residential__c}">
+                                        <td>
+                                            <apex:outputField id="BookerAccommodationReqd"
+                                                value="{!d.Accommodation_Required__c}" />
+                                        </td>
+                                    </apex:outputPanel>                                    
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!booking.Training_Event__r.Accommodation_available_for_this_event__c}">
+                                        <td>
+                                            <apex:outputField id="DelegateIncExtraNight"
+                                                value="{!d.Accommodation_night_before__c}" />
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!AND(NOT(booking.Delegates_inc_exam__c =null),NOT(booking.Training_Translations__r.Include_Exam_with_Course__c),booking.Delegates_inc_exam__c>0)}">
+                                        <td>
+                                            <apex:outputField id="DelegateIncludeOnlineExam"
+                                                value="{!d.Online_Exam__c}" />
+                                        </td>
+                                    </apex:outputPanel>
+
+                                    <apex:outputPanel layout="none"
+                                        rendered="{!AND(NOT(booking.Delegates_inc_standard__c =null),booking.Delegates_inc_standard__c>0)}">
+                                        <td>
+                                            <apex:outputField id="DelegateIncludeOnlineStandard"
+                                                value="{!d.Standard__c}" />
+                                        </td>
+                                    </apex:outputPanel>
+                                    
+
+                                </tr>
+                            </apex:repeat>
+
+        </table> 
+        
+        <!-- JS 03/08/21 - adding in company name for Korea when koreaFormat flag is used   -->
+        <h5>
+                    <apex:outputText rendered="{!FIND('koreaFormat', countrySetting.Flags__c)>0}"  escape="false" 
+                        value="<br/><br/><br/>
+                                ㈜비에스아이그룹코리아,    서울시 종로구 인사동5길 29 태화빌딩 8층,    대표자: 송경수 <br/>
+                               사업자등록번호: 104-81-44779, 통신판매업 신고번호 제 01-2287호,  전화:02-777-4123~4" />
+        </h5>
+                    
+                                                
+</apex:component>

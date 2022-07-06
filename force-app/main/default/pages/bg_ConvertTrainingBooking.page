@@ -1,0 +1,18 @@
+<apex:page standardController="TrainingBooking__c" extensions="TrainingBookingFunctionsV3">
+	<apex:form >
+		<apex:actionFunction name="doInit" action="{!convert}" rerender="allPanel, messages"/>
+	    <apex:outputPanel id="allPanel">
+	      <apex:outputPanel rendered="{!NOT(initialised)}">
+	        <p align="center" style='{font-family:"Arial", Helvetica, sans-serif; font-size:20px;}'><apex:image value="/img/loading.gif"/>&nbsp;Please wait</p>
+	        <script>
+	           window.onload=function()
+	           {
+	             doInit();
+	           };
+	        </script>
+	      </apex:outputPanel>
+	    </apex:outputPanel>
+	</apex:form>
+	<apex:pageMessages id="messages"/>
+	<apex:outputLink value="/{!TrainingBooking__c.Id}" style="margin-left:4%;">Back To Record</apex:outputLink>
+</apex:page>

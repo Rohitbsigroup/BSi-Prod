@@ -1,0 +1,69 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,lightning:availableForFlowScreens" extends="c:lightningUtility" access="global" description="Component to Dynamically configure a record page">
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="recordId"     type="String"	access="global" default=""/>
+    <aura:attribute name="title"        type="String"   access="global" default="My Preferences"/>
+    <aura:attribute name="object"       type="String"   access="global" default="User"/>
+    <aura:attribute name="fieldList"    type="String"   access="global" default="Name,Field__c"/>
+    <aura:attribute name="allowEdit"    type="Boolean"  access="global" default="true"/>
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="toggleMode"   type="Boolean"	access="private" default="true"/>
+    <aura:attribute name="fields"       type="String[]" access="private" default=""/>
+
+    <aura:attribute name="languageOnLoad" type="String" access="private"/>
+    <aura:attribute name="languageOnSubmit" type="String" access="private"/>
+
+    <!--HANDLER -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!--BODY-->
+    <lightning:layout class="slds-hint-parent">
+        <h1 class="slds-text-heading_large slds-m-bottom_xxx-small slds-p-left_x-small">{!v.title}</h1> 
+        <aura:if isTrue="{!v.allowEdit}">
+            <lightning:buttonIcon iconName="utility:edit" class="slds-m-bottom_xxx-small slds-m-left_small" iconClass="slds-button__icon_hint" variant="bare" alternativeText="Edit" onclick="{!c.toggleViewEdit}"/>
+        </aura:if>
+    </lightning:layout>
+
+
+    <aura:if isTrue="{!v.toggleMode}">
+
+        <!-- VIEW -->
+        <lightning:recordViewForm recordId="{!v.recordId}" objectApiName="{!v.object}">
+            <lightning:layout multipleRows="true">
+                <aura:iteration items="{!v.fields}" var="field" indexVar="index">
+                    <lightning:layoutItem size="12" largeDeviceSize="4" mediumDeviceSize="6" smallDeviceSize="12" class="slds-p-around_x-small">
+                        <lightning:outputField fieldName="{!field}"/>
+                    </lightning:layoutItem>
+                </aura:iteration>
+            </lightning:layout>
+        </lightning:recordViewForm>
+
+        <!-- EDIT -->
+        <aura:set attribute="else">
+            <lightning:recordEditForm recordId="{!v.recordId}" objectApiName="{!v.object}" onsuccess="{!c.handleSuccess}" onsubmit="{!c.handleSubmit}" onload="{!c.handleOnLoad}">
+                <lightning:messages/>
+                <lightning:layout multipleRows="true">
+                    <aura:iteration items="{!v.fields}" var="field" indexVar="index">
+                        <aura:if isTrue="{!field == 'LanguageCustom__c' || field == 'Dietary_Requirements__c' || field == 'Other_Dietary_Requirements__c'}">
+                            <lightning:layoutItem size="12" largeDeviceSize="4" mediumDeviceSize="6" smallDeviceSize="12" class="slds-p-around_x-small">
+                                    <lightning:inputField fieldName="{!field}" variant="label-stacked" class="inputDisable"/>
+                            </lightning:layoutItem>
+                            <aura:set attribute="else">
+                                <lightning:layoutItem size="12" largeDeviceSize="4" mediumDeviceSize="6" smallDeviceSize="12" class="slds-p-around_x-small">
+                                    <lightning:inputField fieldName="{!field}" variant="label-stacked" disabled="true" class="inputDisable"/>
+                                </lightning:layoutItem>
+                            </aura:set>
+                        </aura:if>
+                    </aura:iteration>
+                </lightning:layout>
+
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning:button variant="neutral" label="Cancel" title="Cancel" onclick="{!c.handleCancel}" />
+                    <lightning:button variant="brand" type="submit" name="save" label="Save" />
+                </div>
+            </lightning:recordEditForm>
+        </aura:set>
+    </aura:if>
+
+</aura:component>

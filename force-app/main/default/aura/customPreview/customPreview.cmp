@@ -1,0 +1,63 @@
+<aura:component implements="force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" extends="c:lightningUtility" description="BSI Custom Preview Component" controller="CustomPreviewController">
+    
+    <aura:attribute name="recordId"         type="String"       default=""/>
+    <aura:attribute name="tileClicked"      type="String"       default=""/>
+    <aura:attribute name="materialList"     type="Object[]"/>
+
+    <aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+    
+
+    <div class="container">
+        <div class="body">
+            <!--<lightning:fileCard fileId="0693G0000008qp3"/>-->
+            <aura:iteration items="{!v.materialList}" var="material" indexVar="index">
+                <!--Rich text div-->
+                <aura:if isTrue="{!material.recordTypeName == 'Rich Text'}">
+                    <div class="richtextClass">
+                        <ui:outputRichText class="slds-text-longform" value="{!material.content}"/>
+                        <!--<span>{!material.name}</span>-->
+                    </div>
+                    <br></br>
+                </aura:if>
+                    
+                
+                <!--File div-->
+                <aura:if isTrue="{!material.recordTypeName == 'File'}">
+                        <div class="fileClass">
+                            <aura:if isTrue="{!material.isDownloadable}">
+                                <a href="{!material.fileId}">
+                                    <lightning:icon iconName="doctype:image" size="large" alternativeText="Image" title="Image"/>
+                                </a>
+                                <aura:set attribute="else">
+                                    <div onclick="{!c.handleClick}" data-record="{!material.fileId}">
+                                        <a>
+                                            <lightning:icon iconName="{!material.fileExtension}" size="large" alternativeText="File" title="File"/>
+                                        </a>
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                            <div class="nameFile">{!material.name}</div>
+                        </div>
+                        <br></br>
+                </aura:if>
+                    
+
+                <!--Video div-->
+                <aura:if isTrue="{!material.recordTypeName == 'Video'}">
+                    <div class="videoClass">
+                        <aura:if isTrue="{!not(material.videoUrl == null)}">
+                            <a href="{!material.videoUrl}" target="_blank">
+                                <lightning:icon iconName="doctype:video" size="large" alternativeText="Video file" title="Video" />
+                            </a>
+                            <!--<iframe src="{!material.videoUrl}" width="300" height="300" frameborder="0" class="iFrameClass" allow="autoplay; fullscreen"/>-->
+                            <span>{!material.name}</span>
+                        </aura:if>
+                    </div>
+                    <br></br>
+                </aura:if>
+            </aura:iteration>
+
+
+        </div>
+    </div>
+</aura:component>

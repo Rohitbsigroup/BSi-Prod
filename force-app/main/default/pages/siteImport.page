@@ -1,0 +1,127 @@
+<apex:page controller="emq_SiteImportController">
+	<apex:form >
+		<style type="text/css">
+		.topalign{
+			vertical-align:top!important;
+		}
+		</style>
+		<apex:sectionHeader title="Create Site" subtitle="Site Import" />
+		<h3>Site Import instructions</h3>
+		<ol style="padding: 0 20px;">
+			<li>Click "Choose File" </li>
+			<li>Locate completed CSV file</li>
+			<li>Click "Upload File" </li>
+			<li>Review all duplicate warnings</li>
+			<li>Add T-Code and Site Type for all Sites</li>
+			<li>Click Import Sites</li>
+		</ol>
+		<apex:inputFile value="{!csvFile.body}" filename="{!csvFile.name}" fileSize="{!csvFile.BodyLength}" contentType="{!csvFile.ContentType}"
+			 style="font-size:12px;font-weight:bold;" />
+    	<apex:commandButton action="{!readFile}" value="Upload File" id="upload" />
+    	<apex:outputLink value="{!templateURL}" target="_blank" styleclass="btn" style="float:right;text-decoration:none;padding:4px;">
+       		Download Template
+		</apex:outputLink>
+    	<br/><br/>
+    	<apex:pageBlock >
+			<apex:PageBlockButtons >
+                <apex:CommandButton action="{!importSites}" rendered="{!ShowImport}" value="Import Sites" onclick="return importSites();" />
+            </apex:PageBlockButtons>
+    		<apex:variable value="{!0}" var="index" />
+    		<apex:pageMessages />
+	    	<apex:pageBlockTable value="{!SitesToImport}" var="result" columnClasses="topalign">
+				<apex:column headervalue="Status">
+					<apex:outputText rendered="{!Errors[index] == ' '}">
+						<a href="#" title="{!Errors[index]}" style="color:#1c7430;font-size:20px;font-weight:bold;padding:10px;text-decoration:none;">&#10004;</a>
+					</apex:outputText>
+					<apex:outputText rendered="{!Errors[index] != ' '}">
+						<a href="#" title="{!Errors[index]}" style="color:#dc3545;font-size:20px;font-weight:bold;padding:10px;text-decoration:none;">x</a>
+					</apex:outputText>
+				</apex:column>
+				<apex:column headerValue="Skip Dupe Check" rendered="{!ShowSkipDupeCheck}">
+					<apex:inputCheckbox value="{!result.SkipDupeChecker__c}" />
+				</apex:column>
+				<apex:column headerValue="Name" value="{!result.Name}" />
+				<apex:column headerValue="Street" value="{!result.Street__c}" />
+				<apex:column headerValue="City" value="{!result.City__c}" />
+				<apex:column headerValue="State" value="{!result.State__c}" />
+				<apex:column headerValue="Country" value="{!result.Country__c}" />
+				<apex:column headerValue="Post Code" value="{!result.Postcode__c}" />
+				<apex:column headerValue="Telephone Number" value="{!result.SitePhone__c}" />
+				<apex:column headerValue="# Employees" value="{!result.NumberEmployees__c}" />
+				<apex:column headervalue="T-Code"> 
+					<apex:selectList style="width:200px;font-size: 12px;" size="1" value="{!result.TCodeDescr__c}" id="TCode">
+						<apex:selectOptions value="{!TCodeDescription}"></apex:selectOptions>
+					</apex:selectList>
+					<apex:outputLink value="javascript:copyAllTCodes()" rendered="{!index == 0}">
+						<img src="{!$Resource.BtnCopyAll}" />
+					</apex:outputLink>
+				</apex:column>
+				<apex:column headervalue="Site Type"> 
+					<apex:selectList style="width:200px;font-size: 12px;" size="1" value="{!result.Type__c}" id="SiteType">
+						<apex:selectOptions value="{!Type}"></apex:selectOptions>
+					</apex:selectList>
+					<apex:outputLink value="javascript:copyAllSiteTypes()" rendered="{!index == 0}">
+						<img src="{!$Resource.BtnCopyAll}" />
+					</apex:outputLink>
+					<apex:variable value="{!index+1}" var="index" />
+				</apex:column>
+			</apex:pageBlockTable>
+			<apex:variable value="{!0}" var="index" />
+		</apex:pageBlock>
+		<script>
+			function importSites(){
+				var selectObjects = document.getElementsByTagName("select");
+				
+				selectedOption = '';
+				for(i=0;i<selectObjects.length;i++){
+					if(selectObjects[i].id.indexOf("TCode") > 1){
+						if(selectObjects[i].selectedIndex == 0){
+							alert("Please select TCode & SiteType for all sites");
+							return false;
+						}
+					}
+				}
+				
+				selectedOption = '';
+				for(i=0;i<selectObjects.length;i++){
+					if(selectObjects[i].id.indexOf("SiteType") > 1){
+						if(selectObjects[i].selectedIndex == 0) {
+							alert("Please select TCode & SiteType for all sites");
+							return false;
+						}
+					}
+				}
+				
+				return true;
+			}
+		
+			function copyAllTCodes(){
+				var selectObjects = document.getElementsByTagName("select");
+				
+				selectedOption = '';
+				for(i=0;i<selectObjects.length;i++){
+					if(selectObjects[i].id.indexOf("TCode") > 1){
+						if(selectedOption == '')
+							selectedOption = selectObjects[i].selectedIndex;
+						else 
+							selectObjects[i].selectedIndex = selectedOption;
+					}
+				}
+			}
+			
+			function copyAllSiteTypes(){
+				var selectObjects = document.getElementsByTagName("select");
+				
+				selectedOption = '';
+				for(i=0;i<selectObjects.length;i++){
+					if(selectObjects[i].id.indexOf("SiteType") > 1){
+						if(selectedOption == '')
+							selectedOption = selectObjects[i].selectedIndex;
+						else 
+							selectObjects[i].selectedIndex = selectedOption;
+					}
+				}
+			}
+		</script>
+	</apex:form>
+</apex:page>

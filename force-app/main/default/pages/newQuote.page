@@ -1,0 +1,869 @@
+<apex:page controller="NewQuoteController" tabStyle="Quote__c" id="thePage">
+<apex:sectionHeader subtitle="{!IF(isEditMode,'Add Products to Quote','Quote for '&opty.Account.Name&' ('&opty.Name&')')}" title="Create a new quote using the configurator"/>
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.header {
+			position: absolute; 
+			margin-top: 8px;
+			margin-left: 15px;
+			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
+			color: black;
+		}
+		.bubble {
+			position:relative;
+			padding:15px;
+			margin:20px 0 0.5em;
+			color:#333;
+			background:white;
+			/* css3 */
+			-webkit-border-radius:10px;
+			-moz-border-radius:10px;
+			border-radius:10px;
+			border:none;
+			width: 90%;
+			height:60px;
+		}
+		.tableheader {
+			background-color:#E1E6EE;
+			padding:5px;
+			text-align: center;
+		}
+		.required {
+			color: #A23233;
+		}
+		.text {
+			font:12px/1.5em "Courier",Times,serif;
+			//font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.clip{
+			position: absolute;
+			margin-top:-17px;
+			margin-left: 45%;
+		}
+		.hoverDiv {
+			display: none;
+			width: 250px;
+			position: fixed;
+			top: 50px;
+			right: 20px;
+    		padding: 25px 15px 15px 15px;
+    		
+			z-index:999;
+		}
+		.noteRow {
+			background-image: url('{!URLFOR($Resource.texture_note,'note-texture.png')}');
+			background-repeat: repeat-y;
+			padding-left:33px;
+			padding-top: 15px;
+		}
+		.noteBottom {
+			background-image: url('{!URLFOR($Resource.texture_note,'note-bottom.png')}');
+			background-repeat: repeat-x;
+			//margin-top:-20px;
+			height: 20px;
+		}
+		/* USING STYLES AS IDS - IDS ISSUES WITH SALESFORCE AND JQUERY*/
+		.helpTR {}
+		.helpNE {}
+		.helpHQ {}
+		.helpNA {}
+		.helpSample {}
+		.question1 {}
+		.question2 {}
+		.question3 {}
+		.question4 {}
+		.question5 {}
+		.consName {}
+		.saveButton {}	
+		.regPath {}
+		.editPath {}
+	</style>
+
+	<!--<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"> </script>-->	
+	<apex:includeScript value="{!$Resource.jquery}"/>
+	
+	<!-- JAVASCRIPT TO CHECK-UNCHECK ALL VALES IN THE TABLE -->
+	<script>
+		function checkAll(cb)
+		{
+			var inputElem = document.getElementsByTagName("input");
+		   	for(var i=0;i<inputElem.length;i++)
+		    {
+		    	if(inputElem[i].id.indexOf("selectLine1")!=-1)
+		        	inputElem[i].checked = cb.checked;
+		   	}
+		}
+	</script>
+
+  	<apex:actionStatus id="status">
+    	<apex:facet name="start">
+	        <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+		</apex:facet>
+  	</apex:actionStatus>
+ 
+    <apex:pageMessages />
+ 	<apex:form id="theForm"> 
+ 	 
+ 	<!--<apex:actionFunction name="check" action="{!checkMultiSite}" reRender="newQuote" status="status"/>-->
+ 	<apex:actionFunction name="editPath" action="{!updatePath}" reRender="newQuote" status="status"/>
+ 	
+ 	<!-- TRANSIENT HOVER DETAILS -->
+	<div class="hoverDiv" id="transientDiv">
+		<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+		<div class="noteRow">
+			<table width="100%" style="padding:5px;">
+			<!--<tr>
+				<td><apex:outputText value="{!$ObjectType.Site__c.fields.SecurityIssue__c.label}"/>&nbsp;
+				<apex:outputText value="{!quoteT.Site__r.SecurityIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteT.Site__r.SecurityIssue__c == 'Yes','color:#A23233','color:#299E35')}"/></td>
+				<td><apex:outputText value="{!$ObjectType.Site__c.fields.GeographicIssue__c.label}"/>&nbsp;
+				<apex:outputText value="{!quoteT.Site__r.GeographicIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteT.Site__r.GeographicIssue__c == 'Yes','color:#A23233','color:#299E35')}"/></td>
+			</tr>-->
+			<tr>
+				<td colspan="2"><br/><apex:outputText value="You have included Transient sites in this quote. {!$Label.TransientSite}" styleclass="text"/></td>
+			</tr>
+			</table>
+			<br/>
+		</div>
+		<div class="noteBottom">
+       	</div>
+	</div>
+	<!-- NETWORK HOVER DETAILS -->
+	<div class="hoverDiv" id="networkDiv">
+		<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+		<div class="noteRow">
+			<table width="100%" style="padding:5px;">
+			<tr>
+				<td colspan="2"><br/><apex:outputText value="You have included Network sites in this quote. {!$Label.NetworkSite}" styleclass="text"/></td>
+			</tr>
+			</table>
+			<br/>
+		</div>
+		<div class="noteBottom">
+       	</div>
+	</div>
+	<!-- NAMED HOVER DETAILS -->
+	<div class="hoverDiv" id="namedDiv">
+		<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+		<div class="noteRow">
+			<table width="100%" style="padding:5px;">
+			<tr>
+				<td colspan="2"><br/><apex:outputText value="{!$Label.NamedSite}" styleclass="text"/></td>
+			</tr>
+			</table>
+			<br/>
+		</div>
+		<div class="noteBottom">
+       	</div>
+	</div>
+	<!-- HQ HOVER DETAILS -->
+	<div class="hoverDiv" id="hqDiv">
+		<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+		<!--<apex:pageBlock mode="edit" tabstyle="Lead">-->
+		<div class="noteRow">
+			<table width="100%" style="padding:5px;">
+			<tr>
+				<td colspan="2"><br/><apex:outputText value="{!$Label.HQSite}" styleclass="text"/></td>
+			</tr>
+			</table>
+			<br/>
+		</div>	
+		<!--</apex:pageBlock>-->
+		<div class="noteBottom">
+       	</div>
+	</div>
+	<!-- SAMPLE HOVER DETAILS -->
+	<div class="hoverDiv" id="sampleDiv">
+		<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+		<div class="noteRow">
+			<table width="100%" style="padding:5px;">
+			<tr>
+				<td colspan="2"><br/><apex:outputText value="{!$Label.SiteSamplingMessage}" styleclass="text"/></td>
+			</tr>
+			</table>
+			<br/>
+		</div>
+		<div class="noteBottom">
+       	</div>
+	</div>
+	
+	<apex:outputPanel id="searchSec" rendered="{!IF(totalSites == 0 && !isEditMode, false, true)}">
+	<!-- PRODUCT SELECTION SECTION -->
+	<center>
+   		<apex:commandButton id="btnSave" value="{!$Label.AddProductConfigure}" action="{!generateQuote}"  rendered="{!isEditMode}"/>
+       	<apex:commandButton id="btnBack" value="{!$Label.Cancel}" action="{!back}"  rendered="{!isEditMode}"/>
+	</center>
+	<!-- COUNTRIES -->
+	<center><table width="30%" style="background-color:#E1E6EE;border-radius:15px;">
+	<tr>
+	<td align="center" style="vertical-align:middle;" width="100px"><apex:outputText value="Country:" style="font-size:15px;font-weight:bold;"/></td>
+	<apex:repeat value="{!countries}" var="sc">
+		<td align="center">
+			<apex:image value="{!$Resource['flag_'&sc]}" width="25"/>
+		</td>
+	</apex:repeat>
+	</tr>
+	</table></center>
+	
+	<!-- SEARCH SECTION -->	
+	<table width="100%">
+ 	<tr>
+ 	<td style="vertical-align:top;" width="30%"> 
+    <apex:pageBlock id="searchFilter" mode="edit">
+		
+    	<apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+       		<apex:outputPanel >
+        	<apex:image value="{!$Resource.icon_search}" height="30"/>
+        	<apex:outputText value="Search Filters" styleclass="header"/>
+        	</apex:outputPanel>
+    	</apex:panelGrid>
+    	<br/>
+      	<apex:pageBlockSection showHeader="false" columns="1" id="block1">
+        	<apex:pageBlockSectionItem >
+        	<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_area}" width="30"/>
+		    	<apex:outputLabel value="{!$ObjectType.Lead.fields.PortfolioInterestArea__c.label}" for="family"/>
+		    </apex:panelGrid>
+          	<apex:selectList value="{!sFamily}" size="1" id="family">
+          		<apex:selectOptions value="{!Familys}"/>
+          		<apex:actionSupport event="onchange" reRender="costcenter"/>
+          	</apex:selectList>
+        	</apex:pageBlockSectionItem>
+
+	        <apex:pageblockSectionItem >
+	          	<apex:panelGrid columns="2">
+        			<apex:image value="{!$Resource.icon_area}" width="30"/>
+		    		<apex:outputLabel value="{!$ObjectType.Lead.fields.ProductArea__c.label}" for="costcenter"/>
+		   		 </apex:panelGrid>
+	            <apex:selectList value="{!sCostCenter}" size="1" id="costcenter" disabled="{!ISNULL(sFamily)}">
+	                <apex:selectOptions value="{!CostCenters}"/>
+	                <!--<apex:actionSupport event="onchange" reRender="theListBlock"/>-->
+	            </apex:selectList>
+	        </apex:pageblockSectionItem>
+	        <apex:pageblockSectionItem >
+	            <apex:outputLabel value=""/>       
+      			<apex:commandButton action="{!searchProds}" value="Search" status="status" reRender="theListBlock"/>
+      		</apex:pageblockSectionItem>
+      	</apex:pageBlockSection>
+		<br/>
+		<br/>
+		<br/>
+    </apex:pageBlock>
+    </td>
+    <td width="70%">
+	<apex:outputPanel id="theListBlock">
+	<apex:pageBlock mode="edit" >
+		<apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+       		<apex:outputPanel >
+        	<apex:image value="{!$Resource.icon_barcode}" height="30"/>
+        	<apex:outputText value="Select Products" styleclass="header"/>
+        	</apex:outputPanel>
+    	</apex:panelGrid>
+    	<apex:outputPanel layout="block" style="position:relative;overflow:scroll;width:100%;height:182px">
+     	<apex:pageBlockTable value="{!PWlist}" var="p" rules="cols" rows="50" >
+        	<apex:column width="25">
+           	<apex:facet name="header">
+              	<apex:inputCheckbox onclick="checkAll(this)"/>
+           	</apex:facet>
+           	<apex:inputCheckbox value="{!p.checked}" id="selectLine1"/>
+        	</apex:column>
+        	<apex:column headerValue="Product">
+           		<apex:outputField value="{!p.product.name}"/>
+        	</apex:column>
+        	<apex:column value="{!p.product.CCode__c}" width="50"/> 
+        	<apex:column value="{!p.product.Type__c}" width="80"/> 
+     
+    	</apex:pageBlockTable>
+    	</apex:outputPanel>
+  	</apex:pageBlock>
+  	</apex:outputPanel>
+  	</td>
+  	</tr>
+  	</table>
+  	
+  	</apex:outputPanel>
+ 	
+  	<!-- NEW QUOTE SECTION --> 
+ 	<apex:pageBlock id="newQuote" mode="edit" rendered="{!!isEditMode}">
+ 	<!-- SCRIPT FOR HIDING-SHOWING HOVERS -->
+ 	<script type="text/javascript">
+ 		var yes = 'Yes';
+		var no = 'No'; 
+ 		function checkQuestions() {
+ 			if ({!opty.Pricebook2Id != null} && {!opty.QuoteReady__c} && {!!noSiteType}) {
+				// CASE SINGLE SITE ON ACCOUNT
+				if ({!opty.SiteNumber__c} == 1.0 && {!opty.SiteDifference__c} == 0.0) {
+					if (($(".question3").val().match(yes) || $(".question3").val().match(no))
+						&& ($(".question5").val().match(yes) || $(".question5").val().match(no))) {
+						$(".saveButton").show(); 
+					} else {
+						$(".saveButton").hide();
+					}
+				// CASE ALL SITES LINKED	
+				} else if ({!opty.SiteNumber__c} != 1.0 && {!opty.SiteDifference__c} == 0.0) {
+					if($(".question1").val().match(no) 
+				    	&& $(".question2").val().match(yes) 
+				    	&& ($(".question3").val().match(yes) || $(".question3").val().match(no))
+				    	&& ($(".question5").val().match(yes) || $(".question5").val().match(no))) {
+				    	$(".saveButton").show();
+				    } else {
+						$(".saveButton").hide();
+					}
+				// CASE ONE SITE LINKED WITH MISSING SITES	 	
+				} else if({!opty.SiteNumber__c} == 1.0 && {!opty.SiteDifference__c} != 0.0) {
+					if($(".question4").val().match(yes) 
+				    	&& ($(".question3").val().match(yes) || $(".question3").val().match(no))
+				    	&& ($(".question5").val().match(yes) || $(".question5").val().match(no))) {
+				    	$(".saveButton").show();
+				    } else {
+						$(".saveButton").hide();
+					}
+				// CASE MISSING SITES	
+			    } else {			  
+				    if($(".question1").val().match(no) 
+				    	&& $(".question2").val().match(yes)
+				    	&& $(".question4").val().match(yes) 
+				    	&& ($(".question3").val().match(yes) || $(".question3").val().match(no))
+				    	&& ($(".question5").val().match(yes) || $(".question5").val().match(no))) {
+				    	$(".saveButton").show();
+				    } else {
+						$(".saveButton").hide();
+					}	
+			    }
+		    }    	   
+ 		}
+ 		
+ 		function checkAnswers() {
+ 			if($(".question3").val().match(yes)) {
+		        $("#answer3").show();
+		    }
+		    if($(".question5").val().match(yes)) {
+		        $("#answer5").show();
+		    }
+ 		}
+ 		
+		$(document).ready(function(){    	
+			$('.hoverDiv').hide();
+			$("[id$=regPath]").hide();
+			$(".saveButton").hide();
+			$("#answer12").hide();
+			$("#separator").hide();
+			$("#answer3").hide();
+			$("#answer5").hide();
+			
+			checkQuestions();
+			checkAnswers();
+			
+			$(".helpTR").hover(
+		      function(){		      	
+		      	$("#transientDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#transientDiv").fadeOut("300");
+		      }
+			);
+			$(".helpNE").hover(
+		      function(){
+		      	$("#networkDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#networkDiv").fadeOut("300");
+		      }
+			);
+			$(".helpNA").hover(
+		      function(){
+		      	$("#namedDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#namedDiv").fadeOut("300");
+		      }
+			);
+			$(".helpHQ").hover(
+		      function(){
+		      	$("#hqDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#hqDiv").fadeOut("300");
+		      }
+			);
+			$(".helpSample").hover(
+		      function(){
+		      	$("#sampleDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#sampleDiv").fadeOut("300");
+		      }
+			);
+			$(".question1,.question2,.question3,.question4,.question5").change(
+				function(){
+					checkQuestions();
+				}
+			);
+			$(".question1,.question2").change(
+				function(){
+					if($(".question1").val().match(yes) || $(".question2").val().match(no)) {
+				        $("#answer12").fadeIn("200");
+				        $("#separator").show();
+				    } else {
+				    	$("#answer12").fadeOut("200");
+				    	$("#separator").hide();
+				    }			    
+			    }
+			);
+			$(".question3").change(
+				function(){
+					if($(this).val().match(yes)) {
+				        $("#answer3").fadeIn("200");
+				    } else {
+				        $("#answer3").fadeOut("200");
+				        $(".consName").val(""); 
+				        $("[id$=consultantPC]").attr("disabled","disabled");
+			        	$("[id$=consultantCT]").attr("disabled","disabled");
+			        	$("[id$=consultantFN]").attr("disabled","disabled");
+			        	$("[id$=consultantLN]").attr("disabled","disabled");
+			        	$("[id$=consultantEM]").attr("disabled","disabled");
+				        $("[id$=consultantID]").val(null);
+				        $("[id$=consultantPC]").val("");
+				        $("[id$=consultantCT]").val("");
+				        $("[id$=consultantFN]").val("");
+				        $("[id$=consultantLN]").val("");
+				        $("[id$=consultantEM]").val("");
+				        $("[id$=consultantName]").val("");				        
+				    }
+			    }
+			);
+			$(".question5").change(
+				function(){
+					if($(".question5").val().match(yes)) {
+				        $("#answer5").fadeIn("200");
+				    } else {
+				    	$("#answer5").fadeOut("200");
+				    }			    
+			    }
+			);
+			$("[id$=editPath]").click(
+				function(){
+				    $("[id$=editPath]").hide();
+				    $("[id$=regPath]").show();
+			    }
+			);
+			$("[id$=regPath]").change(
+				function(){
+				    $("[id$=regPath]").hide();
+				    $("[id$=editPath]").show();
+			    }
+			);
+			$("[id$=editCons]").click(
+				function(){
+					$("[id$=consultantID]").val(null);
+			        $("[id$=consultantPC]").removeAttr("disabled");
+			        $("[id$=consultantCT]").removeAttr("disabled");
+			        $("[id$=consultantFN]").removeAttr("disabled");
+			        $("[id$=consultantLN]").removeAttr("disabled");
+			        $("[id$=consultantEM]").removeAttr("disabled");
+			        $("[id$=consultantPC]").val("");
+			        $("[id$=consultantCT]").val("");
+			        $("[id$=consultantFN]").val("");
+			        $("[id$=consultantLN]").val("");
+			        $("[id$=consultantEM]").val("");
+			        $("[id$=consultantName]").val("");
+				}
+			);
+			$("[id$=consultantName]").click(
+				function(){
+					$("[id$=consultantID]").val(null);
+			        $("[id$=consultantPC]").attr("disabled","disabled");
+			        $("[id$=consultantCT]").attr("disabled","disabled");
+			        $("[id$=consultantFN]").attr("disabled","disabled");
+			        $("[id$=consultantLN]").attr("disabled","disabled");
+			        $("[id$=consultantEM]").attr("disabled","disabled");
+			        $("[id$=consultantPC]").val("");
+			        $("[id$=consultantCT]").val("");
+			        $("[id$=consultantFN]").val("");
+			        $("[id$=consultantLN]").val("");
+			        $("[id$=consultantEM]").val("");
+			        $("[id$=consultantName]").val("");
+				}
+			);
+		});
+	</script>
+ 	<apex:pageBlockButtons id="theButtons">
+ 		<apex:commandButton id="btnSave" value="{!$Label.AddProductConfigure}" action="{!generateQuote}" styleClass="saveButton"/>
+        <apex:commandButton id="btnBack" value="{!$Label.Cancel}" action="{!back}"/>
+ 	</apex:pageBlockButtons>
+      	<!--<apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+       		<apex:outputPanel >
+        	<apex:image value="{!$Resource.icon_quote}" height="30"/>
+        	<apex:outputText value="New Quote for {!opty.Account.Name} ({!opty.Name})" styleclass="header"/>
+        	</apex:outputPanel>
+    	</apex:panelGrid>
+    	<br/>-->
+    	
+    	<apex:outputpanel rendered="{!ISBLANK(opty.Pricebook2Id)}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="{!$Label.NoDefaultPricebook}" style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+		<apex:outputpanel rendered="{!!opty.QuoteReady__c}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="{!$Label.OpportunityNotReadyQuote}" style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+		<apex:outputpanel rendered="{!noSiteType}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="{!$Label.SiteTypeError}" style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+		
+    	<!-- CONTACTS SECTION -->
+ 		<apex:pageBlockSection title="Contacts Information" rendered="{!IF((isMultiSite && !noSiteType && opty.Pricebook2Id != null && opty.QuoteReady__c) || (!isMultiSite && opty.Pricebook2Id != null && opty.QuoteReady__c),true,false)}">
+ 			<apex:pageblockSectionItem >
+		    	<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_person2}" width="30"/>
+		    	<apex:outputLabel value="{!$ObjectType.Quote__c.fields.Contact__c.label}" for="contacts" />
+		    	</apex:panelGrid>
+		        <apex:selectList value="{!sContact}" size="1" id="contacts">
+		        	<apex:selectOptions value="{!contacts}"/>            
+		    	</apex:selectList>
+        	</apex:pageblockSectionItem>
+        	<!--<apex:outputField value="{!newQuote.Opportunity_Name__c}"/>-->
+        	<apex:pageblockSectionItem >
+        		<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_invoice}" width="30"/>
+		    	<apex:outputLabel value="{!$ObjectType.Quote__c.fields.Invoice_Contact__c.label}" for="contacts" />
+		    	</apex:panelGrid>
+		        <apex:selectList value="{!sInvoice}" size="1" id="contacts">
+		        	<apex:selectOptions value="{!contacts}"/>            
+		    	</apex:selectList>
+        	</apex:pageblockSectionItem>
+ 			<apex:pageblockSectionItem >
+        		<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_clock}" width="30"/>
+		    	<apex:outputLabel value="{!$ObjectType.Quote__c.fields.Booking__c.label}" for="contacts" />
+		    	</apex:panelGrid>
+		        <apex:selectList value="{!newQuote.Booking__c}" size="1" id="contacts">
+		        	<apex:selectOptions value="{!contacts}"/>            
+		    	</apex:selectList>
+        	</apex:pageblockSectionItem>			
+ 			<apex:pageBlockSectionItem >
+        		<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_creditcard}" width="30"/>
+		    	<apex:outputLabel value="{!$ObjectType.Quote__c.fields.CreditCheck__c.label}" for="contacts" />
+		    	</apex:panelGrid>
+        		<apex:selectList value="{!newQuote.CreditCheck__c}" size="1" id="contacts">
+		        	<apex:selectOptions value="{!contacts}"/>            
+		    	</apex:selectList>
+        	</apex:pageBlockSectionItem>
+ 		</apex:pageBlockSection>
+ 		
+ 		<!-- WARNING AND INFO SECTION-->
+ 		<apex:pageBlockSection id="warnings" title="Warnings and Info" columns="2" rendered="{!IF((isMultiSite && !noSiteType && opty.Pricebook2Id != null && opty.QuoteReady__c) || (!isMultiSite && opty.Pricebook2Id != null && opty.QuoteReady__c),true,false)}">
+ 			<apex:outputPanel >
+ 			<apex:outputPanel rendered="{!isMultiSite}">
+			<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+ 			<td style="vertical-align:middle;align:left;"><apex:outputText value="{!$Label.MultiSiteQuestion_1}" style="font-weight:bold;"/></td> 
+ 			<td style="vertical-align:middle;align:left;"><apex:inputField value="{!newQuote.MoreCertificate__c}" styleClass="question1" style="float:right;"/></td>
+	 		</tr></table>
+	 		<br/>
+	 		<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+	 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+	 			<td style="vertical-align:middle;align:left;"><apex:outputText value="{!$Label.MultiSiteQuestion_2}" style="font-weight:bold;" /></td> 
+	 			<td style="vertical-align:middle;align:left;"><apex:inputField value="{!newQuote.OneScopeSystem__c}" styleClass="question2" style="float:right;"/></td>
+	 		</tr></table>
+	 		<br/>
+	 		</apex:outputPanel>
+	 		<apex:outputPanel >
+	 		<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+	 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+	 			<td style="vertical-align:middle;align:left;"><apex:outputText value="{!$Label.MultiSiteQuestion_3}" style="font-weight:bold;" /></td> 
+	 			<td style="vertical-align:middle;align:left;"><apex:inputField value="{!newQuote.ConsultantInvolved__c}" styleClass="question3" style="float:right;"/></td>
+	 		</tr></table>
+	 		<br/>
+			</apex:outputPanel>
+			<apex:outputPanel rendered="{!IF(opty.SiteDifference__c != 0,true,false)}">
+				<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+	 			<td style="vertical-align:middle;align:left;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+	 			<td style="vertical-align:middle;align:left"><apex:outputText value="Site Count {!TEXT(opty.SiteNumber__c)} of {!TEXT(opty.Account.SiteNumber__c)}. {!$Label.SingleSiteWarning}" style="font-weight:bold;"/>
+	 			</td> 
+	 			<td style="vertical-align:middle;">
+	 			<apex:inputField value="{!newQuote.WholeCertAdvised__c}" styleClass="question4" style="float:right;"/><br/>
+	 			<apex:commandButton action="{!manageSite}" value="Manage Site" style="float:right;"/>
+	 			</td>
+	 		</tr></table>
+	 		<br/>
+			</apex:outputPanel>
+			<apex:outputPanel >
+				<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+	 			<td style="vertical-align:middle;align:left;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+	 			<td style="vertical-align:middle;align:left"><apex:outputText value="{!$Label.MultiSiteQuestion_5}" style="font-weight:bold;"/>
+	 			</td> 
+	 			<td style="vertical-align:middle;">
+	 			<apex:inputField value="{!newQuote.Outsourcing__c}" styleClass="question5" style="float:right;"/>
+	 			</td>
+	 		</tr></table>
+	 		<br/>
+			</apex:outputPanel>
+			
+			</apex:outputPanel>
+			<apex:outputPanel >
+			<table width="100%" style="background-color:#F9EAD5;padding:5px;" id="answer12"><tr>
+ 				<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+ 				<td style="vertical-align:middle;align:left;"><apex:outputText value="{!$Label.MultiSiteWarning}" style="font-weight:bold;"/></td> 
+ 			</tr></table>
+ 			<br id="separator"/>
+			<table width="100%" style="background-color:#E1E6EE;padding:5px;" id="answer3"><tr>
+ 				<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_person}" width="30"/></td>
+ 				<td style="vertical-align:middle;">
+ 				<apex:panelGrid columns="1" cellpadding="2" cellspacing="2">
+ 				<apex:outputText value="Consultant Info" style="font-weight:bold;"/>
+ 				<apex:panelGroup >
+ 				<apex:outputText value="Search" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:inputField styleclass="consName" value="{!newQuote.ConsultantName__c}" id="consultantName">
+ 					<c:autoComplete objectname="Contact" 
+ 						queryFields="MailingCountry,MailingPostalCode,Email,FirstName,LastName,Account.Name,TerritoryName__c" 
+ 						additionalfield="MailingPostalCode,MailingCountry,TerritoryName__c"
+ 						fixedSearch="RecordType.DeveloperName = '{!consRT}' and"
+ 						autocomplete_textbox="{!$Component.consultantName}" 
+ 						autocomplete_textid="{!$Component.consultantID}"
+ 						field1="MailingPostalCode"
+ 						field2="MailingCountry"
+ 						field3="Email"
+ 						field4="FirstName"
+ 						field5="LastName"
+ 						textfield1="{!$Component.consultantPC}"
+ 						textfield2="{!$Component.consultantCT}"
+ 						textfield3="{!$Component.consultantEM}"
+ 						textfield4="{!$Component.consultantFN}"
+ 						textfield5="{!$Component.consultantLN}"/>
+ 				</apex:inputField>			
+ 				</apex:panelGroup>
+ 				<apex:panelGroup >
+ 				<apex:outputText value="Add new" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:image value="{!$Resource.icon_add}" width="25" style="position:relative;left:5px;cursor:pointer;" id="editCons"/>
+ 				</apex:panelGroup>
+ 				</apex:panelGrid>
+ 				</td>
+ 				<td style="vertical-align:middle;align:left;">
+ 				<apex:panelGrid columns="4" cellpadding="2" cellspacing="2">							
+ 				<apex:outputText value="FirstName" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:inputText value="{!consultant.FirstName}" id="consultantFN" />
+ 				<apex:outputText value="LastName" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:inputText value="{!consultant.LastName}" id="consultantLN" />
+ 				<apex:outputText value="PostCode" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:inputText value="{!consultant.MailingPostalCode}" id="consultantPC" />
+ 				<apex:outputText value="Country" style="font:11px bold 'American Typewriter'"/>
+ 				<apex:inputText value="{!consultant.MailingCountry}" id="consultantCT" />
+ 				<apex:outputText value="Email" style="font:11px bold 'American Typewriter'" />
+ 				<apex:inputText value="{!consultant.Email}" id="consultantEM" />
+ 				<apex:inputHidden value="{!consID}" id="consultantID"/>	
+ 				
+ 				<!--<img src="{!$resource.icon_selected}" width="25" id="consultantOk"/>-->
+ 				</apex:panelGrid>
+ 				</td> 
+ 			</tr>
+ 			</table>
+ 			<br id="separator"/>
+ 			<table width="100%" style="background-color:#E1E6EE;padding:5px;" id="answer5">
+ 				<tr><td><apex:outputText value="{!$Label.MultiSiteAnswer_5}" style="font-weight:bold;"/><br/></td></tr>
+ 				<tr><td><apex:inputTextArea value="{!newQuote.OutsourcingDetails__c}" styleclass="bubble"/></td></tr>
+ 			</table>
+			</apex:outputPanel>				
+ 		</apex:pageBlockSection>
+ 		<br/>
+ 		<!--<apex:outputPanel rendered="{!IF(opty.SiteDifference__c != 0,true,false)}">
+			<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+ 			<td style="vertical-align:middle;"><apex:outputText value="Site Count {!TEXT(opty.SiteNumber__c)} of {!TEXT(opty.Account.SiteNumber__c)}" styleclass="required" style="font-weight:bold;font-size:14px"/>
+ 			<br/><apex:outputText value="{!$Label.SingleSiteWarning}" style="font-weight:bold;"/>
+ 			</td> 
+ 			<td style="vertical-align:middle;"><apex:commandButton action="{!manageSite}" value="Manage Site" style="float:right;"/></td>
+ 		</tr></table>
+		</apex:outputPanel>-->
+		
+ 		<!-- REGISTRATION PATH SECTION -->
+ 		<apex:pageBlockSection title="Registration Path"/>
+ 		<apex:outputPanel rendered="{!IF((isMultiSite && !noSiteType && opty.Pricebook2Id != null && opty.QuoteReady__c) || (!isMultiSite && opty.Pricebook2Id != null && opty.QuoteReady__c),true,false)}">
+			<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;" width="35px">
+ 			<apex:image value="{!$Resource.icon_new}" width="30" rendered="{!IF(opty.RegistrationPath__c=='New Registration', true, false)}"/>
+ 			<apex:image value="{!$Resource.icon_transfer}" width="30" rendered="{!IF(opty.RegistrationPath__c=='Transfer', true, false)}"/>
+ 			<apex:image value="{!$Resource.icon_extension}" width="30" rendered="{!IF(BEGINS(opty.RegistrationPath__c,'Extension to Scope'),true, false)}"/></td>
+ 			<td style="vertical-align:middle;"><apex:outputText value="{!opty.RegistrationPath__c}" style="font-weight:bold;font-size:13px;"/></td>
+ 			<td style="vertical-align:middle;">
+ 			<apex:inputField value="{!opty.RegistrationPath__c}" onchange="editPath();" id="regPath" style="float:right;"/>
+ 			<apex:outputText value="Edit" id="btneditPath" styleClass="btn" style="text-decoration:none;cursor:pointer;float:right;"/>
+ 			<!--<apex:image value="{!$Resource.icon_edit}" id="imgeditPath" width="25" style="cursor:pointer;float:right;"/>-->
+			</td>
+			</tr>
+			<tr>
+			<td style="vertical-align:middle;" width="35px">
+ 			<apex:image value="{!$Resource.icon_calendar}" width="30" rendered="{!IF(opty.RegistrationPath__c=='Transfer', true, false)}"/></td>
+			<td style="vertical-align:middle;">
+			<apex:outputText value="{!$ObjectType.Quote__c.fields.ExpireDate__c.label}" style="font-weight:bold;" rendered="{!IF(opty.RegistrationPath__c=='Transfer', true, false)}"/>&nbsp;&nbsp;
+			<apex:inputField value="{!newQuote.ExpireDate__c}" style="font-weight:bold;font-size:15px;width:110px;" styleclass="required" rendered="{!IF(opty.RegistrationPath__c=='Transfer', true, false)}"/></td>
+ 			</tr></table>
+ 			<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;">
+ 			<apex:outputText value="{!$Label.RegistrationPath}" style="font-weight:bold;"/></td> 
+ 			<td style="vertical-align:middle;">
+ 			<apex:outputLink styleClass="btn" value="/{!opty.Id}/e?clone=1" target="_blank" style="float:right;text-decoration:none;">
+ 				Clone Opportunity
+ 			</apex:outputLink></td>
+ 			</tr></table>
+		</apex:outputPanel>
+		<br/>
+ 		
+ 		<!-- SITE SECTION -->
+ 		<apex:pageBlockSection title="{!IF(isMultiSite, 'Multi Site Quote ('&TEXT(opty.SiteNumber__c)&')', 'Single Site Quote')}"/>
+ 		<table width="100%"><tr>
+ 		<td >
+ 		<table width="100%" style="padding:10px;"><tr>
+ 		<td width="35px"><apex:image value="{!$Resource.icon_namedhq}" width="30" styleclass="helpHQ" rendered="{!!ISBLANK(quoteHQ)}"/></td>
+ 		<td>
+ 			<apex:panelGrid columns="1" rendered="{!!ISBLANK(quoteHQ)}">
+ 			<a href="/{!quoteHQ.Site__c}" target="_blank" style="font-weight:bold;" id="{!quoteHQ.Site__c}" onblur="LookupHoverDetail.getHover('{!quoteHQ.Site__c}').hide();" 
+ 				onfocus="LookupHoverDetail.getHover('{!quoteHQ.Site__c}','../{!quoteHQ.Site__c}/m?retURL=%2F{!quoteHQ.Site__c}&isAjaxRequest=1').show();"
+				onmouseout="LookupHoverDetail.getHover('{!quoteHQ.Site__c}').hide();"
+				onmouseover="LookupHoverDetail.getHover('{!quoteHQ.Site__c}','../{!quoteHQ.Site__c}/m?retURL=%2F{!quoteHQ.Site__c}&isAjaxRequest=1').show();">
+				{!quoteHQ.Site__r.Name}
+			</a>
+ 			<!--<apex:outputText value="{!quoteHQ.Site__r.Name}" style="font-weight:bold;"/>-->
+	    	<apex:outputText value="{!quoteHQ.Site__r.Type__c}" style="font-weight:bold;" styleclass="required"/>
+	        <apex:outputText value="{!quoteHQ.Site__r.Street__c}" styleclass="text"/>
+	        <apex:outputText value="{!quoteHQ.Site__r.Postcode__c}, {!quoteHQ.Site__r.City__c}" styleclass="text"/>
+	        <apex:outputText value="{!quoteHQ.Site__r.Country__c}" styleclass="text"/>
+	        </apex:panelGrid>
+		</td>
+		</tr>
+		<tr>
+			<td width="35px"><apex:image value="{!$Resource.icon_transient}" width="30" styleclass="helpTR" rendered="{!isTransient}"/></td>
+			<td>
+			<apex:panelGrid columns="2" rendered="{!isTransient}">
+				<a href="/{!quoteT.Site__c}" target="_blank"  style="font-weight:bold;" id="{!quoteT.Site__c}" onblur="LookupHoverDetail.getHover('{!quoteT.Site__c}').hide();" 
+				onfocus="LookupHoverDetail.getHover('{!quoteT.Site__c}','../{!quoteT.Site__c}/m?retURL=%2F{!quoteT.Site__c}&isAjaxRequest=1').show();"
+				onmouseout="LookupHoverDetail.getHover('{!quoteT.Site__c}').hide();"
+				onmouseover="LookupHoverDetail.getHover('{!quoteT.Site__c}','../{!quoteT.Site__c}/m?retURL=%2F{!quoteT.Site__c}&isAjaxRequest=1').show();">
+				{!quoteT.Site__r.Name}
+				</a><apex:outputText value=""/>
+				<apex:outputText value="{!$ObjectType.Site__c.fields.SecurityIssue__c.label}" styleclass="text"/>
+				<apex:outputText value="{!quoteT.Site__r.SecurityIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteT.Site__r.SecurityIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+				<apex:outputText value="{!$ObjectType.Site__c.fields.GeographicIssue__c.label}" styleclass="text"/>
+				<apex:outputText value="{!quoteT.Site__r.GeographicIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteT.Site__r.GeographicIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+			</apex:panelGrid>
+			<!--<apex:outputText value="{!quoteT.Site__r.Description__c}" styleclass="text" style="color:grey;" rendered="{!isTransient}"/>-->
+			</td>
+		</tr>
+		<tr>
+			<td width="35px"><apex:image value="{!$Resource.icon_network}" width="30" styleclass="helpNE" rendered="{!isNetwork}"/></td>
+			<td>
+			<apex:panelGrid columns="2" rendered="{!isNetwork}">
+				<a href="/{!quoteN.Site__c}" target="_blank"  style="font-weight:bold;" id="{!quoteN.Site__c}" onblur="LookupHoverDetail.getHover('{!quoteN.Site__c}').hide();" 
+				onfocus="LookupHoverDetail.getHover('{!quoteN.Site__c}','../{!quoteN.Site__c}/m?retURL=%2F{!quoteN.Site__c}&isAjaxRequest=1').show();"
+				onmouseout="LookupHoverDetail.getHover('{!quoteN.Site__c}').hide();"
+				onmouseover="LookupHoverDetail.getHover('{!quoteN.Site__c}','../{!quoteN.Site__c}/m?retURL=%2F{!quoteN.Site__c}&isAjaxRequest=1').show();">
+				{!quoteN.Site__r.Name}
+				</a><apex:outputText value=""/>
+				<apex:outputText value="{!$ObjectType.Site__c.fields.SecurityIssue__c.label}" styleclass="text"/>
+				<apex:outputText value="{!quoteN.Site__r.SecurityIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteN.Site__r.SecurityIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+				<apex:outputText value="{!$ObjectType.Site__c.fields.GeographicIssue__c.label}" styleclass="text"/>
+				<apex:outputText value="{!quoteN.Site__r.GeographicIssue__c}" styleclass="text" style="font-weight:bold;{!IF(quoteN.Site__r.GeographicIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+			</apex:panelGrid>
+			<!--<apex:outputText value="{!quoteN.Site__r.Description__c}" styleclass="text" style="color:grey;" rendered="{!isNetwork}"/>-->
+			</td>
+		</tr>
+		<tr>
+			<td width="35px"><apex:image value="{!$Resource.icon_named}" width="30" styleclass="helpNA" rendered="{!isMultiSite}"/></td>
+			<td>
+				<apex:outputpanel layout="block" rendered="{!isMultiSite}" style="overflow:auto;width:100%;height:110px">
+				<table width="100%" style="padding:10px;" cellpadding="5">
+ 				<th class="tableheader">Site Name</th>
+    			<th class="tableheader">Type</th>
+				
+					
+					<apex:repeat value="{!namedSites}" var="ns">
+						<tr><td>
+						<a href="/{!ns.Site__c}" target="_blank" style="font-size:11px;font-weight:bold;" id="{!ns.Site__c}" onblur="LookupHoverDetail.getHover('{!ns.Site__c}').hide();" 
+						onfocus="LookupHoverDetail.getHover('{!ns.Site__c}','../{!ns.Site__c}/m?retURL=%2F{!ns.Site__c}&isAjaxRequest=1').show();"
+						onmouseout="LookupHoverDetail.getHover('{!ns.Site__c}').hide();"
+						onmouseover="LookupHoverDetail.getHover('{!ns.Site__c}','../{!ns.Site__c}/m?retURL=%2F{!ns.Site__c}&isAjaxRequest=1').show();">
+						{!ns.Site__r.Name}
+						</a>
+						</td>
+						<td>
+						({!IF(ISBLANK(ns.Site__r.Type__c),$Label.SiteTypeMissing,ns.Site__r.Type__c)})
+						</td></tr>
+						
+					</apex:repeat>
+				</table>	
+				</apex:outputpanel>				
+			</td>		
+ 		</tr></table>
+ 		</td>
+ 		<td width="65%">
+ 		
+ 		<apex:outputPanel rendered="{!IF(isMultiSite && !ISBLANK(quoteHQ), true, false)}">
+ 		<center>
+ 		<table><tr>
+ 		<td width="35px" style="vertical-align:middle;"><apex:image value="{!$Resource.icon_sample}" width="30" styleclass="helpSample"/></td>
+ 		<td>
+ 		<table width="100%" style="padding:10px;" cellpadding="5">
+ 		<th class="tableheader">Site Name</th>
+    	<th class="tableheader">Sampling</th>
+    	<th class="tableheader">Is sampling applicable?</th>
+    	<apex:repeat value="{!siteTypes}" var="st">	
+    		<apex:outputPanel rendered="{!IF(st.name != setting.HQLabel__c,true,false)}">
+    		<tr>		
+    		<td style="font-weight:bold;vertical-align:middle;"> {!st.name}</td>
+    		<td style="vertical-align:middle;"> 
+    		<apex:selectRadio value="{!st.value}" id="sites">
+        		<apex:selectOptions value="{!st.sampling}"/>            
+    		</apex:selectRadio>
+    		</td>
+    		<td style="vertical-align:middle;text-align:center;">
+    		<apex:selectList size="1" value="{!st.approved}" id="confirm" rendered="{!st.showQuestion}">
+        		<apex:selectOptions value="{!st.approving}"/>            
+    		</apex:selectList>
+    		<apex:outputText value="No sampling applicable" rendered="{!!st.showQuestion}"/>
+    		</td>
+    		</tr>
+    		</apex:outputPanel>
+    	</apex:repeat>
+		</table>
+		<!--<table width="95%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+ 			<td style="vertical-align:middle;"><apex:outputText value="{!$Label.SiteSamplingMessage}" style="font-weight:bold;"/></td> 
+ 		</tr></table>-->
+ 		</td>
+ 		</tr></table>
+		</center>
+		</apex:outputPanel>
+		</td>
+		</tr>
+		</table>
+		
+		<apex:outputPanel rendered="{!ISBLANK(quoteHQ)}">
+			<table width="100%" style="background-color:#F9EAD5;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+ 			<td style="vertical-align:middle;"><apex:outputText value="{!$Label.HQWarning}" style="font-weight:bold;"/></td> 
+ 			<td style="vertical-align:middle;"><apex:commandButton action="{!manageSite}" value="Manage Site" style="float:right;"/></td>
+ 		</tr></table>
+		</apex:outputPanel>	
+		<apex:outputPanel rendered="{!IF(!isMultiSite && !ISBLANK(quoteHQ), true, false)}">
+			<table width="100%" style="background-color:#E1E6EE;padding:5px;"><tr>
+ 			<td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+ 			<td style="vertical-align:middle;"><apex:outputText value="{!$Label.HQOnlyInfo}" style="font-weight:bold;"/></td> 
+ 			<td style="vertical-align:middle;"><apex:commandButton action="{!manageSite}" value="Manage Site" style="float:right;"/></td>
+ 		</tr></table>
+		</apex:outputPanel>
+ 		<br/>
+ 	</apex:pageBlock>
+ 	
+	</apex:form>
+</apex:page>

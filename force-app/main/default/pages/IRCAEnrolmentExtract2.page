@@ -1,0 +1,4 @@
+<apex:page standardController="Enrollment__c" extensions="IRCAEnrolmentExtractExt" recordSetVar="e" contentType="text/csv;charset=UTF-8" action="{!build}" standardStylesheets="false">{!headerRow}
+<apex:repeat value="{!csvRows}" var="row">
+{!row}
+</apex:repeat></apex:page>

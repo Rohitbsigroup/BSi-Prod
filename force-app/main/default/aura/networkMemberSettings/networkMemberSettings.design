@@ -1,0 +1,17 @@
+<design:component>
+    <design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!userId}"
+                      description="Record Id of current User"/>
+
+    <design:attribute name="networkId"
+                      label="Network Id (Community Id)"
+                      default=""
+                      description="Id this Community (where this component is being used)"/>
+
+    <design:attribute name="title"
+                      label="Title"
+                      default="My Settings"
+                      description="Title of this Component"/>
+    
+</design:component>

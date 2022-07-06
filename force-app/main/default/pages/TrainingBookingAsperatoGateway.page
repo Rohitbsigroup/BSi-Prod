@@ -1,0 +1,184 @@
+<!--
+    @author Jadd Ennaciri <jadd.ennaciri@cloudshiftgroup.com>
+    @date 2021-01-18
+    @group CloudShiftGroup
+-->
+
+<apex:page controller="TrainingBookingAsperatoGatewayController"
+    language="{!pageLanguage}"
+    standardstylesheets="false"
+    showheader="false"
+    cache="false"
+    applyBodyTag="false"
+    applyHtmlTag="false"
+    action="{!validatePage}"
+    docType="html-5.0">
+    
+    <apex:panelGroup layout="none" rendered="{!NOT(paramMode='3D')}">
+        <html>
+            <head>
+                <title>{!$Label.TrainingBookingTitle}</title>
+                <meta name="viewport" content="width=device-width" />
+                <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+                <apex:variable var="PLStyle" value="PLStylesheet" rendered="{!OR(selectedCountry.countryOptionsDefault = 'Poland',selectedCountry.countryOptionsDefault = 'Vietnam')}" >
+                    <apex:stylesheet value="{!URLFOR($Resource.TrainingBookingResources, 'GTStyleSheet.css')}"/>
+                </apex:variable>
+                <apex:variable var="PLStyle" value="PLStylesheet" rendered="{!NOT(OR(selectedCountry.countryOptionsDefault = 'Poland',selectedCountry.countryOptionsDefault = 'Vietnam'))}" >
+                    <apex:stylesheet value="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}"/>
+                </apex:variable>
+                <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+                <apex:form >
+                    <apex:actionFunction action="{!successPage}" name="successPage"/>
+                    <apex:actionFunction action="{!paymentCancelledPage}" name="paymentCancelledPage"/>
+                    <apex:actionFunction action="{!invoiceInstead}" name="invoiceInstead"/>
+                </apex:form>
+                <script type="text/javascript">
+                
+                    //event listener functionality for all browser types
+                    function addEvent(element,evName,fn) {
+                        if (element.addEventListener) {
+                            element.addEventListener(evName,fn,false);
+                        } else if (element.attachEvent) {
+                            element.attachEvent('on'+evName,function(e) {
+                                fn(e || window.event);
+                            });
+                        }
+                    }
+                    
+                    
+                    function asperatoOverride(e) {
+                        // make sure it's from the expected source
+                        if (e.origin !== 'https://test.protectedpayments.net' && e.origin !== 'https://live.protectedpayments.net') {
+                            console.log(e.origin + ' != https://test.protectedpayments.net');
+                            console.log('NOT EXPECTED SOURCE');
+                            return;
+                        }
+                        
+                        if (e.data === 'asp--exit-screen') {
+                            console.log('SUCCESS');
+                            successPage();
+                        }
+                        if (e.data === 'asp--error-screen') {
+                            console.log('ERROR');
+                            var x = document.getElementById('payByInvoice');
+                            x.style.display = 'block';
+                        }
+                        // close without retry override
+                        if (e.data === 'asp--error') {
+                            console.log('ERROR');
+                            paymentCancelledPage();
+                        }
+                        // cancel button override
+                        if (e.data === 'asp--cancel') {
+                            console.log('CANCEL');
+                            paymentCancelledPage();
+                        }
+                    }
+                    
+                    window.onload = function() {
+                        addEvent(window,'message',asperatoOverride);
+                    }
+
+                </script>
+            </head>
+            <body>
+                <div class="wrapper">
+                    <div class="page">
+                        <div class="header">
+                            <a class="logo" href="http://bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                            <p class="site-strap ir">Making excellence a habit</p>
+                            <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                            <p class="phone-no">
+                                <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                                <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}" />
+                            </p>
+                        </div> <!-- /.header -->
+    
+                        <div class="main">
+                            
+                            <!-- *** Details *** -->
+                            <h1 class="title">{!courseName}</h1>
+                            <apex:outputPanel rendered="{!pageShowSelection}">
+                                <h2 class="subtitle">
+                                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                                </h2>
+                                <h2 class="subtitle">
+                                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                                </h2>
+                            </apex:outputPanel>
+                            
+                            <!-- *** Accepted card types *** -->
+                            <apex:outputPanel layout="block">
+                                <apex:image style="margin-top: 10px; border: 0;" rendered="{!showVisa}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'VISA.gif')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showMastercard}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'mastercard.gif')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showAmex}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'Amex.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showDiners}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'diners.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showDiscover}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'discover.jpeg')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showCup}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'cup.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showJcb}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'jcb.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showGrabpay}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'grabpay.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showPayeasy}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'payeasy.png')}"/>
+                                <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" rendered="{!showAfterpay}" url="{!URLFOR($Resource.TrainingBookingCardLogos, 'afterpay.png')}"/>                            </apex:outputPanel>
+                            
+                            <!-- *** Asperato iframe *** -->
+                            <apex:panelGroup layout="block">
+                                <apex:iframe id="payment-frame" frameborder="false" width="100%" height="330px" src="{!paymentUrl}" scrolling="true" />
+                            </apex:panelGroup>
+                            
+                            <!-- *** Notes *** 
+                            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                                <p>{!$Label.TrainingBookingOgoneNotes}</p>
+                                <p>{!$Label.TrainingBookingOgoneNotes2}</p>
+                            </apex:outputPanel> -->
+                           
+                            <!-- *** Invoice instead option *** -->
+                            <apex:outputPanel layout="block" rendered="{!selectedCountry.isInvoiceAllowed}"
+                                                style="border: 1px solid transparent;border-radius:3px;background-color: #f3f3f3;border-color: #d6d6d6;display:flex;flex-direction:row;font-size:16px;padding: 15px;overflow: hidden;zoom: 1;">
+                                <img src="https://img.icons8.com/cotton/64/000000/invoice.png" style="height: 32px;"/>
+                                <apex:form style="padding-top: 5px;">
+                                    <apex:commandLink action="{!invoiceInstead}" value="{!$Label.TrainingBookingInvoiceInstead}" immediate="true" />
+                                </apex:form>
+                            </apex:outputPanel>
+                        </div> <!-- /.main -->
+                            
+                        <div class="footer">
+                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsDefault = 'Vietnam'}"> 
+                                <a href='http://online.gov.vn/Home/WebDetails/75301'><img alt='vnLogo' title='vnLogo' width='100' style='position: relative; top: 13px; right: 13px;' src='{!URLFOR($Resource.TrainingBookingVNLogo)}'/></a>
+                            </apex:outputPanel>
+                            <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                            <ul>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}"> 
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                            </ul>
+                        </div> <!-- /.footer -->
+                    </div> <!-- /.page -->
+                </div> <!-- /.wrapper -->
+            </body>
+        </html>
+    </apex:panelGroup>
+</apex:page>

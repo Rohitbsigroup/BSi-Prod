@@ -1,0 +1,70 @@
+
+/* Progess indicator =========================================================================================================================================== */
+ul.progress li
+{
+    display: inline;
+    zoom: 1;
+}
+
+/* Listing tables ============================================================================================================================================== */
+.listing select
+{
+    height: auto;
+    width: 240px;
+    padding: 2px 0;
+    margin: 0;
+}
+
+/* Date entry form ============================================================================================================================================= */
+.field-item
+{
+    padding: 2px 0;
+}
+.field-item label
+{
+    padding: 2px 0 0;
+}
+.field-item .output-only
+{
+    padding: 2px 0 0 0;
+}
+.field-item .tooltip-button
+{
+    margin-top: 6px;
+}
+.field-item .tooltip-inline
+{
+    padding: 7px 0 0;
+}
+.field-item input, .field-item select, .field-item textarea
+{
+    float: left;
+    height: auto;
+    width: 295px;
+    margin: 4px 0 0;
+    padding: 2px;
+}
+.field-item select
+{
+    width: 300px;
+}
+.field-item input[type=checkbox]
+{
+    margin: 6px 0 0;
+}
+.field-item textarea
+{
+    height: 72px;
+}
+input.promo
+{
+    width: 220px;
+}
+span.promo
+{
+    padding: 2px 0 0 0;
+}
+a.promo
+{
+    padding: 2px 0 0 0;
+}

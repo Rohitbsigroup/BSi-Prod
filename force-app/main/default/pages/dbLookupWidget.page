@@ -1,0 +1,55 @@
+<apex:page controller="emq_DBLookupController">
+	<style>
+		body{
+			margin: 0!important;
+			background: #cfeef8!important;
+		}
+	</style>
+	<apex:form >
+			<script type="text/javascript">
+		        function search(){
+		        	var companyName = document.getElementById("{!$Component.companyName}").value;
+		        	var dunsNumber = document.getElementById("{!$Component.dunsNumber}").value;
+		        	var countryCode = document.getElementById("{!$Component.countryCode}").value;
+		        	var city = document.getElementById("{!$Component.city}").value;
+		        	var state = document.getElementById("{!$Component.state_text}") != null ? document.getElementById("{!$Component.state_text}").value : document.getElementById("{!$Component.state_select}").value;
+		        	var url = document.getElementById("{!$Component.baseURL}").href;
+		        	
+		        	window.open( url + "?companyName=" + companyName + "&dunsNumber=" + dunsNumber + "&countryCode=" + countryCode + "&city=" + city + "&state=" + state);
+		        } 
+		    </script>
+         	<table>
+         		<tr>
+         			<td><apex:outputLabel value="Company Name :" /><br/><apex:inputText value="{!CompanyName}" id="companyName"  style="width:97%"/></td>
+         		</tr>
+         		<tr>
+         			<td><apex:outputLabel value="DUNS Number:" /><br/><apex:inputText value="{!DUNSNumber}" id="dunsNumber"  style="width:97%"/></td>
+         		</tr>
+         		<tr>
+         			<td><apex:outputLabel value="City :" /><br/><apex:inputText value="{!City}" id="city"  style="width:97%"/></td>
+         		</tr>
+         		<tr>
+         			<td><apex:outputLabel value="Country :" /><br/>
+         			<apex:selectList value="{!CountryCode}" id="CountryCode" size="1" style="width:99%">
+         				<apex:actionSupport event="onchange" reRender="StateWrapper" />
+		        		<apex:selectOptions value="{!CountryList}"></apex:selectOptions>
+		        	</apex:selectList>
+        			</td>
+         		</tr>
+         		<tr>
+         			<td>
+         				<apex:outputLabel value="State :" /><br/><apex:outputPanel id="StateWrapper">
+			        		<apex:selectList value="{!State}" size="1" id="state_select" style="width:99%" rendered="{!StateSelectOrInput}">
+				        		<apex:selectOptions value="{!StateList}"></apex:selectOptions>
+				        	</apex:selectList>
+				        	<apex:inputText value="{!State}" id="state_text" style="width:97%" rendered="{!!StateSelectOrInput}" />
+						</apex:outputPanel>
+					</td>
+         		</tr>
+         		<tr>
+         			<apex:outputLink value="/apex/dbLookup?" target="_blank" style="display:none" id="baseURL">&nbsp;</apex:outputLink>
+					<td><input type="button" onclick="search()" value="Search" /></td>
+         		</tr>
+         	</table>
+	</apex:form>
+</apex:page>

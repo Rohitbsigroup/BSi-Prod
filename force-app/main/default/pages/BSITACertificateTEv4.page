@@ -1,0 +1,642 @@
+<apex:page renderAs="pdf" standardController="Training_Event__c" extensions="CertificateController" showHeader="false" pageStyle="all" lightningStylesheets="true">
+<head>
+
+<!--
+13/03/2018 - JS - Updated the code to show KR date as yyy/mm/dd same as Japan
+15/03/2018 - JS - Commented out signature for VN
+06/04/2018 - JS - Changed size of DE signature, added issue date for modular courses and shows original course dates for non IRCA exam resit
+09/04/2018 - JS - Adjusted CN and TW names to come from correct fields
+14/08/2018 - PC – Added in Course_Dates component
+17/08/2018 - PC – Added in Signature component
+17/08/2018 - PC – Added in Logo component
+20/08/2018 - PC – Added in Delegate_Name component
+20/08/2018 - PC – Added in Course_Name component
+04/09/2018 - PC – Added CertificateController
+06/09/2018 - PC – Added This_is_to_certify component
+06/09/2018 - PC – Added Attended component
+20/11/2018 - JS – Update to the Course Dates code and component and further simplification
+15/03/2019 - JS - Moved the footer up for China
+16/10/2019 - JS - Updated for FSSC
+13/05/2020 - RK - updated JP English name to BSI Group Japan K.K.
+03/08/2020 - JS - Update to dates for Exam Day 5 course and also probitas
+19/10/2020 - JS - Further update for original course dates and issue date and probitas logo
+
+-->
+
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+@page{
+    @bottom-left { 
+    content: element(footer);
+    }
+    size: A4 landscape;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;
+}
+<apex:panelGroup rendered="{!NOT(Training_Event__c.Event_Country__c ='CN')}">
+    .footer {
+        position: fixed;
+        left: 12mm;
+        bottom: 6mm;
+        z-index:+2;
+        font-size: 7pt;
+        line-height: 4px;
+        }
+</apex:panelGroup>       
+<apex:panelGroup rendered="{!Training_Event__c.Event_Country__c ='CN'}">       
+    .footer {
+        position: fixed;
+        left: 12mm;
+        bottom: 13mm;
+        z-index:+2;
+        font-size: 7pt;
+        line-height: 4px;
+        }
+</apex:panelGroup>
+.small8 {
+    font-size: 7pt;
+    text-align: left;
+    line-height: 4px;
+    }
+.size8 {
+    font-size: 8pt;
+    text-align: left;
+    }
+.size12 {
+    font-size: 12pt;
+    text-align: left;
+    }
+.probitas {
+    font-size: 10pt;
+    vertical-align: top;
+    line-height: 2.5;
+    }    
+.size15 {
+    font-size: 15pt;
+    text-align: left;
+    }
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size28 {
+    font-weight: bold;
+    font-size: 28pt;
+    text-align: left;
+    line-height: 28px;
+    }
+.size33 {
+    font-weight: bold;
+    font-size: 33pt;
+    text-align: left;
+    line-height: 34px;
+    }
+</style>
+</head> 
+
+
+<!-- background image -->
+<apex:panelGroup rendered="{!showBg}">
+<img src="{!URLFOR($Resource.TrainingCertificatesv4, 'BSI_training_certificate_newv4-2014.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="29.7cm" height="21cm"/>
+</apex:panelGroup>
+
+<body>
+
+ 
+<!--------  Displays the course dates and name and list of delegates for up to 26 delegates. ------>
+
+<apex:panelGroup rendered="{!IF(((Training_Event__c.Enrollment_Count__c + Training_Event__c.Cancellation_Count__c) <= 26),true,false)}">
+
+    <table align="left" width="19.3cm" valign="top" style="position: absolute; left: 1.5cm; top: 6.5cm; line-height: 12pt;">
+        <tr>
+            <td>
+                <apex:outputText escape="false" value=" {!Training_Event__c.Course_Name_for_Certificate__c}"/>
+            </td>
+        </tr>
+        <tr>
+            <td>        
+               <!--JS 20181120 added component for Course Dates-->                       
+                <c:Course_Dates format="{!IF(OR(Training_Event__c.Event_Country__c='JP',Training_Event__c.Event_Country__c='KR'),'yyyy/MM/dd','dd/MM/yyyy')}" 
+                    duration="{!Training_Event__c.Course_Duration_Days__c}" 
+                    start1="{!Training_Event__c.Start_date__c}" 
+                    end1="{!Training_Event__c.End_Date_of_Section_1__c}" 
+                    start2="{!Training_Event__c.Start_Date_of_Section_2__c}" 
+                    end3="{!Training_Event__c.End_Date3__c}" 
+                    country="{!Training_Event__c.Event_Country__c}"
+                    module="{!Training_Event__c.Module_Event__c}"
+                    split="{!Training_Event__c.Split_Date_Event__c}"
+                    source="certificate"
+                />                                   
+                
+            </td>
+        </tr>
+        <tr><td><br/></td></tr> 
+    </table>
+ 
+                  
+    <table  align="left" cellpadding="2" cellspacing="0" styleclass="table"     style="position: absolute; top: 8cm; text-align: center; font-size:6pt;">
+            <THEAD>
+                <tr>
+                    <th width="1.5cm" style="border:0px solid #000000;border-right:0;"> </th>
+                    <th style="border:1px solid #000000;border-right:0;">Enrolment ID</th>
+                    <th style="border:1px solid #000000;border-right:0;">Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Local Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Booking Status</th>
+                    <th style="border:1px solid #000000;">Exam Results</th>
+                </tr>
+            </THEAD>
+                <apex:repeat value="{!Training_Event__c.Enrollments__r}" var="cx">
+            <TBODY>
+                <tr >
+                    <td width="1.5cm" style="border:0px solid #000000;border-right:0;"> </td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.Name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.LastNameLocal}{!cx.delegate_name__r.FirstNameLocal}</td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.Booking_status__c}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;">{!cx.Exam_results__c}</td>
+                </tr>
+            </TBODY>
+            </apex:repeat>
+    </table>
+
+</apex:panelGroup>
+
+<!--------  For 26+ delegates a message is shown to state a table can't be produced. ------>
+
+<apex:panelGroup rendered="{!IF(((Training_Event__c.Enrollment_Count__c + Training_Event__c.Cancellation_Count__c) <= 26),false, true)}">
+
+     <table valign="middle" style="position: absolute; left: 1.2cm; top: 10cm; line-height: 12pt;">
+         <tr><td><apex:outputText value="A list cannot be displayed for more than 26 delegates, but you can still see all the certificates on the following pages."/></td></tr>
+      </table>
+</apex:panelGroup>
+
+
+<!-- This sets it so that the code is repeated and a certificate is displayed for each enrolment-->
+
+
+<apex:repeat value="{!Training_Event__c.Enrollments__r}" var="enr">
+
+
+<!--This restricts it so that the certificate is only shown if the booking status contains booked so No Shows and Cancelled enrollments are excluded -->
+ 
+<apex:panelGroup rendered="{!AND(OR((CONTAINS('Booked',enr.Booking_status__c)), (CONTAINS('Booked - BSI Employee',enr.Booking_status__c)), (CONTAINS('Booked - Resit',enr.Booking_status__c))) ,NOT(AND((enr.Hold_Certificate__c),CONTAINS('Incomplete Attendance',enr.Hold_Cerificate_Reason__c))) )}">
+ 
+<!--This creates a page break between each certificate -->
+                      
+    <table height="0">
+          <tr><td>
+              <div style="page-break-before:always"></div>
+          </td></tr>
+    </table>
+
+<!---- this creates a table to insert the text in the correct places---->
+<table   width="99%" table-layout="fixed">
+
+<!---- this inserts a space at the top---->
+    <tr>
+        <td width ="0.8cm" ></td>
+        <td height="130"></td>
+    </tr>
+
+<!--BSI TRAINING ACADEMY--> 
+    
+    <tr>
+        <td width ="0.8cm" ></td>
+        <td align="left" valign="bottom" height="50">
+        <!---- this brings in the text "BSI Training Academy" for all countries in size 33.  For JP is is size 28 and for KR the translation is displayed for "Local" and as BSI Training Academy for "English"---->
+            <apex:outputText styleClass="size33" rendered="{!NOT(OR(enr.Translation_Formula__c = 'Japan (Japanese)',AND(enr.Translation_Formula__c = 'Korea (Korean)',enr.Certificate_Language__c = "English")))}" value="{!enr.Training_Translations__r.BSI_Training_Academy__c}"/>
+            <apex:outputText styleClass="size28"  rendered="{!IF(enr.Translation_Formula__c = 'Japan (Japanese)',true,false)}" value="{!enr.Training_Translations__r.BSI_Training_Academy__c}"/>
+            <apex:outputText styleClass="size33" rendered="{!IF((enr.Translation_Formula__c = 'Korea (Korean)') && enr.Certificate_Language__c = "English",true,false)}" value="BSI Training Academy"/>
+        </td>
+    </tr>
+
+    <tr>
+        <!-- THIS IS TO CERTIFY --> 
+        <apex:panelGroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Turkey (Turkish)'),NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}"> <td width="0.8cm" height="50"></td></apex:panelGroup>
+        <apex:panelGroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Turkey (Turkish)'),enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}"> <td width="0.7cm" height="50"></td></apex:panelGroup>
+        <apex:panelGroup rendered="{!AND(enr.Translation_Formula__c = 'Turkey (Turkish)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}"> <td width="0.3cm" height="80"></td></apex:panelGroup>
+        <apex:panelGroup rendered="{!AND(enr.Translation_Formula__c = 'Turkey (Turkish)',enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}"> <td width="0.3cm" height="50"></td></apex:panelGroup>
+
+        <td align="left" valign="bottom" styleClass="size12">
+
+            <!--PC 20180906 added component for This is to certify -->
+            <c:This_is_to_certify enrollment="{!enr}"/>
+
+            
+        </td>
+    </tr>
+
+    <!---- this inserts a space ---->
+    <tr>
+        <td width="0.8cm"></td>
+        <td height="12"></td>
+    </tr>
+    <tr>
+        <td width="0.8cm" height="20"></td>
+        <td align="left" valign="middle">
+
+            <!--PC 20180820 added component for Delegate Name -->
+            <c:Delegate_Name enrollment="{!enr}"/>
+
+       </td>
+    </tr>
+
+    <tr> 
+        <td width="0.8cm"></td>
+        <td height="60" align="left" valign="middle">
+
+            <!--PC 20180906 added component for Attended -->
+            <c:Attended enrollment="{!enr}"/>
+
+            <!--Add additional text for Internal Courses
+            <apex:outputText styleClass="size12" rendered="{!IF(enr.Training_Event__r.Course_Type_Formula__c='Internal',true,false)}" escape="false" value=" the following internal course"/>    
+            -->
+        </td>
+    </tr>
+
+    <tr>
+        <td width="0.8cm" height="70"></td>
+        <td align="left" height="1cm" valign="top"> 
+        
+            <!--PC 20180820 added component for Course Name -->
+            <c:Course_Name enrollment="{!enr}"/>
+
+        </td>
+        <td width ="0.8cm"></td>
+    </tr>
+
+<!-- space before signature or agenda for RU-->
+    <tr>
+        
+        <apex:panelGroup rendered="{!(enr.Training_Event__r.Event_Country__c='RU')}" >         
+           <td width ="0.8cm" ></td>
+           <td align="left" valign="middle"> 
+              <apex:outputField style="small8" value="{!enr.Training_Event__r.Course__r.Agenda_for_Certificate__c}"/>            
+           </td>  
+           <td width ="0.8cm"></td>         
+        </apex:panelGroup> 
+        <apex:panelGroup rendered="{!NOT(enr.Training_Event__r.Event_Country__c='RU')}" >   
+        <td width ="0.8cm" height="15" ></td>
+           <td align="left" valign="middle"> 
+              <apex:outputField value="{!enr.Training_Translations__r.X14_Cht_space__c}"/> 
+           </td> 
+           <td width ="0.8cm"></td>          
+        </apex:panelGroup>      
+    </tr>
+</table>
+
+<table   width="99%"  table-layout="fixed">
+    <tr>
+        <td width ="0.8cm" ></td>
+        <td frame="below" style="align:left; valign:bottom; border-bottom: 1px solid #000;" height="50">
+
+            <!--PC 20180817 added component for Signature -->
+            <c:Signature enrollment="{!enr}"/>
+        </td>
+        <td width ="15.0cm"></td>
+    </tr>
+</table>
+        
+
+<!--TRAINING MANAGERS NAME FROM TRANSLATIONS---->     
+      <table     width="99%" table-layout="fixed" >
+        <tr>
+            <td height="30"  width="0.8cm" ></td>
+            <td valign="top" colspan="2">  
+            
+                 <apex:outputText styleClass="size12" value="{!enr.Training_Translations__r.Training_Manager__c}"/>
+                            
+            </td>
+        </tr>
+       </table>    
+    
+ <!--SECTION FOR Dates, Certificate number, Issue Date, Completion Date, Duration, Location etc-->   
+
+  <table   width="99%"  table-layout="fixed" >
+    <!--outer table ROW 1-->
+    <tr>
+      <td width="0.8cm"></td>
+      <td>
+          <table >
+          <!--ROW 1-->
+          
+              <tr>              
+                  <!--column 1-->
+                  <!--Dates-->                   
+                  <td width="4.5cm" align="left">
+                      <!--ILT-->
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">
+                           <apex:outputText rendered="{!IF(AND(enr.Translation_Formula__c = 'Japan (Japanese)', (enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)&&IF(enr.Certificate_Language__c = "English", false,true)}" styleClass="size10" value="{!enr.Training_Translations__r.Date__c}:"/>  
+                           <apex:outputText rendered="{!IF(AND(enr.Translation_Formula__c = 'Japan (Japanese)', (enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)&&IF(enr.Certificate_Language__c = "English", true,false)}" styleClass="size10" value="Date:"/>
+                      </apex:panelgroup>
+                      <!--Exam (if linked ILT course - if not, then blank)-->
+                      <apex:panelGroup rendered="{!AND(enr.RecordType.Name='E-Learning',NOT(ISBLANK(enr.Master_Enrollment__c)))}">
+                           <apex:outputText styleClass="size10" value="{!enr.Training_Translations__r.Course_Dates__c}:"/> 
+                      </apex:panelgroup>
+                  </td>
+                  <!--column 2-->
+                  <td width="12cm" align="left">
+                      <!--ILT-->
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">                  
+                      <!--Dates for Resits/ Day 5 etc original course dates-->
+                        <apex:outputpanel rendered="{!NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c))}">            
+                            <apex:outputpanel rendered="{!OR(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA',NOT(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR')))}">
+                                            <c:Course_Dates format="dd/MM/yyyy" 
+                                                        duration="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Course_Duration_Days__c}" 
+                                                        start1="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c}" 
+                                                        end1="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date_of_Section_1__c}" 
+                                                        start2="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                                        end3="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c}"
+                                                        country="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Event_Country__c}"
+                                                        module="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Module_Event__c}"
+                                                        split="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Split_Date_Event__c}"
+                                                        source="certificate"
+                                                    />
+                            </apex:outputpanel>                
+                            <apex:outputpanel rendered="{!AND(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR'),NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">
+                                            <c:Course_Dates format="yyyy/MM/dd" 
+                                                        duration="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Course_Duration_Days__c}" 
+                                                        start1="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c}" 
+                                                        end1="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date_of_Section_1__c}" 
+                                                        start2="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                                        end3="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c}"
+                                                        country="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Event_Country__c}"
+                                                        module="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Module_Event__c}"
+                                                        split="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Split_Date_Event__c}"
+                                                        source="certificate"
+                                                    />
+                            </apex:outputpanel>
+                        </apex:outputpanel>
+                        <!--End of Resit Dates-->
+                        
+                        <!--Normal Course Dates-->
+                        <apex:outputpanel rendered="{!NOT(OR(enr.Booking_status__c='Booked - Resit',enr.Booking_status__c='Booked - BSI Employee Resit',enr.Training_Event__r.Course__r.Training_Product_Type__c = 'Exam'))}">            
+                            <apex:outputpanel rendered="{!OR(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA',NOT(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR')))}">
+                                            <c:Course_Dates format="dd/MM/yyyy" 
+                                                        duration="{!enr.Training_Event__r.Course_Duration_Days__c}" 
+                                                        start1="{!enr.Training_Event__r.Start_date__c}" 
+                                                        end1="{!enr.Training_Event__r.End_Date_of_Section_1__c}" 
+                                                        start2="{!enr.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                                        end3="{!enr.Training_Event__r.End_Date3__c}"                                          
+                                                        country="{!enr.Training_Event__r.Event_Country__c}"
+                                                        module="{!enr.Training_Event__r.Module_Event__c}"
+                                                        split="{!enr.Training_Event__r.Split_Date_Event__c}"
+                                                        source="certificate"
+                                                    />
+                            </apex:outputpanel>                
+                            <apex:outputpanel rendered="{!AND(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR'),NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">                
+                                            <c:Course_Dates format="yyyy/MM/dd" 
+                                                        duration="{!enr.Training_Event__r.Course_Duration_Days__c}" 
+                                                        start1="{!enr.Training_Event__r.Start_date__c}" 
+                                                        end1="{!enr.Training_Event__r.End_Date_of_Section_1__c}" 
+                                                        start2="{!enr.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                                        end3="{!enr.Training_Event__r.End_Date3__c}"
+                                                        country="{!enr.Training_Event__r.Event_Country__c}"
+                                                        module="{!enr.Training_Event__r.Module_Event__c}"
+                                                        split="{!enr.Training_Event__r.Split_Date_Event__c}"
+                                                        source="certificate" 
+                                                    />
+                            </apex:outputpanel>
+                        </apex:outputpanel>
+                    <!--End of Normal Course Dates-->
+                    </apex:panelgroup>
+                    <!--Exam (if linked ILT course - if not, then blank)-->
+                    <apex:panelGroup rendered="{!AND(enr.RecordType.Name='E-Learning',NOT(ISBLANK(enr.Master_Enrollment__c)))}">
+                            <apex:outputpanel rendered="{!NOT(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR'))}">                
+                                            
+                            <c:Course_Dates format="dd/MM/yyyy" 
+                                            duration="{!enr.Master_Enrollment__r.Training_Event__r.Course_Duration_Days__c}" 
+                                            start1="{!enr.Master_Enrollment__r.Training_Event__r.Start_date__c}" 
+                                            end1="{!enr.Master_Enrollment__r.Training_Event__r.End_Date_of_Section_1__c}" 
+                                            start2="{!enr.Master_Enrollment__r.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                            end3="{!enr.Master_Enrollment__r.Training_Event__r.End_Date3__c}"
+                                            country="{!enr.Master_Enrollment__r.Training_Event__r.Event_Country__c}"
+                                            module="{!enr.Master_Enrollment__r.Training_Event__r.Module_Event__c}"
+                                            split="{!enr.Master_Enrollment__r.Training_Event__r.Split_Date_Event__c}"
+                                            source="certificate"
+                                        /> 
+                            </apex:outputpanel>            
+                            <apex:outputpanel rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR')}">                            
+                            <c:Course_Dates format="yyyy/MM/dd" 
+                                            duration="{!enr.Master_Enrollment__r.Training_Event__r.Course_Duration_Days__c}" 
+                                            start1="{!enr.Master_Enrollment__r.Training_Event__r.Start_date__c}" 
+                                            end1="{!enr.Master_Enrollment__r.Training_Event__r.End_Date_of_Section_1__c}" 
+                                            start2="{!enr.Master_Enrollment__r.Training_Event__r.Start_Date_of_Section_2__c}" 
+                                            end3="{!enr.Master_Enrollment__r.Training_Event__r.End_Date3__c}"
+                                            country="{!enr.Master_Enrollment__r.Training_Event__r.Event_Country__c}"
+                                            module="{!enr.Master_Enrollment__r.Training_Event__r.Module_Event__c}"
+                                            split="{!enr.Master_Enrollment__r.Training_Event__r.Split_Date_Event__c}"
+                                            source="certificate"
+                                        /> 
+                            </apex:outputpanel>                       
+                    
+                    </apex:panelgroup>                    
+                  </td>
+                <!--column 3-->  
+                <!--NOT if E-Learning.  if IN/FSSC/Probitas show location. If NOT IN/FSSC/Probitas but JP(notJATA/JRCA) OR "Course Duration for certs" on TT populated then show Duration in hours-->  
+                  <td width="5.5cm" align="left">
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">                
+                         <apex:outputText rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas')}" value="{!enr.Training_Translations__r.Location_for_cert__c}:"/>    
+                         <apex:panelGroup rendered="{!NOT(OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas'))}">
+                            <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">
+                               <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="研修時間:"/>
+                               <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="Duration:"/>                                                
+                            </apex:panelgroup>  
+                            <apex:panelgroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Japan (Japanese)'),NOT(ISBLANK(enr.Training_Translations__r.Duration_For_Certificates__c)))}">
+                               <apex:outputText rendered="{!NOT(enr.Certificate_Language__c='English')}" value="{!enr.Training_Translations__r.Duration_For_Certificates__c}:"/>
+                               <apex:outputText rendered="{!enr.Certificate_Language__c='English'}" value="Duration (Hours):"/>
+                            </apex:panelgroup>
+                         </apex:panelgroup>                          
+                      </apex:panelgroup>
+                  </td> 
+                  <!--column 4-->               
+                  <td width="16cm" align="left">
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">                
+                         <apex:outputText rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas')}">{!enr.Training_Event__r.Venue_City__c}</apex:outputText>                         
+                         <apex:panelGroup rendered="{!NOT(OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas'))}">
+                            <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">
+                               <apex:outputText value="{!enr.Training_Event__r.Course_Duration_Hours__c} Hours"/>                                                
+                            </apex:panelgroup>  
+                            <apex:panelgroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Japan (Japanese)'),NOT(ISBLANK(enr.Training_Translations__r.Duration_For_Certificates__c)))}">
+                               <apex:outputText value="{!enr.Training_Event__r.Course_Duration_Hours__c}"/>
+                            </apex:panelgroup>
+                         </apex:panelgroup>                          
+                      </apex:panelgroup>                      
+                  </td>                                               
+              </tr>
+              
+              <tr>
+              <!--ROW 2-->
+                <!--column 1-->
+                <!-- Certificate Number-->
+                <td>
+                  <apex:outputText rendered="{!IF(AND(enr.Translation_Formula__c = 'Japan (Japanese)', (enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)&& IF(enr.Certificate_Language__c = "English", false,true)}" value="{!enr.Training_Translations__r.Certificate_Number__c}"/>
+                  <apex:outputText rendered="{!IF(AND(enr.Translation_Formula__c = 'Japan (Japanese)', (enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)&& IF(enr.Certificate_Language__c = "English", true,false)}" value="Certificate Number:"/>
+                </td>
+                <!--column 2-->
+                <td>
+                  <apex:outputText styleClass="size10" value="{!enr.Name}"/>
+                </td>
+                <!--column 3-->
+                <td>
+                <!--NOT if E-Learning.  if IN/FSSC/Probitas location shown above, and JP(notJATA/JRCA) OR "Course Duration for certs" on TT populated then show Duration in hours. if not IN/FSSC/Probitas and JP - show company name-->
+                      <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC'),NOT(enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas'))}">
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="主催者:"/>
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="Delivered by:"/>                      
+                      </apex:panelgroup>                     
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">                
+                         <apex:panelGroup rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas')}">
+                            <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">
+                               <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="研修時間:"/>
+                               <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="Duration:"/>                                                
+                            </apex:panelgroup>  
+                            <apex:panelgroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Japan (Japanese)'),NOT(ISBLANK(enr.Training_Translations__r.Duration_For_Certificates__c)))}">
+                               <apex:outputText rendered="{!NOT(enr.Certificate_Language__c='English')}" value="{!enr.Training_Translations__r.Duration_For_Certificates__c}:"/>
+                               <apex:outputText rendered="{!enr.Certificate_Language__c='English'}" value="Duration (Hours):"/>
+                            </apex:panelgroup>
+                         </apex:panelgroup>                          
+                      </apex:panelgroup>
+                </td>
+                <!--column 4-->
+                <td>
+                <!--NOT if E-Learning.  if IN/FSSC/Probitas location shown above, and JP(notJATA/JRCA) OR "Course Duration for certs" on TT populated then show Duration in hours.if not IN/FSSC/Probitas and JP - show company name-->
+                      <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC'),NOT(enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas'))}">
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="BSIグループジャパン株式会社"/>
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="BSI Group Japan K.K."/>                      
+                      </apex:panelgroup>
+                      <apex:panelGroup rendered="{!NOT(enr.RecordType.Name='E-Learning')}">                
+                         <apex:panelGroup rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'IN',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas')}">
+                            <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',NOT(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">
+                               <apex:outputText value="{!enr.Training_Event__r.Course_Duration_Hours__c} Hours"/>                                                
+                            </apex:panelgroup>  
+                            <apex:panelgroup rendered="{!AND(NOT(enr.Translation_Formula__c = 'Japan (Japanese)'),NOT(ISBLANK(enr.Training_Translations__r.Duration_For_Certificates__c)))}">
+                               <apex:outputText value="{!enr.Training_Event__r.Course_Duration_Hours__c}"/>
+                            </apex:panelgroup>
+                         </apex:panelgroup>                          
+                      </apex:panelgroup>
+                </td>
+                
+              </tr>
+              <!--ROW 3-->
+              <tr>
+                  <!--column 1-->
+                  <!-- Completion date for exams, issue date for FSSC and day 5 exam-->
+                  <td>
+                      <apex:outputText rendered="{!enr.RecordType.Name='E-Learning'}" value="{!enr.Training_Translations__r.Examination_Completed__c}:"/>
+                      <apex:outputText rendered="{!OR(enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c)))}" value="{!enr.Training_Translations__r.Issue_Date__c}:"/>
+                      <!--JS 26/03 combined with above<apex:outputText rendered="{!AND(enr.Training_Event__r.Course__r.Training_Product_Type__c = 'Exam',OR(enr.Training_Event__r.Course__r.Course_Format__c = 'ILT',enr.Training_Event__r.Course__r.Course_Format__c = 'Virtual Training'))}" value="{!enr.Training_Translations__r.Issue_Date__c}:"/>-->                                     
+                                                       
+                  </td>
+                  <!--column 2-->
+                  <td>
+                      <apex:outputpanel rendered="{!NOT(OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR'))}">                                                        
+                         <apex:outputText rendered="{!enr.RecordType.Name='E-Learning'}" value="{0, date, dd/MM/yyyy}">
+                           <apex:param value="{!enr.Online_Training_Completed_Date__c}" /> 
+                         </apex:outputText>
+                         <apex:outputText rendered="{!OR(enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c)))}" value="{0, date, dd/MM/yyyy}">
+                           <apex:param value="{!enr.Training_Event__r.End_Date3__c}" /> 
+                         </apex:outputText>
+                         <!--JS 26/03 combined with above<apex:outputText rendered="{!NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c))}" value="{0, date, dd/MM/yyyy}">
+                           <apex:param value="{!enr.Training_Event__r.End_Date3__c}" /> 
+                         </apex:outputText>-->
+                      </apex:outputpanel>   
+                      <apex:outputpanel rendered="{!OR(enr.Training_Event__r.Event_Country__c = 'JP',enr.Training_Event__r.Event_Country__c='KR')}">
+                      <apex:outputText rendered="{!enr.RecordType.Name='E-Learning'}" value="{0, date, yyyy/MM/dd}">
+                           <apex:param value="{!enr.Online_Training_Completed_Date__c}" /> 
+                         </apex:outputText>
+                         <apex:outputText rendered="{!OR(enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC',NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c)))}" value="{0, date, yyyy/MM/dd}">
+                           <apex:param value="{!enr.Training_Event__r.End_Date3__c}" /> 
+                         </apex:outputText>
+                         <!--JS 26/03 combined with above<apex:outputText rendered="{!NOT(ISNULL(enr.Original_IRCA_Course_Enrollment__c))}" value="{0, date, yyyy/MM/dd}">
+                           <apex:param value="{!enr.Training_Event__r.End_Date3__c}" /> 
+                         </apex:outputText>      -->                      
+                      </apex:outputpanel>                       
+                  </td>
+                  <!--column 3-->
+                  <td>
+                  <!--if IN/FSSC location shown in row 1, duration row 2 then if JP - show company name-->
+                      <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC')}">
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="主催者:"/>
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="Delivered by:"/>                      
+                      </apex:panelgroup>                                         
+                  </td>
+                  <!--column 4-->
+                  <td>
+                      <apex:panelgroup rendered="{!AND(enr.Translation_Formula__c = 'Japan (Japanese)',enr.Training_Event__r.Course__r.Certified_Course__c = 'FSSC')}">
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'Local'}" value="BSIグループジャパン株式会社"/>
+                          <apex:outputText rendered="{!enr.Certificate_Language__c = 'English'}" value="BSI Group Japan K.K."/>                      
+                      </apex:panelgroup>
+                  </td>
+              </tr>
+               
+              <!-- extra ro pushed the logo down a bit far - need to restrict size<tr>
+              
+              <td>Validation Code:</td>
+              <td>{!LEFT(enr.id,15)}</td>
+              <td></td>
+              <td></td>
+              </tr>-->
+              
+          </table>
+      </td>
+    
+    </tr> 
+    
+    <!-- Probitas validity statement-->
+    <!--outer table ROW 2-->
+    <tr>  
+        <td width ="0.7cm" height="10"></td><td></td><td width ="2cm"></td>   
+    </tr>
+    <!--outer table ROW 3-->
+    <tr>
+        <td></td>
+        <td align="left" valign="middle">            
+            <!--JS removed 20200803<apex:outputText rendered="{!AND(enr.Exam_results__c = 'Pass exam & pass CA',enr.Training_Event__r.Course__r.Certified_Course__c = 'Probitas')}" styleClass="size8" escape="false" value="This course is approved by Probitas Authentication and recognized as meeting the IAQG requirements for AS/EN/JISQ 9100:2016 Lead Auditor training."/>-->
+        </td>
+        <td></td>
+    </tr>
+</table>      
+
+
+
+<!--END SECTION FOR Dates etc-->
+ 
+   
+<table   width="99%"  valign="middle" table-layout="fixed">
+    <tr>
+        <td width="0.8cm"></td>
+        <td>
+            <!--JS added 20200803 for Probitas - Recognized by for pass and other for fail -->
+            <apex:outputText styleClass="probitas" rendered="{!AND(enr.Training_Event__r.Course__r.Certified_Course__c='Probitas', enr.Exam_results__c='Pass exam & pass CA')}" escape="false" value="Recognized by:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"/>           
+            <apex:outputText styleClass="probitas" rendered="{!AND(enr.Training_Event__r.Course__r.Certified_Course__c='Probitas', NOT(enr.Exam_results__c='Pass exam & pass CA'))}" escape="false" value="Certificates of ‘Attendance’ will not be accepted for authentication "/>           
+              
+            <!--PC 20180817 added component for Logo -->
+            <c:Logo enrollment="{!enr}"/>
+            <!-- QR code test <apex:image styleClass="logo" height="1.2cm"  url="https://dev--c.cs87.content.force.com/servlet/servlet.ImageServer?id=0158E000000yxhD&oid=00D8E0000000ydC"/>               -->
+        </td>
+    </tr>
+</table>
+
+</apex:panelGroup>
+</apex:repeat>
+
+<!-- this sets out the office address in the footer at the bottom of the page -->
+<table   width="99%" align="left" valign="middle" table-layout="fixed">
+    <tr>
+        <td width="0.8cm"></td>
+        <td valign="bottom">
+            <apex:panelGroup styleClass="footer">
+            {!Training_Event__c.Course__r.Training_Translations__r.Royal_Charter__c}<br/><br/><br/>
+            {!Training_Event__c.Course__r.Training_Translations__r.Office_Address__c}
+            </apex:panelGroup>
+        </td>     
+    </tr> 
+</table>
+
+</body> 
+
+</apex:page>

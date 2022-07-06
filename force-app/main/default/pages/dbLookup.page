@@ -1,0 +1,85 @@
+<apex:page standardController="Account" extensions="emq_DBLookupController">
+	<apex:form >
+		<apex:sectionHeader title="Account" subtitle="D&B LookUp" rendered="{!!ShowCreate}" />
+		<apex:sectionHeader title="Company Search" subtitle="D&B LookUp" rendered="{!ShowCreate}" />
+		<apex:pageMessages escape="false" />
+        <apex:outputPanel id="search">
+        	<table>
+        		<tr>
+        			<td style="vertical-align: middle;"><apex:outputLabel value="Company Name:" /></td>
+        			<td><apex:inputText value="{!CompanyName}" /></td>
+        			<td style="vertical-align: middle;"><apex:outputLabel value="City:" /></td>
+        			<td><apex:inputText value="{!City}" /></td>
+        			<td style="vertical-align: middle;"><apex:outputLabel value="DUNS Number:" /></td>
+        			<td><apex:inputText value="{!DUNSNumber}" /></td>
+        			<td style="vertical-align: middle;"><apex:outputLabel value="Country Code:" /></td>
+        			<td>
+        				<apex:selectList value="{!CountryCode}" size="1" style="width:175px">
+			        		<apex:actionSupport event="onchange" reRender="StateWrapper" />
+			        		<apex:selectOptions value="{!CountryList}"></apex:selectOptions>
+			        	</apex:selectList>
+        			</td>
+        		</tr>
+        		<tr>
+        			<td style="vertical-align: middle;"><apex:outputLabel value="State:" /> </td>
+        			<td>
+        				<apex:outputPanel id="StateWrapper">
+			        		<apex:selectList value="{!State}" size="1" style="width:175px" rendered="{!StateSelectOrInput}">
+				        		<apex:selectOptions value="{!StateList}"></apex:selectOptions>
+				        	</apex:selectList>
+				        	<apex:inputText value="{!State}" rendered="{!!StateSelectOrInput}" />
+						</apex:outputPanel>
+        			</td>
+        			<td><apex:CommandButton action="{!Filter}" value="Filter Results" /></td>
+        			<td colspan="5"><label style="float:right;padding-top:8px;"><strong>Branch:</strong> B: Branch, N: Not a branch, H: Headquarters, S: Single Location </label></td>
+        		</tr>
+        	</table>            
+        </apex:outputPanel><br/>
+		<apex:pageBlock >
+			<apex:PageBlockButtons >
+                <apex:CommandButton action="{!UpdateDuns}" value="Update DUNS Number" rendered="{!!ShowCreate}" />
+                <apex:CommandButton action="{!UpdateAddress}" value="Update Name/Address" rendered="{!!ShowCreate}"/>
+                <apex:CommandButton action="{!CreateAccount}" value="Create New Account" rendered="{!ShowCreate}"/>
+                <apex:CommandButton action="{!Cancel}" value="Cancel" immediate="true" rendered="{!!ShowCreate}"/>
+            </apex:PageBlockButtons>
+			<apex:outputPanel id="list">
+				<apex:inputHidden id="HiddenSelection" value="{!SelectedDuns}"/>
+				<apex:pageBlockTable value="{!LookupResults}"
+					var="result">
+					<apex:column headerClass="actionColumn">
+						<apex:facet name="header">&nbsp;</apex:facet>
+						<input type="radio" name="duns" style="padding: 0; margin: 0;"
+							onclick="setDuns(this)" value="{!result.DUNS_NBR}" />
+					</apex:column>
+					<apex:column headerValue="Name" value="{!result.NME}" />
+					<apex:column headerValue="Address" value="{!result.ADR_LINE}" />
+					<apex:column headerValue="City" value="{!result.NON_POST_TOWN}" />
+					<apex:column headerValue="Post Code" value="{!result.POST_CODE}" />
+					<apex:column headerValue="DUNS Number" value="{!result.DUNS_NBR}" />
+					<apex:column headerValue="Telephone Number" value="{!result.TLCM_NBR}" />
+					<apex:column headerValue="Branch" value="{!result.BR_IND}" style="text-align:center" />
+					<apex:column headerValue="Confidence Score" value="{!result.CONF_CD}" style="text-align:center" />
+				</apex:pageBlockTable>
+				<script>
+					// Remember the hidden field that contains the Duns
+					var hiddenSelection = document
+							.getElementById("{!$Component.HiddenSelection}");
+
+					// If a Duns has already been selected, set the appropriate radio button to checked
+					var inputElem = document.getElementsByTagName("input");
+					for (var i = 0; i < inputElem.length; i++) {
+						if (inputElem[i].name == 'duns'
+								&& inputElem[i].value == hiddenSelection.value)
+							inputElem[i].checked = true;
+					}
+
+					// Set the hidden field whenever a radio button is clicked
+					function setDuns(radioBtn) {
+						if (radioBtn.checked)
+							hiddenSelection.value = radioBtn.value;
+					}
+				</script>
+			</apex:outputPanel>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

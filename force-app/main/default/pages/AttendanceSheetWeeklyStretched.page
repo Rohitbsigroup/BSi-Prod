@@ -1,0 +1,506 @@
+<apex:page renderas="pdf" controller="AttendanceRegisterController"  showheader="false" pagestyle="all" language="{!IF(OR(trainingEvent.Event_Country__c = 'NL',trainingEvent.Event_Country__c = 'SE'),trainingEvent.Course__r.Training_Translations__r.Language__c, trainingEvent.Training_Venue__r.Training_Office__r.Training_Translations__r.Language__c)}">
+    <head>
+        <style type="pdf" media="print">
+            body {
+                font-family: Arial Unicode MS;
+                font-size: 10pt;
+            }
+
+            @page {
+                @top-left-corner {
+                    content: element(header);
+                }
+
+                size: A4 landscape;
+                margin-top: 6cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                margin-bottom: 1.9cm;
+
+                @bottom-left {
+                    content: element(footer);
+                }
+
+                @bottom-right {
+                    color: #A9A9A9;
+                    font-size: 10pt;
+                    font-family: Arial Unicode MS;
+                    content: "Page " counter(page) " of " counter(pages);
+                }
+            }
+
+            table {
+                -fs-table-paginate: paginate;
+            }
+
+            .table {
+                font-size: 10pt;
+            }
+
+            .table th, .table td {
+                border: 1px solid #333333;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            div.footer {
+                display: block;
+                padding: 0px;
+                position: running(footer);
+                line-height: 10px;
+                color: #A9A9A9;
+            }
+
+            div.header {
+                display: block;
+                position: running(header);
+            }
+        </style>
+    </head>
+
+    <apex:variable var="dtmFormat" value="dd/MM/yyyy"/>
+    <apex:variable var="dtmFormatKR" value="yyyy.MM.dd"/>
+    <apex:variable var="dtmFormatText0" value="{0,date,{!dtmFormat}}"/>
+    <apex:variable var="dtmFormatText1" value="{1,date,{!dtmFormat}}"/>
+    <apex:variable var="dtmFormatText0KR" value="{0,date,{!dtmFormatKR}}"/>
+    <apex:variable var="dtmFormatText1KR" value="{1,date,{!dtmFormatKR}}"/>
+
+    <apex:outputPanel rendered="{!trainingEvent.Event_Country__c!='KR'}">
+        <!--NOT KR-------------------------------------------------------------------->
+        <div class="header">
+            <table table-layout="fixed">
+                <tr>
+                    <td width="1.1cm"/>
+                    <td><img src="{!URLFOR($Resource.BSI_Letter_New_Brand_Header_Landscape)}" width="25.9cm" height="1.85cm" /></td>
+                    <td width="1.1cm"/>
+                </tr>
+
+                <table align="left" width="28.5cm" valign="top" style="top: 0cm; line-height: 14pt;padding: 10px;">
+                    <tr>
+                        <td width=".9cm"/>
+                        <td width="85%" style="font-size: 14pt; text-align: center;">
+                            <apex:outputText escape="false" value="{!trainingEvent.Course_Name_for_Certificate__c}"/>
+                        </td>
+                        <td width=".9cm"/>
+                    </tr>
+                </table>
+
+                <table align="left" width="100%" valign="top" style="top: 0cm; line-height: 12pt;padding: 5px;">
+                    <tr>
+                        <td width="1.5cm"/>
+
+                        <!-- Date(s) -->
+                        <td width="1.4cm" valign="top" align="left">
+                            <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.Date_s__c}:" />
+                        </td>
+
+                        <td valign="top" align="left">
+                        <!-- non-split date not JP -->
+                            <apex:outputPanel rendered="{!AND(NOT(trainingEvent.Split_Date_Event__c), trainingEvent.Event_Country__c != 'JP')}">                            
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c <= 1}" value="{!dtmFormatText0}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c > 1}" value="{!dtmFormatText0} - {!dtmFormatText1}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>
+                        <!-- non-split date JP -->
+                            <apex:outputPanel rendered="{!AND(NOT(trainingEvent.Split_Date_Event__c), trainingEvent.Event_Country__c = 'JP')}">
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c <= 1}" value="{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c > 1}" value="{!dtmFormatText0KR} - {!dtmFormatText1KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>
+                            
+
+                            <!-- split date NOT JP -->
+                            <apex:outputPanel rendered="{!AND(trainingEvent.Split_Date_Event__c, trainingEvent.Event_Country__c != 'JP')}">
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_date__c))}" value="{!dtmFormatText0}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!AND(NOT(ISBLANK(trainingEvent.End_Date_of_Section_1__c)),trainingEvent.Start_date__c!=trainingEvent.End_Date_of_Section_1__c)}" value=" - {!dtmFormatText0}">
+                                    <apex:param value="{!trainingEvent.End_Date_of_Section_1__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_Date_of_Section_2__c))}" escape="false" value=",<br/>{!dtmFormatText0}">
+                                    <apex:param value="{!trainingEvent.Start_Date_of_Section_2__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!trainingEvent.Start_Date_of_Section_2__c!=trainingEvent.End_Date3__c}" value=" - {!dtmFormatText0}">
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>
+                            <!-- split date JP-->
+                            <apex:outputPanel rendered="{!AND(trainingEvent.Split_Date_Event__c, trainingEvent.Event_Country__c = 'JP')}">
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_date__c))}" value="{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+    
+                                <apex:outputText rendered="{!AND(NOT(ISBLANK(trainingEvent.End_Date_of_Section_1__c)),trainingEvent.Start_date__c!=trainingEvent.End_Date_of_Section_1__c)}" value=" - {!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.End_Date_of_Section_1__c}"/>
+                                </apex:outputText>
+    
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_Date_of_Section_2__c))}" escape="false" value=",<br/>{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_Date_of_Section_2__c}"/>
+                                </apex:outputText>
+    
+                                <apex:outputText rendered="{!trainingEvent.Start_Date_of_Section_2__c!=trainingEvent.End_Date3__c}" value=" - {!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>                                                                               
+                         </td>
+
+                        <!-- Venue -->
+                        <td width="3cm" valign="top" align="left">
+                            <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.Location__c}:"/>
+                        </td>
+                        <td valign="top" align="left">
+                            <apex:outputText escape="false" value=" {!trainingEvent.Training_Venue__r.Name}"/>
+                        </td>
+
+                        <!-- Time -->
+                        <td width="1cm" valign="top" align="left">
+                            <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.Time__c}:"/>
+                        </td>
+                        <td valign="top" align="left">
+                            <apex:outputPanel rendered="{!NOT(trainingEvent.Training_Venue__r.Venue_Country__c = 'Singapore')}">
+                                &nbsp; ________ &nbsp; <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.To__c}"/> ________
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!trainingEvent.Training_Venue__r.Venue_Country__c = 'Singapore'}">
+                                &nbsp; 9:00am &nbsp; <apex:outputText value="{!trainingEvent.Training_Venue__r.Training_Office__r.Training_Translations__r.To__c}"/> 5:30pm 
+                            </apex:outputPanel>
+                        </td>
+
+                        <!-- Instructor -->
+                        <td valign="top" align="left">
+                            <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.Instructor__c}:"/>&nbsp;&nbsp;
+                            <apex:outputText escape="false" value=" {!trainingEvent.Trainer__r.Name}"/>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- addition of attendance register guide text 24022020 RK/JS edit adding rendered 20200227-->
+                <apex:outputPanel rendered="{!NOT(ISBLANK(trainingEvent.Course__r.Training_Translations__r.Attendance_Register_Guide__c))}" > 
+                <table align="left" width="28.5cm" valign="top" style="top: 0cm; line-height: 12pt;padding: 5px;">
+                    <tr>
+                        <td width=".9cm"/>
+                        <td width="85%" style="font-size: 10pt; text-align: center;">
+                        <span style="color:red; font-weight: bold">
+
+                            <apex:outputText escape="false" value="{!trainingEvent.Course__r.Training_Translations__r.Attendance_Register_Guide__c}"/> 
+                            </span>
+
+                        </td>
+                        <td width=".9cm"/>
+                    </tr>
+                </table>
+                </apex:outputPanel>
+            </table>
+        </div>
+
+
+
+        <!---------------------------------------------------------------------->
+        <div class="footer">
+            <table width="40%" align="left" valign="middle" table-layout="fixed">
+                <tr>
+                    <td width="0.1cm"></td>
+                    <td><apex:outputField value="{!trainingEvent.Name}"/></td>
+                    <td><apex:outputField value="{!trainingEvent.SAP_SMO_number__c}"/></td>
+                </tr>
+            </table>
+        </div>
+
+
+        <!---------------------------------------------------------------------->
+        <body>
+
+            <apex:variable var="currentPage" value="{!1}"/>
+            <apex:repeat value="{!pageDateList}" var="pageDates">
+                <div style="{!IF(currentPage>1,'page-break-before:always','')}">
+                    <table align="center" cellpadding="4" cellspacing="0" class="table" width="{!IF(pageDates.size=1,'40',IF(pageDates.size=2,'55',IF(pageDates.size=3,'70',IF(pageDates.size=4,'85','100'))))}%">
+                        <thead>
+                            <tr>
+                                <th width=".8cm">No. </th>
+                                <th width="4cm">{!$ObjectType.Contact.fields.Name.Label}</th>
+
+                                <!--- MD 20190130 Account column for JP CN and MY and SG only --->
+                                <th style="{!IF(OR(trainingEvent.Event_Country__c='CN',trainingEvent.Event_Country__c='JP',trainingEvent.Event_Country__c='MY',trainingEvent.Event_Country__c='SG'),'width:4cm;','display:none;')}">
+                                    <apex:outputText rendered="true">
+                                        Company Name
+                                    </apex:outputText>
+                                </th>
+                                <th style="{!trainingEvent.Event_Country__c='JP'}">
+                                    <apex:outputText rendered="true">
+                                        Job Title
+                                    </apex:outputText>
+                                </th>
+                        
+                                <apex:repeat value="{!pageDates}" var="pageDate">
+                                    <th>
+                                        <apex:outputText rendered="{!trainingEvent.Event_Country__c != 'JP'}" value="{!dtmFormatText0}">
+                                            <apex:param value="{!pageDate}"/>
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!trainingEvent.Event_Country__c = 'JP'}" value="{!dtmFormatText0KR}">
+                                            <apex:param value="{!pageDate}"/>
+                                        </apex:outputText>                                        
+                                    </th>
+                                </apex:repeat>
+                                <!--- MD 20190108 Add an extra column for China --->
+                                <th style="{!IF(trainingEvent.Event_Country__c='CN','width:5cm;','display:none;')}">
+                                    <apex:outputText rendered="{!trainingEvent.Event_Country__c='CN'}">
+                                        发票签收
+                                    </apex:outputText>
+                                </th>
+                            </tr>
+                        </thead>
+                    
+                        <apex:variable var="cnt" value="{!1}" />
+                        <apex:repeat value="{!enrollmentList}" var="e">
+                            <tbody>
+                                <tr>
+                                    <td height="1.15cm" width=".8cm">
+                                        <apex:outputText value="{0, number,###}">
+                                            <apex:param value="{!cnt}"/>
+                                        </apex:outputText>
+                                    </td>
+
+                                    <td style="font-size:8pt;">
+                                        <apex:outputText rendered="{!NOT(AND(ISBLANK(e.Delegate_Name__r.FirstNameLocal),ISBLANK(e.Delegate_Name__r.LastNameLocal)))}">
+                                            {!e.Delegate_Name__r.FirstNameLocal} {!e.Delegate_Name__r.LastNameLocal}
+                                        </apex:outputText>
+                                        <apex:outputText >
+                                            <br/>
+                                            {!e.Delegate_Name__r.Name}
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!trainingEvent.RecordType.Name = $Label.Global_Training_Event_Combined_Master}">
+                                            <br/>
+                                            {!e.Training_Event__r.Course_Name_for_Certificate__c}
+                                        </apex:outputText>
+                                    </td>
+
+                                    <!--- MD 20190130 Account column for JP CN and MY and SG only --->
+                                    <td style="{!IF(OR(trainingEvent.Event_Country__c='CN',trainingEvent.Event_Country__c='JP',trainingEvent.Event_Country__c='MY',trainingEvent.Event_Country__c='SG'),'width:4cm;','display:none;')}">
+                                        <apex:outputText rendered="true">
+                                            {!IF(ISBLANK(e.Delegate_Name__r.Account.NameLocal),e.Delegate_Name__r.Account.Name,e.Delegate_Name__r.Account.NameLocal)}
+                                        </apex:outputText>
+                                    </td>
+                                    <td style="{!trainingEvent.Event_Country__c='JP'}">
+                                        <apex:outputText rendered="true">
+                                            {!e.Delegate_Name__r.Title}
+                                        </apex:outputText>
+                                    </td>
+                        
+
+                                    <apex:repeat value="{!pageDates}" var="pageDate">
+                                        <td></td>
+                                    </apex:repeat>
+                                    <!--- MD 20190108 Add an extra column for China --->
+                                    <td style="{!IF(trainingEvent.Event_Country__c='CN','width:4cm;','display:none;')}"></td>
+
+                                </tr>
+                            </tbody>
+                            <apex:variable var="cnt" value="{!cnt + 1}" />
+                        </apex:repeat>
+                    </table>
+                </div>
+                <apex:variable var="currentPage" value="{!currentPage + 1}" />
+            </apex:repeat>
+
+        </body>
+    </apex:outputPanel>
+
+
+
+
+
+    <!-- korea layout -->
+    <apex:outputPanel rendered="{!trainingEvent.Event_Country__c='KR'}">
+        <!---------------------------------------------------------------------->
+        <div class="header">
+            <table table-layout="fixed">
+                <tr>
+                    <td width="28.5cm" align="center">
+                        <!--<img src="{!URLFOR($Resource.BSI_Letter_New_Brand_Header_Landscape)}" width="25.9cm" height="1.85cm" />-->
+                        <span style="font-size:30pt;">출 석 부</span>
+                    </td>
+                </tr>
+
+                <!--
+                <table align="left" width="28.5cm" valign="top" style="top: 0cm; line-height: 12pt;padding: 10px;">
+                    <tr>
+                        <td width=".9cm"/>
+                        <td style="font-size: 14pt; text-align: center;">
+                            <apex:outputText escape="false" value="{!trainingEvent.Course_Name_for_Certificate__c}"/>
+                        </td>
+                        <td width=".9cm"/>
+                    </tr>
+                </table>
+                -->
+
+                <table align="left" width="28.5cm" valign="top" style="top:0cm; line-height:12pt; padding:5px;">
+                    <tr>
+                        <td width=".9cm"/>
+
+                        <td align="left" valign="top">
+                            <span style="margin-right:10px;">훈련기관명:</span> BSI KOREA
+                        </td>
+
+                        <!-- Course Name, Instructor -->
+                        <td align="left" valign="top">
+                            <span style="margin-right:10px;">훈련과정명:</span> <apex:outputText value="{!trainingEvent.Course_Name_for_Certificate__c}"/><br/>
+                            <span style="margin-right:10px;">강사:</span> <apex:outputText value="{!trainingEvent.Course__r.Training_Translations__r.Instructor__c}"/>
+                        </td>
+
+                        <!-- Date(s) -->
+                        <td width="1.4cm" align="left" valign="top">
+                            <span style="margin-right:10px;">훈련기간:</span>
+                        </td>
+
+                        <td valign="top" align="left">
+                            <!-- non-split date -->
+                            <apex:outputPanel rendered="{!NOT(trainingEvent.Split_Date_Event__c)}">
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c <= 1}" value="{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!trainingEvent.Course_Duration_Days__c > 1}" value="{!dtmFormatText0KR} - {!dtmFormatText1KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>
+
+                            <!-- split date -->
+                            <apex:outputPanel rendered="{!trainingEvent.Split_Date_Event__c}">
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_date__c))}" value="{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_date__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!AND(NOT(ISBLANK(trainingEvent.End_Date_of_Section_1__c)),trainingEvent.Start_date__c!=trainingEvent.End_Date_of_Section_1__c)}" value=" - {!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.End_Date_of_Section_1__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!NOT(ISBLANK(trainingEvent.Start_Date_of_Section_2__c))}" escape="false" value=",<br/>{!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.Start_Date_of_Section_2__c}"/>
+                                </apex:outputText>
+
+                                <apex:outputText rendered="{!trainingEvent.Start_Date_of_Section_2__c!=trainingEvent.End_Date3__c}" value=" - {!dtmFormatText0KR}">
+                                    <apex:param value="{!trainingEvent.End_Date3__c}"/>
+                                </apex:outputText>
+                            </apex:outputPanel>
+                        </td>
+
+                    </tr>
+                </table>
+                 <!-- addition of attendance register guide text 24022020 -->
+                 <apex:outputPanel rendered="{!NOT(ISBLANK(trainingEvent.Course__r.Training_Translations__r.Attendance_Register_Guide__c))}" > 
+                                                <table align="left" width="28.5cm" valign="top" style="top:0cm; line-height: 12pt;padding: 5px;">
+                    <tr>
+                        <td width=".9cm"/>
+                        <td width="85%" style="font-size: 10pt; text-align: center;">
+                        <span style="color:red; font-weight: bold">
+                            <apex:outputText escape="false" value="{!trainingEvent.Course__r.Training_Translations__r.Attendance_Register_Guide__c}"/>
+                            </span>
+
+                        </td>
+                        <td width=".9cm"/>
+                    </tr>
+                </table>
+                  </apex:outputPanel>
+            </table>
+        </div>
+
+
+        <!---------------------------------------------------------------------->
+        <div class="footer">
+            <table width="40%" align="left" valign="middle" table-layout="fixed">
+                <tr>
+                    <td width="0.1cm"></td>
+                    <td><apex:outputField value="{!trainingEvent.Name}"/></td>
+                    <td><apex:outputField value="{!trainingEvent.SAP_SMO_number__c}"/></td>
+                </tr>
+            </table>
+        </div>
+
+
+        <!---------------------------------------------------------------------->
+        <body>
+
+            <apex:variable var="currentPage" value="{!1}"/>
+            <apex:repeat value="{!pageDateListKR}" var="pageDatesKR">
+                <div style="{!IF(currentPage>1,'page-break-before:always','')}">
+                    <table align="center" cellpadding="4" cellspacing="0" class="table" width="{!IF(pageDatesKR.size=1,'60','100')}%">
+                        <thead>
+                            <tr>
+                                <th width=".8cm" rowspan="3">연번</th>
+                                <th width="4cm" rowspan="3">성명</th>
+                        
+                                <apex:repeat value="{!pageDatesKR}" var="pageDateKR">
+                                    <th colspan="2">
+                                        <apex:outputText value="{!dtmFormatText0KR}">
+                                            <apex:param value="{!pageDateKR}"/>
+                                        </apex:outputText>
+                                    </th>
+                                    <th rowspan="3">지각</th>
+                                    <th rowspan="3">조퇴</th>
+                                    <th rowspan="3">외출</th>
+                                    <th rowspan="3">최종확인<br/>(훈련생)</th>
+                                </apex:repeat>
+                            </tr>
+                            <tr>
+                                <apex:repeat value="{!pageDatesKR}" var="pageDateKR">
+                                    <td colspan="2">기관장결제:</td>
+                                </apex:repeat>
+                            </tr>
+                            <tr>
+                                <apex:repeat value="{!pageDatesKR}" var="pageDateKR">
+                                    <td>시작</td>
+                                    <td>종료</td>
+                                </apex:repeat>
+                            </tr>
+                        </thead>
+                    
+                        <apex:variable var="cnt" value="{!1}" />
+                        <apex:repeat value="{!enrollmentList}" var="e">
+                            <tbody>
+                                <tr>
+                                    <td height="1.15cm" width=".8cm">
+                                        <apex:outputText value="{0, number,###}">
+                                            <apex:param value="{!cnt}"/>
+                                        </apex:outputText>
+                                    </td>
+
+                                    <td style="font-size:8pt;">
+                                        <apex:outputText rendered="{!trainingEvent.RecordType.Name = $Label.Global_Training_Event_Combined_Master}">
+                                            {!e.Delegate_Name_Characters__c}<br/>
+                                            {!e.Training_Event__r.Course_Name_for_Certificate__c}
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!NOT(trainingEvent.RecordType.Name = $Label.Global_Training_Event_Combined_Master)}">
+                                            {!e.Delegate_Name_Characters__c}
+                                        </apex:outputText>
+                                    </td>
+
+                                    <apex:repeat value="{!pageDatesKR}" var="pageDateKR">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </apex:repeat>
+                                </tr>
+                            </tbody>
+                            <apex:variable var="cnt" value="{!cnt + 1}" />
+                        </apex:repeat>
+                    </table>
+                </div>
+                <apex:variable var="currentPage" value="{!currentPage + 1}" />
+            </apex:repeat>
+
+        </body>
+    </apex:outputPanel>
+</apex:page>

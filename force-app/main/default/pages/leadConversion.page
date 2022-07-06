@@ -1,0 +1,261 @@
+<apex:page standardcontroller="Lead" extensions="LeadConversionController" tabstyle="Lead">
+<apex:sectionHeader subtitle="Lead Conversion" title="All the Sites will be linked to the new/old Account"/>	
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.header {
+			position: absolute; 
+			margin-top: 8px;
+			margin-left: 20px;
+			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
+			color: white;
+		}
+		.smallheader {
+			position: absolute; 
+			margin-top: 5px;
+			margin-left: 20px;
+			font-size: 12px;
+			font-weight: bold;
+			text-align: center;
+			color: black;
+		}
+		.text {
+			font-family: "Courier",Times,serif;
+			font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.required {
+			color: #A23233;
+		}
+		.clip{
+			position: absolute;
+			margin-top:-17px;
+			margin-left: 80%;
+		}
+		.dealHeader {
+			background-image: url('{!URLFOR($Resource.coolhover,'coolhover/calendarbar.png')}');
+			background-repeat: repeat-x;
+			padding: 8px;
+			height: 50px;
+			color: black;
+			font-weight: bold;
+			font-size: 14px;
+		}
+		.hoverDiv {
+			display: none;
+			width: 300px;
+			position: absolute;
+			margin-top: -90px;
+			margin-left: 500px;
+    		padding: 25px 15px 15px 15px;
+    		
+			z-index:999;
+		}
+		.dealBottom {
+			background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-bottom-trsp.png')}');
+			background-repeat: repeat-x;
+			height: 20px;
+		}
+		.viewAcc {}
+		.viewCon {}
+		.viewOpp {}
+	</style>
+	
+	<apex:includeScript value="{!$Resource.jquery}"/>
+	
+	<apex:actionStatus id="status">
+    	<apex:facet name="start">
+	        <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+		</apex:facet>
+  	</apex:actionStatus>
+	
+	<apex:pageMessages />
+		
+	<apex:form id="theForm">
+	
+	<!-- SCRIPT FOR HIDING-SHOWING HOVERS -->
+	<script type="text/javascript">
+		$(document).ready(function(){          	
+			$('.hoverDiv').hide(); 
+			$(".viewOpp").hover(
+		      function(){
+		      	$("#oppHoverDiv").fadeIn("200");
+		      },
+		      function(){
+		      	$("#oppHoverDiv").fadeOut("300");
+		      }
+			);
+		});
+	</script>
+	
+	<apex:actionFunction name="rAcc" action="{!viewAccount}" reRender="theForm" status="status"/>	
+	<apex:actionFunction name="rCon" action="{!viewContact}" reRender="theForm" status="status"/>
+		
+	<apex:pageBlock id="theBlock" mode="edit" title="Lead Conversion">
+		<apex:pageBlockButtons location="top">
+			<apex:commandButton action="{!convertLead}" value="Convert" disabled="{!!showConvert}"/>
+        	<apex:commandButton action="{!back}" value="{!$Label.Cancel}"/>
+        	<apex:outputText rendered="{!Lead.RecordType.DeveloperName!='Training_Leads'}" value="{!Lead.Readiness__c}" escape="false" style="float:right"/>
+        	<apex:outputText rendered="{!Lead.RecordType.DeveloperName='Training_Leads'}" value="{!Lead.Readiness_Training__c}" escape="false" style="float:right"/>
+		</apex:pageBlockButtons>
+		<apex:outputpanel rendered="{!ISBLANK(Lead.Territory__c)}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="No Territory has been found for Country: {!Lead.Country}. You can not convert the Lead: contact your Administrator." style="font-weight:bold;color:white;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+<!-- 		
+		<apex:outputpanel rendered="{!IF(ISBLANK(Lead.Territory__r.AssignedTo__c) && NOT(ISBLANK(Lead.Territory__c)),true,false)}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="Postcode not found in any Territory: please check your Postcode format." style="font-weight:bold;color:white"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+ -->		
+		<apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#F9EAD5" rendered="{!showConvert}">
+           	<apex:outputPanel >
+            <apex:image value="{!$Resource.icon_lead}" height="25"/>
+            <apex:outputText value="Lead Info" styleclass="smallheader" />
+        	</apex:outputPanel>  	
+        </apex:panelGrid>
+		<apex:pageBlockSection rendered="{!showConvert}">
+			<apex:repeat value="{!$ObjectType.Lead.FieldSets.LeadConversion}" var="field">
+			<apex:outputField value="{!Lead[field]}"/>
+			</apex:repeat>
+		</apex:pageBlockSection>
+		<br/>
+		<br/>
+		<apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#F9EAD5" rendered="{!showConvert}">
+           	<apex:outputPanel >
+            <apex:image value="{!$Resource.icon_convert}" height="25"/>
+            <apex:outputText value="Convert To..." styleclass="smallheader"/>            
+        	</apex:outputPanel>  	
+        </apex:panelGrid>
+        
+		<!-- OPPORTUNITY HOVER DETAILS -->
+		<div class="hoverDiv" id="oppHoverDiv">
+			<apex:image value="{!$Resource.line_separator}" height="40" styleclass="clip"/>
+			<apex:pageBlock mode="edit">
+				<div class="dealHeader">
+       				<apex:outputText value="Opportunity Defaults"/>
+       			</div>
+				<apex:pageBlockSection columns="1">
+					<apex:outputField value="{!newOpty.CloseDate}" styleclass="text"/>
+					<apex:pageBlockSectionItem >
+						<apex:image value="{!$Resource.icon_person}" width="30"/>
+						<apex:outputField value="{!newOpty.OwnerId}" styleClass="text"/>
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+				<br/>
+			</apex:pageBlock>
+			<div class="dealBottom" style="margin-top:-11px">
+	       	</div>
+		</div>
+        
+        <table width="100%"><tr>
+        <td>
+        <apex:pageBlockSection columns="1" rendered="{!showConvert}">
+        
+        <apex:panelGrid columns="1" cellspacing="5" cellpadding="5" width="100%" bgcolor="#A23233" rendered="{!IF(dupeAccount || dupeContact, true, false)}">
+        <apex:outputText value="Possible duplicates found. Please check picklist values below." style="font-size:14px;font-weiht:bold;color:white"/>
+		</apex:panelGrid>
+			
+			<apex:pageblockSectionItem >
+        		<apex:panelGrid columns="2">
+	        		<apex:image value="{!$Resource.icon_account}" width="30"/>
+			    	<apex:outputLabel value="Account Name" for="accounts" styleclass="required"/>
+		    	</apex:panelGrid>
+		    	<apex:panelGrid columns="1">
+		    		<apex:actionRegion >
+				        <apex:selectList value="{!linkAccId}" size="1" id="accounts" onchange="rAcc();">
+				        	<apex:selectOptions value="{!Accounts}"/>
+				        	<apex:actionSupport event="onchange" rerender="accountOwnerChangePanel" />     
+				    	</apex:selectList>
+			    	</apex:actionRegion>
+<!-- RPJ: Hidden until required 			    	
+					<apex:outputPanel id="accountOwnerChangePanel" rendered="{!linkAccId==''}" >
+			    		<apex:inputCheckbox value="{!takeAccountOwnership}" id="accountOwnerChange" />
+			    		<apex:outputLabel value="{!$Label.TakeAccountOwnership}" for="accountOwnerChange" />
+			    	</apex:outputPanel>
+ -->			    	
+		    	</apex:panelGrid>
+
+        	</apex:pageblockSectionItem>
+
+        	<apex:pageblockSectionItem >
+        		<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_contact}" width="30"/>
+		    	<apex:outputLabel value="Contact Name" for="contacts" styleclass="required"/>
+		    	</apex:panelGrid>
+		    	<apex:panelGrid columns="1">
+		        <apex:selectList value="{!linkConId}" size="1" id="contacts" onchange="rCon();" disabled="{!ISNULL(linkAccId)}">
+		        	<apex:selectOptions value="{!Contacts}"/>        
+		    	</apex:selectList>
+		    	</apex:panelGrid>
+        	</apex:pageblockSectionItem>
+        	<apex:pageBlockSectionItem id="oppConv">
+        		<apex:panelGrid columns="2">
+        		<apex:image value="{!$Resource.icon_opty}" width="30"/>
+		    	<apex:outputLabel value="Create Opportunity" for="opty"/>
+		    	</apex:panelGrid>
+		    	<apex:panelGrid columns="2">		    	
+			    	<apex:inputText id="name" value="{!newOpty.Name}" style="width:250px;" disabled="{!DoNotCreateOpportunity}" >
+			    		<apex:image value="{!$Resource.icon_search}" width="20" styleclass="viewOpp"/>
+			    	</apex:inputText>
+			    	<br />
+			    	<apex:outputPanel >
+				    	<apex:inputCheckbox id="doNotCreateOpportunity" value="{!DoNotCreateOpportunity}" >
+				    		<apex:actionSupport event="onchange" rerender="name" />
+				    	</apex:inputCheckbox>
+						<apex:outputLabel value="{!$Label.DoNotCreateOpportunity}" for="doNotCreateOpportunity" />
+					</apex:outputPanel>	    	
+		    	</apex:panelGrid>
+        	</apex:pageBlockSectionItem>       	
+		</apex:pageBlockSection>
+		</td>
+		<td align="left" width="40%">
+			<apex:include pageName="requiredToConvert" rendered="{!!showConvert}"/>
+			<apex:outputPanel rendered="{!showAccount}">				
+				<apex:pageBlockSection columns="1">
+					<apex:panelGrid columns="1" width="100%" bgcolor="#F9EAD5">
+						<apex:outputPanel >
+						<apex:image value="{!$Resource.icon_account}" height="25"/>
+       					<apex:outputLink value="/{!selAccount.Id}" target="_blank"><apex:outputText value="{!selAccount.Name}" styleclass="smallheader" style="text-decoration:underline;"/></apex:outputLink>
+       					</apex:outputPanel>
+       				</apex:panelGrid>									
+					<apex:outputText value="{!selAccount.TCodeDescr__c}" styleclass="text" rendered="{!!ISNULL(selAccount.TCodeDescr__c)}"/>
+					<apex:pageBlockSectionItem >
+						<apex:image value="{!$Resource.icon_map}" width="30"/>
+						<apex:panelGrid columns="1">
+						<apex:outputText value="{!selAccount.BillingStreet}" styleclass="text"/>
+						<apex:outputText value="{!selAccount.BillingCity} {!selAccount.BillingPostalCode}" styleclass="text"/>
+						<apex:outputText value="{!selAccount.BillingCountry}" styleclass="text"/>
+						</apex:panelGrid>
+					</apex:pageBlockSectionItem>
+					<apex:outputField value="{!selAccount.KeyAccount__c}" rendered="{!selAccount.KeyAccount__c}"/>
+					<apex:outputField value="{!selAccount.ParentId}" styleclass="text" rendered="{!!ISBLANK(selAccount.ParentId)}"/>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			<apex:outputPanel rendered="{!showContact}">				
+				<apex:pageBlockSection columns="1">
+					<apex:panelGrid columns="1" width="100%" bgcolor="#F9EAD5">
+						<apex:outputPanel >
+						<apex:image value="{!$Resource.icon_contact}" height="25"/>
+       					<apex:outputLink value="/{!selContact.Id}" target="_blank"><apex:outputText value="{!selContact.Name}" styleclass="smallheader" style="text-decoration:underline;"/></apex:outputLink>
+       					</apex:outputPanel>
+       				</apex:panelGrid>
+					<apex:outputField value="{!selContact.Phone}" styleClass="text"/>
+					<apex:outputField value="{!selContact.Email}" styleClass="text"/>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+		</td>
+		</tr></table>
+		
+		<br/>
+		<br/>
+	</apex:pageBlock>
+	</apex:form>
+
+</apex:page>

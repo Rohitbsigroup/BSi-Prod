@@ -1,0 +1,17 @@
+<design:component>
+    <design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!userId}"
+                      description="Record Id of current User"/>
+    
+    <design:attribute name="title"
+                      label="Title"
+                      default="My Settings"
+                      description="Title of this Component"/>
+
+    <design:attribute name="fieldList"
+                      label="Fields"
+                      default="FirstName,LastName,Title,Readonly_Membership_Type__c,Readonly_Email__c,Readonly_Username__c,Job_Title__c,Role_Level__c,Functional_Area__c,Country__c,Chapter_Group__c,Phone,Receive_Event_Notifications__c,Receive_Product_Notifications__c,AboutMe,TimeZoneSidKey,LanguageLocaleKey,LocaleSidKey,Address"
+                      description="List of Fields of this object: provided Comma-separated"/>
+
+</design:component>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>25.0</apiVersion>
+    <availableInTouch>true</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Shows a list of delegates for the attendance sheet. Showing in landscape to accommodate dynamic date range, this version centers table and works on count to run different tables.</description>
+    <label>AttendanceSheetWeeklyStretchedXLS</label>
+</ApexPage>

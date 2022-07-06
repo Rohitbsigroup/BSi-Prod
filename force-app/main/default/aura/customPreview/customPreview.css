@@ -1,0 +1,41 @@
+.THIS .body {
+    background: white;
+    width: 100%;
+    
+}
+
+.THIS .materialHeader{
+    border: 1px solid;
+    text-align: center;
+}
+
+.THIS .fileClass{
+    vertical-align: middle;
+    display: inline-flex;
+    text-align: center;
+    margin: 5px;
+    width: 100%;
+    line-height: 55px;
+}
+
+.THIS .videoClass{
+    margin: 5px;
+    width: 100%;
+    display: inline-flex;
+    line-height: 55px;
+}
+
+.THIS .videoClass .iFrameClass{
+    margin: 10px;
+    width: 350px;
+    height: 200px;
+}
+
+.THIS .richtextClass{
+    height: auto;
+    text-align: left;
+    margin: 10px;
+    border: 2px solid #ececec;
+    box-sizing: border-box;
+    padding: 10px;
+}

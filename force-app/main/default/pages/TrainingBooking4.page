@@ -1,0 +1,286 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+            <apex:outputPanel rendered="{!pageShowSelection}">
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                </h2>
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                </h2>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!selectedCountry.portalLogin}"> <!--JS added additional render condition 04/03-->
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingCurrentUser}"/>:&nbsp;
+                    <apex:outputText value="{!portalUser.Username}" rendered="{!isAuthenticated}"/>
+                    <apex:outputText value="{!$Label.TrainingBookingGuestUser}" rendered="{!NOT(isAuthenticated)}"/>
+                </h2>
+            </apex:outputPanel>
+        </apex:define>
+
+        <!-- *** Introduction *** -->
+        <apex:define name="introduction">
+            <p class="intro">{!$Label.TrainingBookingStep4Intro}</p>
+        </apex:define>
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <apex:form id="tb4form">
+                <div class="two-thirds">
+
+                    <!-- Pricing details -->
+                    <fieldset class="form-fields">
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!NOT(objBooking.Number_of_Delegates__c=null)}">
+                            <apex:outputLabel for="NoDelegates" value="{!$ObjectType.TrainingBooking__c.fields.Number_of_Delegates__c.label}"/>
+                            <div class="output-only"><apex:outputField id="NoDelegates" value="{!objBooking.Number_of_Delegates__c}"/></div>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!NOT(objBooking.Delegates_Inc_Accommodation__c=null||objBooking.Delegates_Inc_Accommodation__c=0)}">
+                            <apex:outputLabel for="NoDelegatesInc" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_Inc_Accommodation__c.label}"/>
+                            <div class="output-only"><apex:outputField id="NoDelegatesInc" value="{!objBooking.Delegates_Inc_Accommodation__c}"/></div>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!NOT(objBooking.Delegates_inc_extra_night__c=null||objBooking.Delegates_inc_extra_night__c=0)}">
+                            <apex:outputLabel for="NoDelegatesEN" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_inc_extra_night__c.label}"/>
+                            <div class="output-only"><apex:outputField id="NoDelegatesEN" value="{!objBooking.Delegates_inc_extra_night__c}"/></div>
+                        </apex:outputPanel>
+
+                        <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Start -->
+                        <!-- 07/05/2019 PC section hidden for 'IncludeExam' config flag -->
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!AND(NOT(objBooking.Delegates_inc_exam__c=null||objBooking.Delegates_inc_exam__c=0), NOT(isIncludeExam))}">
+                            <apex:outputLabel for="NoDelegatesIncludingExam" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_inc_exam__c.label}"/>
+                            <div class="output-only"><apex:outputField id="NoDelegatesIncludingExam" value="{!objBooking.Delegates_inc_exam__c}"/></div>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!NOT(objBooking.Delegates_inc_standard__c=null||objBooking.Delegates_inc_standard__c=0)}">
+                            <apex:outputLabel for="NoDelegatesIncludingStandard" value="{!$ObjectType.TrainingBooking__c.fields.Delegates_inc_standard__c.label}"/>
+                            <div class="output-only"><apex:outputField id="NoDelegatesIncludingStandard" value="{!objBooking.Delegates_inc_standard__c}"/></div>
+                        </apex:outputPanel>
+                        <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Finish -->
+
+                        <!-- Price calculation -->
+                        <!-- JE 08/02/2021 - changes to display only total price when the totalInclTaxOnly flag is set -->
+                        <apex:actionRegion >
+                            <apex:outputPanel layout="none" id="pricing">
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('totalInclTaxOnly', selectedCountry.Flags)=0}">
+                                    <apex:outputLabel for="NetPrice" value="{!$ObjectType.TrainingBooking__c.fields.Net_Price__c.label}"/>
+                                    <div class="output-only">
+                                        <apex:outputText id="NetPrice" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!objBooking.Net_Price__c}"/>
+                                        </apex:outputText>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!objBooking.Discount__c>0}">
+                                    <apex:outputLabel for="Discount" value="{!$ObjectType.TrainingBooking__c.fields.Discount__c.label}"/>
+                                    <div class="output-only">
+                                        <apex:outputText id="Discount" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!objBooking.Discount__c}"/>
+                                        </apex:outputText>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!AND(objBooking.Total_Price__c>0,FIND('totalInclTaxOnly', selectedCountry.Flags)=0)}">
+                                    <apex:outputLabel for="Tax" value="{!$ObjectType.TrainingBooking__c.fields.Tax__c.label}"/>
+                                    <div class="output-only">
+                                        <apex:outputText id="Tax" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!objBooking.Tax__c}"/>
+                                        </apex:outputText>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!objBooking.Total_Price__c>0}">
+                                    <apex:outputLabel for="TotalPrice" value="{!$ObjectType.TrainingBooking__c.fields.Total_Price__c.label}"/>
+                                    <div class="output-only">
+                                        <apex:outputText id="TotalPrice" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!objBooking.Total_Price__c}"/>
+                                        </apex:outputText>
+                                    </div>
+                                </apex:outputPanel>
+                                <div class="field-item">
+                                    <apex:outputPanel layout="none">
+                                        <apex:outputLabel for="promo" value="{!$ObjectType.TrainingBooking__c.fields.Promotional_Code__c.label}"/>
+                                        <apex:outputPanel layout="inline" rendered="{!AND(objBooking.Discount__c=0,NOT(promoError))}">
+                                            <apex:inputField id="Promo" value="{!objBooking.Promotional_Code__c}" styleClass="promo"/>
+                                            <apex:commandLink value="{!$Label.TrainingBookingApplyPromo}" action="{!applyPromo}" reRender="pricing" oncomplete="clean()" status="loader" styleClass="promo underline"/>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel layout="inline" rendered="{!objBooking.Discount__c>0}">
+                                            <span class="promo">{!objBooking.Promotional_Code__c}</span>
+                                            <apex:commandLink value="{!$Label.TrainingBookingRemovePromo}" action="{!removePromo}" reRender="pricing" oncomplete="clean()" status="loader" styleClass="promo underline"/>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel layout="inline" rendered="{!promoError}">
+                                            <span class="promo">{!$Label.TrainingBookingPromoInvalid}</span>
+                                            <apex:commandLink value="{!$Label.TrainingBookingResetPromo}" action="{!resetPromo}" reRender="pricing" oncomplete="clean()" status="loader" styleClass="promo underline"/>
+                                        </apex:outputPanel>
+                                        <apex:actionStatus id="loader" layout="inline">
+                                            <apex:facet name="start">
+                                                <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'ajax-loader.gif')}"/>
+                                            </apex:facet>
+                                        </apex:actionStatus>
+                                    </apex:outputPanel>
+                                </div>
+                            </apex:outputPanel>
+                        </apex:actionRegion>
+
+                        <!-- Payment Method  -->
+                        <apex:outputPanel layout="block" styleClass="field-item">
+                            <apex:outputLabel for="PaymentMethod" value="{!$ObjectType.TrainingBooking__c.fields.Payment_Method__c.label}" />
+                            <apex:inputField id="PaymentMethod" value="{!objBooking.Payment_Method__c}" rendered="{!AND(pageAllowCard, pageAllowInvoice)}" required="true" />
+                            <apex:outputPanel layout="block" styleClass="output-only" rendered="{!NOT(AND(pageAllowCard, pageAllowInvoice))}">
+                                <apex:outputField value="{!objBooking.Payment_Method__c}" />
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+
+                        <div class="field-item">
+                            <apex:outputLabel for="PoNumber" value="{!$ObjectType.TrainingBooking__c.fields.PO_Number__c.label}"/>
+                            <apex:inputField id="PoNumber" value="{!objBooking.PO_Number__c}"/>
+                        </div>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedCountry.invoiceOptions.size>0}">
+                            <apex:outputLabel for="InvoiceLanguage" value="{!$ObjectType.TrainingBooking__c.fields.Language_For_Invoice__c.label}"/>
+                            <apex:selectList id="InvoiceLanguage" value="{!objBooking.Language_For_Invoice__c}" size="1">
+                                <apex:selectOptions value="{!selectedCountry.invoiceOptions}" />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                        <apex:actionRegion >
+                            <apex:outputPanel layout="none" id="Sources">
+                                <div class="field-item">
+                                    <!-- 01/11/2017 addded from Global - 15 March Vim added code to make source field mantory for Singapore -->
+                                    <apex:outputPanel rendered="{!FIND('SourceReq', selectedCountry.Flags)>0}">
+                                        <apex:outputLabel for="Source" value="{!$ObjectType.TrainingBooking__c.fields.How_Did_You_hear_About_Us__c.label} *"/>
+                                        <apex:inputField id="Source1" value="{!objBooking.How_Did_You_hear_About_Us__c}" required="true">
+                                            <apex:actionSupport event="onchange" reRender="Sources"/>
+                                         </apex:inputField>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!FIND('SourceReq', selectedCountry.Flags)=0}">
+                                        <apex:outputLabel for="Source" value="{!$ObjectType.TrainingBooking__c.fields.How_Did_You_hear_About_Us__c.label}"/>
+                                        <apex:inputField id="Source" value="{!objBooking.How_Did_You_hear_About_Us__c}">
+                                            <apex:actionSupport event="onchange" reRender="Sources"/>
+                                        </apex:inputField>
+                                    </apex:outputPanel>
+                                </div>
+                                <apex:outputPanel layout="block" rendered="{!objBooking.How_Did_You_hear_About_Us__c='Referral from member of BSI staff'}" styleClass="field-item">
+                                    <apex:outputLabel for="SourceStaff" value="{!$Label.TrainingBookingPleaseSpecify} *"/>
+                                    <apex:inputField id="SourceStaff" value="{!objBooking.Source_BSI_Staff__c}" required="true"/> <!--JS 25/06/2019 Made this field required-->
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" rendered="{!objBooking.How_Did_You_hear_About_Us__c='Other'}" styleClass="field-item">
+                                    <apex:outputLabel for="SourceOther" value="{!$Label.TrainingBookingPleaseSpecify}"/>
+                                    <apex:inputField id="SourceOther" value="{!objBooking.Source_Other__c}"/>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:actionRegion>
+
+                        <!-- User Agreement checkboxes -->
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('koreaFormat', selectedCountry.Flags)>0}">
+                            <apex:outputLabel for="AgreeTermsKR">
+                                <apex:outputLink target="blank" value="{!selectedCountry.bookingTermsUrl}" rendered="{!NOT(selectedCountry.bookingTermsUrl=null)}" styleClass="underline">{!$ObjectType.TrainingBooking__c.fields.Agree_Terms_Conditions__c.label}</apex:outputLink>
+                                <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Agree_Terms_Conditions__c.label}" rendered="{!selectedCountry.bookingTermsUrl=null}"/>
+                                &nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>x
+                            </apex:outputLabel>
+                            <apex:inputField id="AgreeTermsKR" value="{!objBooking.Agree_Terms_Conditions__c}"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('koreaFormat', selectedCountry.Flags)=0}">
+                            <apex:outputLabel for="AgreeTerms">
+                                <apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>&nbsp;
+                                <apex:outputLink target="blank" value="{!selectedCountry.bookingTermsUrl}" rendered="{!NOT(selectedCountry.bookingTermsUrl=null)}" styleClass="underline">{!$ObjectType.TrainingBooking__c.fields.Agree_Terms_Conditions__c.label}</apex:outputLink>
+                                <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Agree_Terms_Conditions__c.label}" rendered="{!selectedCountry.bookingTermsUrl=null}"/>
+                            </apex:outputLabel>
+                            <apex:inputField id="AgreeTerms" value="{!objBooking.Agree_Terms_Conditions__c}"/>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="{!AND(selectedCountry.calculateTax, selectedCountry.calculateTaxMethod='SFDC', CONTAINS(selectedCountry.Flags,'bankTransfer'))}">
+                            <apex:outputLabel for="AgreePayment" value="{!$Label.TrainingBookingAgreementPayment}" />
+                            <apex:inputField id="AgreePayment" value="{!objBooking.Agree_Immediate_Payment__c}" />
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="block" styleClass="field-item" rendered="true">
+                            <apex:outputLabel for="AgreePersonalData" >
+                                <apex:outputText value="{!$Label.TrainingBookingStep4GDPR1}"/>&nbsp;
+                                <apex:outputLink target="blank" value="{!selectedCountry.privacyUrl}" styleClass="underline">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>&nbsp;
+                                <apex:outputText value="{!$Label.TrainingBookingStep4GDPR2}" rendered="{!NOT($Label.TrainingBookingStep4GDPR2="*HIDDEN*")}"/>
+                            </apex:outputLabel>
+                            <apex:inputField id="AgreePersonalData" value="{!objBooking.Agree_Personal_Data_Statement__c}"/>
+                        </apex:outputPanel>
+
+                    </fieldset>
+                    
+                    <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT(selectedCountry.localEntityDetails=null)}">
+                            <apex:outputText value="{!$Label.TrainingBookingTrainingProvidedBy}"/>:&nbsp;
+                            <apex:outputText value="{!selectedCountry.localEntityDetails}"/>
+                    </apex:outputPanel>
+
+                    <div style="float: left; width: auto; margin-top: 15px;">
+                        <!-- PK(NEB) 10 Sep 2018 - Added special attribute to bypass native html5 form field validation -->
+                        <apex:commandButton value="{!$Label.TrainingBookingPreviousButton}" html-formnovalidate="formnovalidate" action="{!backToStep3}" immediate="true"/>
+
+                        <!-- PC K2 20180921 added onclick replacement to prevent multiple clicks 
+                        During first click both action attribute and onclick JS are executed. 
+                        Action is processed and waits for PageReference while button click is replaced by null function.
+                        -->
+                        <!-- PC K2 20181015 added check if form is valid before button is disabled -->
+                        <apex:commandButton id="forwardButton" value="{!$Label.TrainingBookingContinueButton}" action="{!forwardToStep5Or6}" 
+                        onclick="disableAfterValidation()" style="margin-left: 20px;"/>
+                    </div>
+                    <div style="clear:both;"></div>
+                </div>
+
+                <!-- Script to remove the --None-- option from the PaymentMethod dropdown -->
+                <!-- PC K2 20200820 remove 'Bank Transfer' option if Calculate Tax Method is not SFDC -->
+                <script>
+                    function disableAfterValidation(){
+                        if(document.getElementById('{!$Component.tb4form}').checkValidity()){
+                            button = document.getElementById('{!$Component.forwardButton}');
+                            button.onclick = function(){return false;};
+                        }
+                    }
+                    function clean() {
+                        var sel = document.getElementById('{!$Component.PaymentMethod}');
+                        if (sel != null) {
+                            for (var i = 0; i < sel.length; i++) {
+                                if (sel.options[i].value == '') sel.remove(i);
+                                if (sel.options[i].value == 'Bank Transfer' && ('{!selectedCountry.calculateTaxMethod}' != 'SFDC' || '{!FIND("bankTransfer", selectedCountry.Flags)=0}' == 'true')) {
+                                    sel.remove(i);
+                                }
+                            }
+                        }
+                    }
+                    function removeInvoice() {
+                        var inputPaymentMethods = document.getElementById('{!$Component.PaymentMethod}');
+                        for (var i=0; i<inputPaymentMethods.length; i++) {
+                            if(inputPaymentMethods.options[i].value == 'Invoice') {
+                                console.log('check');
+                                inputPaymentMethods.remove(i);
+                            }
+                        }
+                    }
+
+                    document.addEventListener("DOMContentLoaded", function() {
+                        console.log('DOMContentLoaded');
+                        clean();
+                        if('{!FIND("bankTransfer", selectedCountry.Flags)>0}' == 'true') {
+                            removeInvoice();    
+                        }
+                    });
+                </script>
+
+            </apex:form>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep4Notes='')}">
+                <p>{!$Label.TrainingBookingStep4Notes}</p>
+            </apex:outputPanel>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

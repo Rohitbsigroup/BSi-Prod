@@ -1,0 +1,25 @@
+<apex:page contentType="text/plain">
+
+    User-agent: Twitterbot 
+    Disallow:
+     
+    User-agent: * 
+    Disallow: /
+    
+   
+   
+    <!--  SF asked for this to be included
+    User-agent: *    # applies to all robots
+
+    Allow: /secur/frontdoor.jsp?*sid=*
+    Allow: /secur/contentDoor?*sid=*
+    Allow: /secur/myDomainDoor?*sid=*
+    Allow: /secur/LoginInterstitial.apexp
+    Allow: /secur/login_portal.jsp?*pw=*
+    Allow: /sserv/login.jsp?*pw=*
+    Allow: /login.jsp?*pw=*
+    Allow: /login/login.jsp?*pw=*
+    Allow: /secur/login_page.jsp?*pw=*
+    Disallow: /      # disallow indexing of all pages -->
+
+</apex:page>

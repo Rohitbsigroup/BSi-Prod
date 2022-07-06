@@ -1,0 +1,28 @@
+<apex:page standardController="CI_Account__c" extensions="CiWizardController">
+    <apex:form >
+        <apex:sectionHeader title="CI Account" subtitle="Create Sales Copy" />
+        <apex:pageMessages />
+        <apex:pageBlock Title="Step 1 of 3 - Account options">
+            <apex:PageBlockButtons style="text-align: right;">
+                <apex:commandButton action="{!forwardToStep2}" value="Next"/>&nbsp;
+                <apex:commandLink action="{!cancel}" value="Cancel" immediate="true"/>
+            </apex:PageBlockButtons>
+            <div style="margin-bottom: 18px;">
+                <p style="font-weight: bold;">Source CI Account:</p>
+                <p style="margin-left: 10px;"><apex:outputField value="{!sourceAccount.Name}" /></p>
+            </div>
+            <div>
+                <p style="font-weight: bold; margin-bottom: 5px;">Target Account (please select one of the options below):</p>
+                <apex:selectRadio value="{!targetType}" layout="pageDirection" required="true">
+                    <apex:actionSupport event="onclick" action="{!ok}" reRender="accountInput" />
+                    <apex:selectOptions value="{!existingAccounts}" />
+                    <apex:selectOption itemValue="new" itemLabel="Create a brand new Account" />
+                    <apex:selectOption itemValue="old" itemLabel="Select an existing Account" />
+                </apex:selectRadio>
+                <apex:panelGroup id="accountInput" layout="block" style="margin-left: 25px;">
+                    <apex:inputField value="{!tempSite.Account__c}" rendered="{!targetType='old'}" />
+                </apex:panelGroup>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,94 @@
+<apex:page renderAs="PDF" controller="CertificateControllerUniversal" applyBodyTag="false">
+    <head>
+        <style type="text/css">
+            body{font-family: Arial Unicode MS; } <!--font-size: 10pt;-->
+            @page{
+                @bottom-left { 
+                    content: element(footer);
+                }
+                size: A4 landscape;
+                margin-top:.0cm;
+                margin-left:0cm;
+                margin-right:0cm;
+                margin-bottom:0cm;
+            }
+        
+            <apex:panelGroup rendered="{!NOT(translationName = 'China (Chinese)')}">
+                .master-div {
+                    width: 29cm;
+                    height: 197mm;
+                    overflow: hidden;
+                }
+            </apex:panelGroup>
+            <apex:panelGroup rendered="{!translationName = 'China (Chinese)'}">
+                .master-div {
+                    width: 29cm;
+                    height: 191mm;
+                    overflow: hidden;
+                }
+            </apex:panelGroup>
+                
+            .small8 {
+                font-size: 7pt;
+                text-align: left;
+                line-height: 4px;
+            }
+            .size8 {
+                font-size: 8pt;
+                text-align: left;
+            }
+            .size10 {
+                font-size: 10pt;               
+            }
+            .size12 {
+                font-size: 12pt;
+                text-align: left;
+            }
+            .size10 {
+                font-size: 10pt;               
+            }
+            .probitas {
+                font-size: 10pt;
+                vertical-align: top;
+                line-height: 2.5;
+            }
+            .size15 {
+                font-size: 15pt;
+                text-align: left;
+            }
+            .size22 {
+                font-weight: bold;
+                font-size: 22pt;
+                text-align: left;
+                line-height: 34px;
+            }
+            .size28 {
+                font-weight: bold;
+                font-size: 28pt;
+                text-align: left;
+                line-height: 28px;
+            }
+            .size33 {
+                font-weight: bold;
+                font-size: 33pt;
+                text-align: left;
+                line-height: 34px;
+            }
+            .size16tall {
+                font-size: 16pt;
+                text-align: left;
+                line-height: 34px;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <apex:panelGroup rendered="{!showCertificate}">
+            <c:certificateComponent recordId="{!id}" bg="{!showBackground}"/>
+        </apex:panelGroup>
+        
+        <apex:panelGroup rendered="{!NOT(showCertificate)}">
+            <div style="text-align:center;padding-top:9cm;">{!certificateError}</div>
+        </apex:panelGroup>
+    </body>
+</apex:page>

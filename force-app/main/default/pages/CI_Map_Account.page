@@ -1,0 +1,128 @@
+<apex:page controller="CiMappingController" tabStyle="CI_Account__c" standardStylesheets="true" readOnly="true">
+    <style>
+        <!-- Style to hide default value next to date-picker -->
+        span.hideCurrDate span.dateInput span.dateFormat { display:none; }
+    </style>
+    <script>
+        <!-- Stop DatePicker getting initial focus -->
+        function setFocusOnLoad() {}
+    </script>
+    <apex:sectionHeader title="CI Data" subtitle="{!passedName}" />
+    <apex:pageBlock >
+        <div style="margin-bottom: 8px;">
+            <apex:form >
+                <span style="margin-right: 30px;">
+                    <apex:actionRegion id="options">
+                        <apex:outputText >Display:</apex:outputText>
+                        <apex:inputCheckbox id="showSites" value="{!showSites}" style="vertical-align: middle;">
+                            <apex:actionSupport event="onclick" reRender="confirm"/>
+                        </apex:inputCheckbox>
+                        <apex:outputLabel for="showSites">sites</apex:outputLabel>
+                        <apex:inputCheckbox id="showVisits" value="{!showVisits}" style="vertical-align: middle;">
+                            <apex:actionSupport event="onclick" reRender="datesPanel,confirm"/>
+                        </apex:inputCheckbox>
+                        <apex:outputLabel for="showVisits">visits</apex:outputLabel>
+                    </apex:actionRegion>
+                </span>
+                <apex:outputPanel id="datesPanel" layout="inline" styleClass="hideCurrDate" style="margin-right: 30px;">
+                    <apex:outputLabel for="startDate">Dates:</apex:outputLabel>&nbsp;
+                    <apex:inputField id="startDate" value="{!dateStore.Start_Date__c}" />
+                    -&nbsp;
+                    <apex:inputField id="endDate" value="{!dateStore.End_Date__c}" />
+                    <script>document.getElementById('{!$Component.startDate}').disabled = {!AND(NOT(showVisits),NOT(showEvents))}; </script>
+                    <script>document.getElementById('{!$Component.endDate}').disabled = {!AND(NOT(showVisits),NOT(showEvents))}; </script>
+                </apex:outputPanel>
+
+                <!-- Hidden fields are used to pass JavaScript map values back to controller -->
+                <apex:inputHidden id="mapLatFld" value="{!mapLat}" />
+                <apex:inputHidden id="mapLngFld" value="{!mapLng}" />
+                <apex:inputHidden id="mapZoomFld" value="{!mapZoom}" />
+                <script>
+                    <!-- JavaScript variables to store map settings -->
+                    var mapLat;
+                    var mapLng;
+                    var mapZoom;
+                    
+                    <!-- JavaScript function to pass map settings to controller -->
+                    function saveMapSettings()
+                    {
+                        if (mapZoom != null)
+                        {
+                            document.getElementById('{!$Component.mapZoomFld}').value = mapZoom;
+                            document.getElementById('{!$Component.mapLatFld}').value = mapLat;
+                            document.getElementById('{!$Component.mapLngFld}').value = mapLng;
+                        }
+                    }
+                </script>              
+
+                <apex:commandButton id="confirm" value="Go" onclick="saveMapSettings();" action="{!accountBased}" style="width: 70px;" disabled="{!AND(NOT(showSites),NOT(showVisits),NOT(showEvents))}" />
+                <apex:commandButton value="Cancel" action="{!customCancel}" style="width: 70px;" immediate="true"/>
+
+                <apex:outputPanel id="key" layout="block" style="margin-top: 10px; padding: 5px; border: solid 1px #aaa; background-color: white; vertical-align: middle;">
+                    <apex:actionRegion id="categories">
+                        <apex:selectList id="colouring" value="{!categoryName}" size="1" multiselect="false" tabindex="7">
+                            <apex:selectOptions value="{!config.categoryList}" />
+                            <apex:actionSupport event="onchange" action="{!SwitchCategories}" reRender="key" />
+                        </apex:selectList>
+                        <apex:repeat value="{!selectedCategory.valueList}" var="c">
+                            &nbsp;|&nbsp;
+                            <apex:image url="{!URLFOR($Resource.CI_Resources, c.colour + '-dot.png')}" style="height: 16px;" rendered="{!selectedCategory.multipick=FALSE}" />
+                            <apex:inputCheckbox value="{!c.include}" />
+                            <apex:outputText value="{!c.label}" />&nbsp;
+                        </apex:repeat>
+                    </apex:actionRegion>
+                </apex:outputPanel>
+            </apex:form>
+        </div>
+
+        <apex:pageMessages />
+        
+        <apex:outputPanel layout="none" style="margin-bottom: 8px;" rendered="{!hasRecords}">
+            <div id="map_canvas"></div>
+            <script type="text/javascript">
+                function initialize()
+                {
+                    // Create map
+                    var latlngbounds = new google.maps.LatLngBounds( );
+                    var myLatlng = new google.maps.LatLng(0, 0);
+                    var myOptions = {'zoom': 20, 'center': myLatlng, 'mapTypeId': google.maps.MapTypeId.ROADMAP}
+                    var mapComp = document.getElementById("map_canvas");
+                    mapComp.style.width = '100%';
+                    mapComp.style.height = '750px';
+                    var map = new google.maps.Map(mapComp, myOptions);
+
+                    // Repeat a geocoded marker for each site (minimized for performance)
+                    <apex:repeat value="{!sitesList}" var="s">
+var lt='{!s.site.Location__Latitude__s}';var lg='{!s.site.Location__Longitude__s}';var pn=new google.maps.LatLng(lt,lg);map.setCenter(pn);latlngbounds.extend(pn);var mk=new google.maps.Marker({'map':map,'position':pn,zIndex:99,'icon':'{!URLFOR($Resource.CI_Resources,s.colour+"-dot.png")}','title':'{!s.label}','url':'{!URLFOR($Action.CI_Site__c.View,s.site.id)}'});google.maps.event.addListener(mk,'click',function(){window.open(this.url);});</apex:repeat>
+
+                    // Repeat a geocoded marker for each visit (minimized for performance)
+                    <apex:repeat value="{!visitsList}" var="v">
+var lt='{!v.visit.CI_Certificate_Site__r.CI_Site__r.Location__Latitude__s}';var lg='{!v.visit.CI_Certificate_Site__r.CI_Site__r.Location__Longitude__s}';var pn=new google.maps.LatLng(lt,lg);map.setCenter(pn);latlngbounds.extend(pn);var mk=new google.maps.Marker({'map':map,'position':pn,zIndex:{!IF(v.highlight,101,100)},'icon':'{!URLFOR($Resource.CI_Resources,IF(v.highlight,"gold-man.png","silver-man.png"))}','title':'{!v.label}','url':'{!URLFOR($Action.CI_Visit__c.View,v.visit.id)}'});google.maps.event.addListener(mk,'click',function(){window.open(this.url);});</apex:repeat>
+
+                    // Set map bounds if defined
+                    if ('{!mapZoom}' != '0')
+                    {
+                        map.setZoom({!mapZoom});
+                        map.setCenter(new google.maps.LatLng('{!mapLat}', '{!mapLng}'));
+                    }
+                    else
+                    {
+                        // Zoom and center to fit the markers
+                        map.fitBounds(latlngbounds);
+                    }
+
+                    // Listen for changes to map bounds
+                    google.maps.event.addListener(map,'idle', function()
+                    {
+                        var mapCentre = map.getCenter();
+                        mapLat = mapCentre.lat();
+                        mapLng = mapCentre.lng();
+                        mapZoom = map.getZoom();
+                    });
+                }
+            </script>
+            <script src="https://maps.googleapis.com/maps/api/js?client=gme-thebritishstandards&callback=initialize" async="async" defer="defer"></script>
+
+        </apex:outputPanel>
+    </apex:pageBlock>
+</apex:page>

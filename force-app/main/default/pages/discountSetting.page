@@ -1,0 +1,67 @@
+<apex:page controller="DiscountSettingController" sidebar="true">
+	
+	<!--<apex:sectionHeader title="Configure Discounts" subtitle="US discounts"/>-->
+	
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.section {
+			position: absolute; 
+			margin-top: 8px;
+			margin-left: 15px;
+			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
+			color: black;
+		}
+	</style>
+	
+	<apex:form id="theForm" >
+	<apex:pageMessages id="error"/>
+	<apex:pageBlock id="theBlock" mode="edit">
+		<apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+	      	<apex:outputPanel >
+	       	<apex:image value="{!$Resource.icon_setting}" height="30"/>
+	       	<apex:outputText value="US Discount Settings" styleclass="section"/>
+	       	</apex:outputPanel>
+	   	</apex:panelGrid><br/><br/>
+		
+		<apex:pageBlockSection title="Levels">
+		<apex:inputField value="{!score.DiscountLevel1__c}"/>
+		<apex:inputField value="{!score.DiscountLevel3__c}"/>
+		<apex:inputField value="{!score.DiscountLevel2__c}"/>
+		<apex:inputField value="{!score.DiscountLevel4__c}"/>
+		</apex:pageBlockSection>
+		
+		<apex:pageBlockSection title="Approvers">
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="Approver Level 1"/>
+			<apex:inputField value="{!ApproverId11.AssignedTo__c}"/>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="Approver Level 4 (1)"/>
+			<apex:inputField value="{!ApproverId41.AssignedTo__c}"/>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="Approver Level 2"/>
+			<apex:inputField value="{!ApproverId21.AssignedTo__c}"/>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="Approver Level 4 (2)"/>
+			<apex:inputField value="{!ApproverId42.AssignedTo__c}"/>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="Approver Level 3"/>
+			<apex:inputField value="{!ApproverId31.AssignedTo__c}"/>
+		</apex:pageBlockSectionItem>
+
+		</apex:pageBlockSection>
+		
+		<br/><br/>
+		<center>
+			<apex:commandButton action="{!saveAll}" value="Save"/>	
+			<apex:commandButton action="{!cancel}" value="Cancel"/>	
+		</center>
+		<br/><br/>
+	</apex:pageBlock>
+	</apex:form>
+</apex:page>

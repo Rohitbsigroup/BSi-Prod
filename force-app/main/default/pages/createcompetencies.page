@@ -1,0 +1,10 @@
+<apex:page standardController="Personal_Qualification__c" >
+
+  
+    <flow:interview name="Create_Competencies">
+      <apex:param name="PQIDin" value="{!Personal_Qualification__c.Id}"/>
+      <apex:param name="linkedQualID" value="{!Personal_Qualification__c.Qualification__r.Id}"/>                 
+    </flow:interview>
+
+
+</apex:page>

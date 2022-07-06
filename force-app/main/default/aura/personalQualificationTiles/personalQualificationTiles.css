@@ -1,0 +1,56 @@
+.THIS.container {
+    /*border: 1px solid #d8dde6;*/
+    margin: 10px 0 20px 0;
+    text-align: left;
+}
+
+.THIS .body{
+    display: inline-block !important;
+}
+
+.THIS .spanClass{
+    display: inline-flex;
+}
+
+.THIS button{
+    background: #ffffff;
+    margin: 5px;
+    padding: 0;
+    color: #4D4D4D;;
+    width: 260px; /*300*/
+    text-align: left;
+    display: inline-block;
+    height: 100px; /*150*/
+    box-shadow: 0 1px 4px 0 rgba(166, 166, 166, 0.6);
+}
+
+.THIS button:hover{
+    box-shadow: 0 4px 4px 0 rgba(166, 166, 166, 0.6);
+    -webkit-box-shadow: 0 4px 4px -8px rgba(166, 166, 166, 0.6);
+	-moz-box-shadow: 0 4px 4px -8px rgba(166, 166, 166, 0.6);
+}
+
+.THIS .buttonTile{
+    border-top: 8px solid #00A3AD;
+}
+
+.THIS .title{
+    display: inline-flex;
+    font-size: 18px; /*was20*/
+    line-height: 25px; /*was50*/
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: normal;
+    margin-left: 12px;
+    color: #0071ad;
+    height: 60px;/* added*/
+}
+
+.THIS .title .clickedClass{
+    color: #00A3AD;
+}
+
+.THIS .description{
+    display: inline-flex;
+    font-size: 15px;
+}

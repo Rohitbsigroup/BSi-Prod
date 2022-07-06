@@ -1,0 +1,88 @@
+<apex:component controller="findCombinedSurveyResultsReturned" access="global">
+<apex:attribute name="TEId" type="Id" description="Id of the training event" assignTo="{!TrainingEventId_S}"    /> 
+
+
+<head>
+<style type="text/css">
+{
+color:#000000;
+font-family:"Tahoma";
+font-size:11pt;
+font-style:normal;
+
+}
+
+p
+{
+color:#000000;
+font-family:"Tahoma";
+font-size:11pt;
+
+}
+
+</style>
+</head>
+
+<apex:panelGroup rendered="{!If(BlnSurveysReturned=false,true,false)}">
+    <table border = "0" cellspacing="6"  style="text-align:left;padding:0px;font-weight:medium;border:0px;">
+    <br></br><br></br>
+    <tr> 
+                <td>{!TrainingTranslations[0].No_Surveys__c} </td>
+            </tr>
+    </table>
+</apex:panelGroup>
+
+<!--Training Survey results-->
+    <apex:panelGroup rendered="{!If(BlnSurveysReturned=true,true,false)}">
+        <table border = "0"  cellspacing="6"  style="text-align:left;padding:0px;font-weight:medium;border:0px;">
+            <tr>
+                <td>
+                    {!TrainingTranslations[0].Number_of_Surveys__c} &nbsp; {!Summaries[0].SurveysReturned} <br/>
+                </td>
+                <td></td>
+            </tr>
+            <tr><td></td></tr>               
+            <tr> 
+                 <td style="Color:#E52013;font-weight:bold;">{!TrainingTranslations[0].Tutor_Scores__c}:</td>
+                 <td></td>
+            </tr>      
+            <tr> 
+                 <td>{!TrainingTranslations[0].Tutor_Delivery__c}</td>
+                 <td>:&nbsp; {!CombinedSurveyResults[0].DeliveryScore}</td>
+            </tr>
+            <tr> 
+                 <td>{!TrainingTranslations[0].Tutor_competence__c}</td>
+                 <td>:&nbsp; {!CombinedSurveyResults[0].CompetenceScore}</td>
+            </tr>     
+        </table>
+        <table border = "0" cellspacing="6"  style="text-align:left;padding:0px;font-weight:medium;border:0px;">
+                <tr> 
+                    <td style="Color:#E52013;font-weight:bold;">{!TrainingTranslations[0].Event_Scores__c}: </td>
+                    <td></td>
+                </tr>
+                <tr> 
+                    <td>{!TrainingTranslations[0].How_likely_are_you_to_recommend_BSI__c}</td>
+                    <td>:&nbsp; {!CombinedSurveyResults[0].NetPromoterScore}</td>
+                </tr> 
+                <apex:panelGroup rendered="{!If(CombinedSurveyResults[0].TrainingVenueScore>0,true,false)}">
+                <tr> 
+                    <td>{!TrainingTranslations[0].Training_Venue__c}</td>
+                    <td>:&nbsp; {!CombinedSurveyResults[0].TrainingVenueScore}</td>
+                </tr> 
+                </apex:panelGroup>
+                <apex:panelGroup rendered="{!If(CombinedSurveyResults[0].PlatformScore>0,true,false)}">
+                <tr> 
+                    <td>{!TrainingTranslations[0].Platform__c}</td>
+                    <td>:&nbsp; {!CombinedSurveyResults[0].PlatformScore}</td>
+                </tr>
+                </apex:panelGroup>
+                <tr> 
+                    <td >{!TrainingTranslations[0].Course_Overall__c}</td>
+                    <td>:&nbsp; {!CombinedSurveyResults[0].OverallScore}</td>
+                </tr>
+                 
+        </table>
+    </apex:panelGroup>
+
+
+</apex:component>

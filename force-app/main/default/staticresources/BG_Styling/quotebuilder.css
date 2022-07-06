@@ -1,0 +1,39 @@
+.header {
+    position: absolute; 
+    margin-top: 8px;
+    margin-left: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    color: black;
+}
+/*  Standard SFDC CSS Overrides to match PS Wireframes  */
+.bPageBlock {
+	border-top:none !important;
+}
+.pbHeader .pbTitle .mainTitle {
+	margin-left: 20px !important;
+}
+body .btn{
+	background:transparent !important;
+	padding:8px 8px !important;
+}
+.ui-widget{
+    font-family: inherit;
+    font-size: inherit;
+}
+.ui-widget-header{
+	text-align: center;
+}
+.ui-dialog-title{
+	float:none !important;
+}
+.productName{
+	width: 450px;
+    padding: 10px;
+    background-image: url(/img/func_icons/util/search20.gif);
+    background-repeat: no-repeat;
+    background-position: right;
+    background-position-x: -20px;
+    text-indent: 20px;
+}

@@ -1,0 +1,21 @@
+<apex:page language="{!$CurrentPage.parameters.L}" standardstylesheets="false" showheader="false" cache="false" applyBodyTag="false" applyHtmlTag="false" docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <div class="title">
+                <h1 class="title">{!$Label.TrainingBookingErrorTitle}</h1>
+            </div>
+        </apex:define> 
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <p class="intro">
+                <apex:outputText value="{!$Label.TrainingBookingErrorExplanation}"/>&nbsp;
+                <!-- <apex:outputLink target="blank" value="{!selectedCountry.enquiryUrl}" styleClass="underline" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.enquiryUrl=''))}">{!$Label.TrainingBookingEnquiryFormLink}</apex:outputLink>
+                <apex:outputText value="{!$Label.TrainingBookingEnquiryFormLink}" rendered="{!OR(selectedCountry='', selectedCountry.enquiryUrl='')}"/> -->
+            </p>
+        </apex:define>
+
+    </apex:composition> 
+</apex:page>

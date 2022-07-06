@@ -1,0 +1,290 @@
+<apex:page renderAs="pdf" standardController="Personal_Qualification__c" applyBodyTag="false" applyHtmlTag="false"  showHeader="false" lightningStylesheets="">
+<!-- ReviewPDFtranscriptNewDQ_V1 Checked Out NAME DATE -->
+<html>
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 portrait;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;         
+}
+
+.footer {
+        position: fixed;
+        left: 12mm;
+        bottom: 6mm;
+        z-index:+1;
+        font-size: 7pt;
+        line-height: 4px;
+        }
+
+.logo {
+   position: relative;
+   left: 10mm;
+   bottom: -3mm;
+   z-index:+3;
+   }
+
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+    }
+.size12 {
+    font-size: 12pt;
+    text-align: left;
+    } 
+.size15 {
+    font-weight: bold;
+    font-size: 15pt;
+    text-align: left;
+    }
+.size20 {
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size25 {
+    font-weight: bold;
+    font-size: 25pt;
+    text-align: left;
+    line-height: 34px;
+    }     
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size30 {
+    font-weight: bold;  
+    font-size: 30pt;
+    text-align: left;
+    }   
+.size35 {
+    font-weight: bold;
+    font-size: 35pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.small8 {
+    font-size: 8pt;
+    text-align: left;
+    line-height: 4px;
+   }
+
+</style>
+</head>
+
+<!-- BACKGROUND -->
+<img src="{!URLFOR($Resource.TrainingCertificatesv3, 'BSI_training_certificate_newv3.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="21cm" height="29.7"/>
+
+<body>
+
+ <table     width="99%" align="center" table-layout="fixed">     
+    <tr >
+        <td width ="0.7cm" ></td>
+        <td height="140"></td>
+        <td width="1.7"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td align="left" valign="bottom" height="40">
+        <!--BSI TA-->
+        <apex:outputText styleClass="size30" value="{!Personal_Qualification__c.Training_Translations__r.BSI_Training_Academy__c}"/>
+        </td>
+        <td></td>
+    </tr>
+    <tr>
+        <td ></td>
+        <td height="35"></td>
+    </tr>     
+    <tr> 
+        <td ></td>
+        <td align="left" valign="bottom" height="40">
+        <!--TRANSCRIPT-->
+        <apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Transcript__c}" styleClass="size25" /> 
+        <hr></hr>
+        </td>
+        <td width ="0.7cm"></td>        
+    </tr>
+</table>
+
+<table    width="99%" align="center" table-layout="fixed">   
+    <tr>        
+        <td width="0.7cm" height="50"></td> 
+        <td align="left" valign="center" styleClass="size12">
+    <!-- THIS IS TO CERTIFY --> 
+           <apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Text_Box_1__c}"  styleClass="size12" />        
+        </td>
+    </tr>
+    <tr>
+        <td width="0.7cm" height="20"></td>
+        <td align="left" valign="center" >
+        
+            <!--Try new Delegate Name component-->
+            <c:Delegate_Name2 pq="{!Personal_Qualification__c}"
+                              source="qual"/>
+       </td>
+    </tr>
+    <tr>
+        <td height="60" ></td>
+        <td align="left" valign="middle">
+        <!--Try new Attended component - fufilled requirements for AU-->
+            <c:Attended2 pq="{!Personal_Qualification__c}"
+                              source="qual"/>
+        </td>
+    </tr>
+    <tr>
+        <td height="64" ></td>
+        <td align="left" valign="top"> 
+        <!-- This brings in the Qualification name -->
+        <apex:outputText value="{!Personal_Qualification__c.Qualification_Name__c}" styleClass="size22"/></td>
+    </tr>     
+</table> 
+ 
+<!-- Alternate table but not got lines right <table width="99%" align="center" table-layout="fixed">
+    <tr>
+    <td width ="3cm" ></td>
+    <td  align="left" height="2.8cm" valign="top">
+       <!-- This creates the completion table or units 
+       <apex:dataTable style="border:1px solid #000000;" styleClass="size15" value="{!Personal_Qualification__c.Steps__r}" var="step" columns="2" rules="all" columnsWidth="9cm,5cm" cellpadding="4" cellspacing="0" >       
+           <apex:column style="border:1px solid #000000;" styleClass="size12" value="{!step.Name__c}" headerValue="Unit" />       
+           <apex:column style="border:1px solid #000000;" styleClass="size12" value="{!step.Progress__c}" headerValue="Course/Assessment" />        
+       </apex:dataTable>
+    </td> 
+    </tr>
+      
+</table> -->
+
+
+<table width="99%" align="center" cellpadding="4" cellspacing="0" >
+<!-- This creates the completion table or units -->
+    <THEAD>
+        <tr>
+            <th width ="2cm"></th>
+            <th style="border:1px solid #000000;border-right:0;font-size:13pt;">Unit</th>
+            <th style="border:1px solid #000000;font-size:13pt">Course/Assessment</th>
+            <th width ="2cm"></th>
+        </tr>
+    </THEAD>
+
+    <apex:variable var="i" value="{!1}" />
+    <apex:repeat value="{!Personal_Qualification__c.Steps__r}" var="step">
+        <TBODY>
+            <tr >
+                <td></td>
+                <apex:repeat value="{!Personal_Qualification__c.Steps__r}" var="step2a">
+                    <apex:panelGroup rendered="{!AND(FLOOR(step2a.Order__c)=i, ISBLANK(step2a.Name_Local__c))}"> 
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;font-size:10pt">{!step2a.Name__c}</td>
+                    </apex:panelGroup>
+                </apex:repeat>
+                <apex:repeat value="{!Personal_Qualification__c.Steps__r}" var="step2b">
+                    <apex:panelGroup rendered="{!AND(FLOOR(step2b.Order__c)=i, NOT(ISBLANK(step2b.Name_Local__c)))}"> 
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;font-size:10pt">{!step2b.Name_Local__c}</td>
+                    </apex:panelGroup>
+                </apex:repeat>
+                <apex:repeat value="{!Personal_Qualification__c.Steps__r}" var="step2c">
+                    <apex:panelGroup rendered="{!FLOOR(step2c.Order__c)=i}">
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;font-size:10pt">{!step2c.Progress__c}</td>
+                    </apex:panelGroup>
+                </apex:repeat>
+                <td></td>
+            </tr>
+        </TBODY>
+        <apex:variable var="i" value="{!i + 1}" />
+    </apex:repeat>
+</table>
+
+<br/>
+
+<!-- SIGNATURE --> 
+<table     width="99%" align="center" table-layout="fixed">
+    <tr>
+    <td width ="0.7cm" height="30" ></td>
+        <td frame="below" style="align:left; valign:bottom; border-bottom: 1px solid #000;" height="50">
+
+            <!--Try new component for Signature2 -->
+            <c:Signature2 pq="{!Personal_Qualification__c}"
+                                source="qual"/>          
+        </td>
+        <td width ="0.7cm"></td>
+    </tr>
+</table>
+<!--TRAINING MANAGERS NAME FROM TRANSLATIONS (ALL Countries)-->     
+      <table   width="99%" align="center" table-layout="fixed"   >
+        <tr>
+            <td width ="0.7cm" height="30"  ></td>
+            <td valign="top">
+                <apex:outputText styleClass="size12" value="{!Personal_Qualification__c.Training_Translations__r.Training_Manager__c}"/>
+            </td>
+        </tr>
+</table>
+<!-- DATE, CERT NO  -->
+<table   width="99%" align="center" table-layout="fixed"   >
+    <tr>
+        <td width ="0.7cm" ></td>
+        <td width="4cm" align="left"><apex:outputText styleClass="size10" value="{!Personal_Qualification__c.Training_Translations__r.Date__c} :"/></td> 
+        <td align="left" width="5cm">
+            <apex:outputText styleClass="size10" rendered="{!OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR')}" value="{0,date,yyyy/MM/dd}">
+                <apex:param value="{!Personal_Qualification__c.Date_Qualification_Completed__c}"/>
+            </apex:outputText>
+            <apex:outputText styleClass="size10" rendered="{!NOT(OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR'))}" value="{0,date,dd/MM/yyyy}">
+                <apex:param value="{!Personal_Qualification__c.Date_Qualification_Completed__c}"/>
+            </apex:outputText>
+        </td>
+        <td align="left"></td>
+    </tr>
+    <tr>
+        <td ></td>
+        <td width="4cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Certificate_Number__c}"  styleClass="size10"/></td>
+        <td width="5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Name}"/></td>                     
+        <td align="left"></td>    
+    </tr>
+    
+    <tr>
+        <td width ="0.7cm" ></td>
+        <!-- can't access field in portal <apex:panelgroup rendered="{!Personal_Qualification__c.Qualification__r.Master_Qualification__r.Level__c = 'Certified Professional'}">-->
+        <apex:panelgroup rendered="{!Personal_Qualification__c.Qualification__r.Level__c = 'Certified Professional'}">
+                
+            <!-- EXPIRY DATE FOR CERTIFIEFD PROFESSIONAL -->
+            <td width="4cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Expiry_Date__c} :"  styleClass="size10"/></td>
+            <td width="5cm" align="left">
+                <apex:outputText styleClass="size10" rendered="{!OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR')}" value="{0,date,yyyy/MM/dd}">
+                    <apex:param value="{!Personal_Qualification__c.Expiry_Date__c}"/>
+                </apex:outputText>
+                <apex:outputText styleClass="size10" rendered="{!NOT(OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR'))}" value="{0,date,dd/MM/yyyy}">
+                    <apex:param value="{!Personal_Qualification__c.Expiry_Date__c}"/>
+                </apex:outputText>
+            </td>
+            <td></td> 
+        </apex:panelGroup>
+    </tr>
+</table>
+
+<!-- this sets out the office address in the footer at the bottom of the page -->
+
+<table  width="99%" align="left" valign="bottom" table-layout="fixed">
+    <tr>
+        <td width="0.7cm"></td>
+        <td valign="bottom">
+            <apex:panelGroup styleClass="footer">
+            {!Personal_Qualification__c.Training_Translations__r.Royal_Charter__c}<br/><br/><br/>
+            {!Personal_Qualification__c.Training_Translations__r.Office_Address__c}            
+            </apex:panelGroup>
+        </td>     
+    </tr> 
+</table>
+
+</body>
+
+</html>
+
+</apex:page>

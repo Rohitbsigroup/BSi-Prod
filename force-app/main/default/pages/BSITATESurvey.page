@@ -1,0 +1,93 @@
+<apex:page standardController="Training_Event__c" showHeader="false" pageStyle="all" lightningStylesheets="" >
+
+<!--removed from above contentType="{!renderedContentType}" renderAs="{!renderingService}"--> 
+<apex:stylesheet value="{!$Resource.Aboutmycoursecss}"/>
+<!--         
+14/04/2022 - JS - Initial Version created from complete precoursesurveys and furthercourse information
+--><!--commenting out
+    <apex:panelGroup rendered="{! renderingService != 'PDF' }">        
+        <apex:stylesheet value="{!$Resource.Aboutmycoursecss}"/>
+    </apex:panelGroup>   
+    <apex:panelGroup rendered="{! renderingService = 'PDF' }">        
+        <apex:stylesheet value="{!$Resource.AboutmycoursecssPDF}"/>
+    </apex:panelGroup>  
+                
+renderAs="PDF" 
+<head>
+    <meta http-equiv="Content-Type" content="{! renderedContentType }" />                   
+</head>
+-->
+
+
+
+<body>
+
+<!-- commenting out
+
+    <apex:form rendered="{! renderingService != 'PDF' }"
+               style="text-align: right; margin-right: 10px;">
+               
+        <apex:commandLink action="{! saveToPdf }" value="Save to PDF">
+            <apex:param assignTo="{! renderedFileName }" value="{!Training_Event__c.Name}.pdf"/> 
+        </apex:commandLink>
+        <hr/>        
+    </apex:form>
+   
+
+        <apex:form rendered="{! renderingService = 'PDF' }">
+         <apex:image value="{!URLFOR($Resource.CLP_BSIBanner)}" width="18.5cm" 
+             style="position: static;"/>                   
+        </apex:form>   
+ -->   
+<!--contentType: <apex:outputText value=" {! renderedContentType }"/><br/>-->
+
+<!----Course name and Start Date
+      <p>
+          <apex:outputtext styleClass="big" value="{!Training_Event__c.Course__r.Product_Name_Local__c}"/> <apex:outputtext styleClass="big" rendered="{!IF(Training_Event__c.Event_Country__c ='CN',true,false)}" Value="课程"/>
+      </p>
+
+<!--For all courses this shows the translation of "date(s)" shows course dates       
+      <p><apex:outputPanel >
+            <apex:outputtext styleClass="med" value="{!Training_Event__c.Name}"/>:&nbsp;
+         </apex:outputPanel> 
+         <!--JS 20181207 updated course dates component position
+           <apex:outputText >
+             <c:Course_Dates format="{!Training_Event__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Training_Event__c.Course_Duration_Days__c}" 
+                start1="{!Training_Event__c.Start_date__c}" 
+                end1="{!Training_Event__c.End_Date_of_Section_1__c}" 
+                start2="{!Training_Event__c.Start_Date_of_Section_2__c}" 
+                end3="{!Training_Event__c.End_Date3__c}" 
+                country="{!Training_Event__c.Event_Country__c}"
+                module="{!Training_Event__c.Module_Event__c}"
+                split="{!Training_Event__c.Split_Date_Event__c}"
+                source="email"
+            /> 
+           </apex:outputText>
+      </p>
+-->                
+    <c:CombinedSurveyResultsReturned teid="{!Training_Event__c.Id}" />
+            
+            <apex:outputpanel rendered="{!IF((Training_Event__c.Training_Venue__r.Training_Office__r.Training_Translations__r.Comments__c != ''), true,false)}">
+                <table border="0" cellspacing="6" style="text-align:left;padding:0px;font-weight:medium;border:0px;">
+                    <tr>
+                        <td colspan="2">
+                            <apex:repeat value="{!Training_Event__c.Surveys__r}" var="survey">
+                    <tr>
+                        <apex:outputpanel rendered="{!IF(survey.Anything_Else_Comments__c != "", true,false)}">
+                            <td style="valign:top; width:3cm; overflow: hidden;  display: inline-block; white-space: nowrap;">
+                                <apex:outputfield value="{!survey.Name}" /><br></br>
+                            </td>
+                            <td>
+                                <apex:outputfield value="{!survey.Overall_Satisfaction_Comments__c}" /><br></br>
+                            </td>
+                        </apex:outputpanel>
+                    </tr>
+                    </apex:repeat>
+                    </td>
+                    </tr>
+                </table>
+            </apex:outputpanel>                       
+ 
+</body>
+</apex:page>

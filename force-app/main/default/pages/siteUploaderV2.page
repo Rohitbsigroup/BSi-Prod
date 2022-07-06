@@ -1,0 +1,182 @@
+<apex:page controller="SiteUploaderControllerV2" tabStyle="Account">
+    <style type="text/css">
+        .classHeader { 
+            padding-top: 2px;
+            padding-right: 2px;
+            padding-bottom: 2px;
+            padding-left: 2px;
+            background-color: #F9EAD5;
+            font-weight: bolder;
+            width: 100%;
+        }
+        .width45 { width: 45%; }
+        .width1 { width: 1% }
+        .moreInfo {
+			background-color:#FFFFFF;
+  			border:1px solid #999999;
+  			cursor:default;
+  			display:none;
+  			margin-top: 15px;
+  			margin-left: -500px;
+  			position:absolute;
+  			text-align:left;
+  			z-index:50;
+  			padding: 5px 5px 5px;
+		}
+		.leftCol { float: left; width: 50%; }
+        .rightCol { float: right; padding: 5px; }
+        .container { width: 100%; }
+		
+    </style>
+    <apex:includeScript value="{!$Resource.jquery}"/>
+
+    <script type="text/javascript">
+        var element = '';
+        $(document).ready(
+            function(){
+                $(".theLink").click(function(event){
+                    $("#moreInfo"+$(this).attr("title")).show();
+                    return false;
+                });
+
+                $(".theLink").bind('mouseleave', function(event){
+                    $("#moreInfo"+$(this).attr("title")).hide();
+                    return false;
+                });
+        });
+    </script>
+
+    <apex:form >
+        <apex:sectionHeader title="{!$Label.SU_Upload_Sites}"/>
+
+        <apex:pageMessages rendered="{!ISNULL(Success)}"/>
+        <apex:pageMessage summary="Possible duplicates found. See table below and assign appropriate acction" severity="error" strength="1" rendered="{!NOT(ISNULL(Success))}" />
+
+        <!-- IMPORT SECTION -->
+        <apex:pageBlock title="{!$Label.SU_Upload_Sites_Description}">
+            <apex:pageBlockButtons location="both" rendered="{!ISNULL(Success)}">
+                <apex:commandButton action="{!back}" value="{!$Label.Cancel}" style="float:right;"/>
+            </apex:pageBlockButtons>
+            <apex:panelGrid columns="1" cellspacing="5" cellpadding="5" width="100%" bgcolor="#A23233" rendered="{!!showCSV}">
+                <apex:outputText value="{!$Label.SU_No_csv_template}" style="font-size:14px;font-weiht:bold;color:white"/>
+            </apex:panelGrid>
+            <apex:panelGrid columns="1" cellspacing="5" cellpadding="5" width="100%" bgcolor="#2B9639" rendered="{!emailSent}">
+                <apex:outputText value="{!$Label.SU_your_email_has_been_sent}" style="font-size:14px;font-weight:bold;color:white"/>
+            </apex:panelGrid>
+            <br/>
+            <apex:panelGrid columns="3" cellpadding="2" cellspacing="2" width="100%" columnClasses="width45, width1">
+                <apex:outputPanel rendered="{!showCSV}">
+                    <apex:panelGrid columns="1" styleClass="classHeader">
+                        <apex:outputLabel value="{!$Label.SU_File_Upload}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:inputFile value="{!docFile.body}" filename="{!docFile.name}" fileSize="{!docFile.BodyLength}" contentType="{!docFile.ContentType}" size="40" />
+                        <apex:commandButton action="{!readFile}" value="{!$Label.SU_Validate_File}" id="theButton2"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="1" styleClass="classHeader">
+                        <apex:outputLabel value="{!$Label.SU_File_Downloads}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="1" cellpadding="5" cellspacing="2">
+                        <apex:outputLink value="{!templateURL}" target="_blank">{!$Label.SU_Download_csv}</apex:outputLink>
+                        <apex:outputLink value="{!countryCodesURL}" target="_blank">{!$Label.SU_Download_Country_Code}</apex:outputLink>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" styleClass="classHeader">
+                    	<apex:outputPanel >
+	                    	<apex:image value="/img/icon/mail16.png" height="16" />
+    	                    <apex:outputLabel value="{!$Label.SU_Send_to_customer}" styleClass="classHeader" />
+    	                </apex:outputPanel>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="1" cellpadding="5" cellspacing="2" width="100%">
+                        <apex:selectList value="{!customer}" size="1" style="width:100%;">
+                            <apex:selectOptions value="{!Customers}" />
+                        </apex:selectList>
+                        <apex:commandLink value="{!$Label.SU_Send}" action="{!sendCSV}" target="_top" styleclass="btn" style="text-decoration:none; float:right;"/>
+                    </apex:panelGrid>
+                </apex:outputPanel>
+				<apex:outputPanel >&nbsp;</apex:outputPanel>
+                <apex:outputPanel >
+                    <apex:panelGrid columns="1" styleClass="classHeader">
+                        <apex:outputLabel value="{!$Label.SU_Instructions}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/warning16.png" width="16"/>
+                        <apex:outputText value="{!$Label.SU_Max_Cell}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/warning16.png" width="16"/>
+                        <apex:outputText value="{!$Label.SU_Max_Row}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/warning16.png" width="16"/>
+                        <apex:outputText value="{!$Label.SU_File_Format}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/info16.png" width="16"/>
+                        <apex:outputText value="{!$Label.SU_Template_Info}" />
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/info16.png" width="16"/>
+                        <apex:outputText value="{!$Label.SU_Validate_Instructions}" escape="false"/>
+                    </apex:panelGrid>
+                </apex:outputPanel>
+            </apex:panelGrid>
+        </apex:pageBlock>
+        <apex:pageBlock title="{!$Label.SU_Results_Title}" rendered="{!NOT(ISNULL(Success))}">
+            <apex:pageBlockButtons location="both">
+                <apex:commandButton action="{!updateSites}" value="{!$Label.SU_Update_Sites}" style="float:right;"/>
+                <apex:commandButton action="{!back}" value="{!$Label.Cancel}" style="float:right;"/>
+            </apex:pageBlockButtons>
+            	<apex:variable var="rowIndex" value="{!0}" />
+	            <apex:pageblocktable value="{!Success}" var="s">
+	            	<apex:column headerValue="{!$Label.SU_Actions_Title}">
+	            		<apex:variable var="rowIndex" value="{!rowIndex + 1}"/>
+	            		<apex:selectList value="{!s.action}" size="1" style="width:150px;">
+	                    	<apex:selectOptions value="{!s.actions}" />
+	                    </apex:selectList>
+	            	</apex:column>
+                    <apex:column headerValue="{!$Label.SU_Reason}" value="{!s.reason}" />
+                    <apex:column headerValue="{!$Label.SU_Duplicate_Site}">
+                        <apex:outputPanel rendered="{!NOT(ISNULL(s.existingSite.id))}">
+                            <a href="/{!s.existingSite.Id}" id="{!s.existingSite.Id}" onblur="LookupHoverDetail.getHover('{!s.existingSite.Id}').hide();" onfocus="LookupHoverDetail.getHover('{!s.existingSite.Id}', '/{!s.existingSite.Id}/m?retURL=%2F{!s.existingSite.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!s.existingSite.Id}').hide();" onmouseover="LookupHoverDetail.getHover('{!s.existingSite.Id}', '/{!s.existingSite.Id}/m?retURL=%2F{!s.existingSite.Id}&isAjaxRequest=1').show();" target="_blank">{!s.existingSite.Name}</a>
+                        </apex:outputPanel>
+                        <apex:outputLabel value="{!s.existingSite.Name} {!$Label.SU_In_File}" rendered="{!s.existingSite.id == null && s.dupeSite}" />
+                    </apex:column>
+            	    <apex:column headerValue="{!$ObjectType.Site__c.fields['Name'].label}"> 
+                        <apex:outputField value="{!s.site['Name']}"/>
+                    </apex:column>
+            	    <apex:column headerValue="{!$ObjectType.Site__c.fields['Street__c'].label}"> 
+                        <apex:outputField value="{!s.site['Street__c']}"/>
+                    </apex:column>
+					<apex:column headerValue="{!$ObjectType.Site__c.fields['City__c'].label}"> 
+                        <apex:outputField value="{!s.site['City__c']}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.Site__c.fields['State__c'].label}"> 
+                        <apex:outputField value="{!s.site['State__c']}"/>
+                    </apex:column>
+					<apex:column headerValue="{!$ObjectType.Site__c.fields['Postcode__c'].label}"> 
+                        <apex:outputField value="{!s.site['Postcode__c']}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.Site__c.fields['Country__c'].label}"> 
+                        <apex:outputField value="{!s.site['Country__c']}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$Label.SU_More_Info}">
+                    	<a href="#" id="theLink" class="theLink" title="{!rowIndex}">{!$Label.SU_more}</a>
+                    	<div class="moreInfo" id="moreInfo{!rowIndex}">
+	                    	<apex:panelGrid columns="4">
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['Country_Code__c'].label}:"/><apex:outputText value="{!s.site['Country_Code__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['SitePhone__c'].label}:"/><apex:outputText value="{!s.site['SitePhone__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['Type__c'].label}:"/><apex:outputText value="{!s.site['Type__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['NumberEmployees__c'].label}:"/><apex:outputText value="{!s.site['NumberEmployees__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['TCodeDescr__c'].label}:"/><apex:outputText value="{!s.site['TCodeDescr__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['S_Code__c'].label}:"/><apex:outputText value="{!s.site['S_Code__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['Industry__c'].label}:"/><apex:outputText value="{!s.site['Industry__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['Risk_Level__c'].label}:"/><apex:outputText value="{!s.site['Risk_Level__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['EMS_Risk_Level__c'].label}:"/><apex:outputText value="{!s.site['EMS_Risk_Level__c']}"/>
+	                    		<apex:outputText value="{!$ObjectType.Site__c.fields['H_S_Risk_Level__c'].label}:"/><apex:outputText value="{!s.site['H_S_Risk_Level__c']}"/>
+							</apex:panelGrid>
+						</div>
+                    </apex:column>
+ 	            </apex:pageblocktable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

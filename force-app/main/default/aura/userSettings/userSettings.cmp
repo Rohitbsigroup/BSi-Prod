@@ -1,0 +1,25 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,lightning:availableForFlowScreens" extends="c:lightningUtility" access="global" description="Component to Customise My Settings page">
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="recordId"         type="String"	access="global" default=""/>
+    <aura:attribute name="title"            type="String"   access="global" default="My Settings"/>
+    <aura:attribute name="fieldList"        type="String"   access="global" default="FirstName"/>
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="hasPermissions"   type="Boolean"	access="private" default="false"/>
+
+    <!--HANDLER -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!--BODY-->
+    <aura:if isTrue="{!v.hasPermissions}">
+
+        <!-- User Section -->
+        <c:recordForm recordId="{!v.recordId}"
+                      title="{!v.title}"
+                      object="User"
+                      fieldList="{!v.fieldList}" />
+        
+    </aura:if>
+
+</aura:component>

@@ -1,0 +1,530 @@
+<apex:page standardController="EfQuestionnaire__c" extensions="EfQuestionnaireCtrl" readonly="true">
+<apex:form >
+
+  <style>
+    textarea {
+      width: 94%;
+      min-height: 100px;
+      margin-bottom: 10px;
+      padding: 12px 24px;     
+      border-radius: 5px;
+    }
+    textarea.half {
+      width: 88%;
+    }
+    textarea.spaced {
+      margin-top: 5px;
+    }
+    .subheading {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #d72d18;
+    }
+    .centered {
+      text-align: center;
+      padding-left: 50px;
+    }
+    .standard {
+      width: 300px;
+      white-space: nowrap;
+    }
+    .fixed1 {
+      width: 160px;
+      white-space: nowrap;
+    }
+    .fixed2 {
+      width: 275px;
+      white-space: nowrap;
+    }
+    .standardTick {
+     text-align: center;
+     width: 150px;
+    }
+    .right {
+      text-align: right;
+    }
+    .prompt {
+      color: #d72d18;
+    }
+    .nowrap {
+      width: 140px;
+      white-space: nowrap;
+    }
+    fieldset legend {
+      font-weight: normal;
+      font-size: 0.75em;
+      text-align: center;
+    }
+    table.wide {
+      width: 95%;
+    }
+    table.wide td:first-child {
+      width: auto;
+    }
+    table.wide td:last-child {
+      width: 100px;
+    }
+    table.wide td:last-child fieldset {
+      padding-bottom: 0;
+    }
+    .bottom td {
+      padding-top: 0;
+      padding-bottom: 0;
+      vertical-align: bottom !important;
+    }
+    .bottom fieldset {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .bottom input[type=text] {
+      margin-top: 3px;
+    }
+    .bottom .raised {
+      display: block;
+      margin-bottom: 2px;
+    }
+    .external {
+      display: inline-block;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    .pbSubheader {
+      background-color: #007DBA !important; /* or #00A3AD */
+    }
+  </style>
+  
+  <apex:sectionHeader title="EF Questionnaire" subtitle="{!Efq.Name}" />
+  
+  <apex:pageBlock mode="edit">
+    
+    <apex:pageMessages />
+    
+    <apex:pageBlockButtons location="both">
+      <apex:commandButton value="Edit" action="{!Edit}" immediate="true" />
+      <apex:commandButton value="Delete" onclick="return confirm('Are you sure?');" action="{!Delete}"/>
+    </apex:pageBlockButtons>
+
+    <apex:pageBlockSection columns="1" title="Section 1: Client environment">
+      <apex:outputLink value="{!Settings.Playbook_Link__c}" rendered="{!NOT(ISBLANK(Settings.Playbook_Link__c))}" target="_blank" styleClass="external">View the playbook</apex:outputLink>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="2">
+      <apex:panelGrid >
+        <apex:outputText value="Individual Name" styleClass="prompt" />
+        <apex:inputText value="{!Efq.S1_Individual_Name_Calc__c}" label="" disabled="true" styleClass="standard" />
+        <apex:outputText value="Organization" styleClass="prompt" />
+        <apex:inputText value="{!Efq.S1_Organization_Name_Calc__c}" label="" disabled="true" styleClass="standard" />
+        <apex:outputText value="Job Title" styleClass="prompt" />
+        <apex:inputText value="{!Efq.S1_Individual_Title_Calc__c}" label="" disabled="true" styleClass="standard" />
+        <apex:outputText value="Email" styleClass="prompt" />
+        <apex:inputText value="{!Efq.S1_Individual_Email_Calc__c}" label="" disabled="true" styleClass="standard" />
+        <br />
+        <apex:outputText value="How many people does your organization employ & how many people are covered by the scope of this project?"  styleClass="prompt" />
+        <br />
+        <apex:dataTable value="{!mySizes}" var="item" columns="3">    
+          <apex:column headerValue="" value="{!item.Label}" styleClass="nowrap" />
+          <apex:column headerValue="Organization" headerClass="centered" styleClass="centered">
+            <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+          </apex:column>
+          <apex:column headerValue="Project scope" headerClass="centered" styleClass="centered">
+            <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+          </apex:column>
+        </apex:dataTable>
+        <br />
+        <apex:outputText value="How many many sites are covered in the scope of this project?" styleClass="prompt" />
+        <apex:InputText value="{!Efq.S1_Project_Sites__c}" label="" disabled="true" />
+      </apex:panelGrid>
+      <apex:panelGrid >
+        <apex:outputText value="What is the primary industry that you operate in and which do you sell into (Tick all that apply)?" styleClass="prompt" />
+        <br />
+        <apex:dataTable value="{!mySectors}" var="item" columns="3">    
+          <apex:column headerValue="" value="{!item.Label}" styleClass="nowrap" />
+          <apex:column headerValue="Your sector" headerClass="centered" styleClass="centered">
+            <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+          </apex:column>
+          <apex:column headerValue="Sell in to" headerClass="centered" styleClass="centered">
+            <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+          </apex:column>
+        </apex:dataTable>
+        <apex:inputText value="{!Efq.S1_Other_Sectors__c}" label="" disabled="true" styleClass="fixed1" />
+      </apex:panelGrid>
+    </apex:pageBlockSection>
+
+    <apex:pageBlockSection columns="1" title="Section 2: Business environment and strategic direction" collapsible="false">
+      <apex:outputText value="2.1 Organization context, risks and opportunities:" styleClass="prompt" />
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="2">
+      <apex:panelGroup >
+        <apex:outputText value="External Factors" />
+        <c:EfQuestionnaireHelp helpId="Efq.S2_External_Factors__c" helpText="{!$Label.Ef_S2_External_Factors_Help}" />
+        <br />
+        <apex:inputTextarea label="" value="{!Efq.S2_External_Factors__c}" styleClass="half spaced" disabled="true" />
+      </apex:panelGroup>
+      <apex:panelGroup >
+        <apex:outputText value="Internal Factors" />
+        <c:EfQuestionnaireHelp helpId="Efq.S2_Internal_Factors__c" helpText="{!$Label.Ef_S2_Internal_Factors_Help}" />
+        <br />
+        <apex:inputTextarea label="" value="{!Efq.S2_Internal_Factors__c}" styleClass="half spaced" disabled="true" />
+      </apex:panelGroup>
+      <apex:panelGroup >
+        <apex:outputText value="Risks" />
+        <c:EfQuestionnaireHelp helpId="Efq.S2_Risks__c" helpText="{!$Label.Ef_S2_Risks_Help}" />      
+        <br />
+        <apex:inputTextarea label="" value="{!Efq.S2_Risks__c}" styleClass="half spaced" disabled="true" />
+      </apex:panelGroup>
+      <apex:panelGroup >
+        <apex:outputText value="Opportunities" />
+        <c:EfQuestionnaireHelp helpId="Efq.S2_Opportunities__c" helpText="{!$Label.Ef_S2_Opportunities_Help}" />
+        <br />
+        <apex:inputTextarea label="" value="{!Efq.S2_Opportunities__c}" styleClass="half spaced" disabled="true" />
+      </apex:panelGroup>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="1">
+      <apex:outputText value="2.2 What are the most important strategic goals for your organization over the next two or three years?" styleClass="prompt" />
+      <apex:inputTextarea label="" value="{!Efq.S2_Strategic_Goals__c}" disabled="true"  />
+      <apex:outputText value="2.3 How confident are you in achieving these goals?" styleClass="prompt" />
+      <apex:inputTextarea label="" value="{!Efq.S2_Confidence__c}" disabled="true"  />    
+      <apex:outputText value="2.4 Our clients inform us some of the most common business motivations to implement and improve business processes are as follows, what are your motivations?" styleClass="prompt" />
+      <apex:outputLink value="{!Settings.Motivations_Dashboard__c}" rendered="{!NOT(ISBLANK(Settings.Motivations_Dashboard__c))}" target="_blank" styleClass="external">View motivations dashboard</apex:outputLink>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="2">
+      <apex:panelGrid columns="2" styleClass="bottom">
+        <apex:OutputText value="Meet tender requirements" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Tender__c}" legendText="Unimportant → Important" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Ensure compliance to regulation" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Compliance__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Manage business risk" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Risk__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Protect your business" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Protect__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Improve products & services" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Improve__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:panelGrid columns="2" styleClass="bottom">
+        <apex:OutputText value="Reduce likelihood of mistakes" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Mistakes__c}" legendText="Unimportant → Important" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Reduce waste/defects" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Waste__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Attract new customers" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Attract__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:OutputText value="Other (please specify)" styleClass="raised" />
+        <apex:selectRadio value="{!Efq.S2_Motivation_Other__c}" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+        <apex:InputText value="{!Efq.S2_Motivation_Other_Text__c}" label="" disabled="true" />
+      </apex:panelGrid>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection columns="1">
+      <apex:outputText value="...And what are your personal motivations?" styleClass="prompt" />
+      <apex:inputTextarea label="" value="{!Efq.S2_Motivation_Personal__c}" disabled="true" />          
+      <apex:outputText value="2.5 Which management systems do you already have in place, which are you certified to, and which are a focus for the future?" styleClass="prompt" />
+      <br />
+      <apex:outputText styleClass="subheading" value="Operational Resilience" />
+      <apex:dataTable value="{!mySystemsOperational}" var="item" columns="4">    
+        <apex:column headerValue="" value="{!item.Label}" styleClass="standard" />
+        <apex:column headerValue="Currently implemented" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Currently certified" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Future focus" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[2]}" disabled="true" />
+        </apex:column>
+      </apex:dataTable>
+      <apex:outputText styleClass="subheading" value="Information Resilience" />
+      <apex:dataTable value="{!mySystemsInformation}" var="item" columns="4">    
+        <apex:column headerValue="" value="{!item.Label}" styleClass="standard" />
+        <apex:column headerValue="Currently implemented" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Currently certified" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Future focus" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[2]}" disabled="true" />
+        </apex:column>
+      </apex:dataTable>
+      <apex:outputText styleClass="subheading" value="Other Management Systems" />
+      <apex:dataTable value="{!mySystemsOther}" var="item" columns="4">    
+        <apex:column headerValue="" value="{!item.Label}" styleClass="standard" />
+        <apex:column headerValue="Currently implemented" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Currently certified" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+        </apex:column>
+        <apex:column headerValue="Future focus" headerClass="standardTick" styleClass="standardTick">
+          <apex:inputCheckbox value="{!item.Checked[2]}" disabled="true" />
+        </apex:column>
+      </apex:dataTable>
+      <apex:inputText value="{!Efq.S2_Other_Systems__c}" label="" disabled="true" styleClass="fixed2" />
+    </apex:pageBlockSection>
+
+    <apex:pageBlockSection columns="1" Title="Section 3: Client journey: improvement continuum for management systems">
+      <apex:image url="{!$Resource.EfChart}" width="95%" />
+      <br />
+      <apex:outputText value="3.1 Where do you think you currently are?" styleClass="prompt" />
+      <apex:InputText value="{!Efq.S3_Stages__c}" label="" disabled="true" />
+      <apex:outputText value="3.2 Where would you like to be?" styleClass="prompt" />
+      <apex:InputText value="{!Efq.S3_Target__c}" label="" disabled="true" />
+    </apex:pageBlockSection>
+
+    <apex:pageBlockSection columns="1" Title="Section 4: Improvement continuum best practice">
+      <apex:outputLink value="{!Settings.Improvement_Slides__c}" rendered="{!NOT(ISBLANK(Settings.Improvement_Slides__c))}" target="_blank" styleClass="external">View improvement matrix</apex:outputLink>
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:OutputText value="4.1 Our business strategy and operational processes are aligned to respond to internal/external issues" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Alignment_Score__c" helpText="{!$Label.Ef_S4_Alignment_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Alignment_Score__c}" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Alignment_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.2 Our senior management team understands their role within the management systems" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Management_Score__c" helpText="{!$Label.Ef_S4_Management_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Management_Score__c}" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Management_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.3 We evaluate risks and opportunities to develop actions to meet our objectives" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Evaluation_Score__c" helpText="{!$Label.Ef_S4_Evaluation_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Evaluation_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Evaluation_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.4 We actively plan and maintain the core competencies in our business" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Competencies_Score__c" helpText="{!$Label.Ef_S4_Competencies_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Competencies_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Competencies_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.5 We keep documented information up-to-date and available" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Documentation_Score__c" helpText="{!$Label.Ef_S4_Documentation_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Documentation_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Documentation_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.6 We use our systems to monitor, control and improve performance of the organization" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Systems_Score__c" helpText="{!$Label.Ef_S4_Systems_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Systems_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Systems_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.7 We manage business disruptions and unforeseen events and non-conformities" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Events_Score__c" helpText="{!$Label.Ef_S4_Events_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Events_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Events_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.8 We have a system in place to create, plan, schedule, conduct and report" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Audits_Score__c" helpText="{!$Label.Ef_S4_Audits_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Audits_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Audits_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.9 We have a clear process to execute our plans for change" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Change_Score__c" helpText="{!$Label.Ef_S4_Change_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Change_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Change_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:panelGrid columns="2" styleClass="wide">
+        <apex:panelGroup >
+          <apex:outputText value="4.10 We understand and manage the performance of our core suppliers" styleClass="prompt" />
+          <c:EfQuestionnaireHelp helpId="Efq.S4_Suppliers_Score__c" helpText="{!$Label.Ef_S4_Suppliers_Help}" />
+        </apex:panelGroup>
+        <apex:selectRadio value="{!Efq.S4_Suppliers_Score__c }" legendText="Disagree → Agree" disabled="true">
+          <apex:selectOption itemValue="1" />
+          <apex:selectOption itemValue="2" />
+          <apex:selectOption itemValue="3" />
+          <apex:selectOption itemValue="4" />
+        </apex:selectRadio>
+      </apex:panelGrid>
+      <apex:inputTextarea value="{!Efq.S4_Suppliers_Notes__c }" label="" html-placeholder="Notes:" disabled="true" />
+      <apex:chart height="450" width="700" data="{!Chart1}" id="chart1" animate="false">
+        <apex:axis type="Numeric" position="bottom" fields="Score" title="Performance" grid="false" steps="1" dashSize="0" minimum="8" maximum="52">
+          <apex:chartLabel font="0px Helvetica, sans-serif" />
+        </apex:axis>
+        <apex:axis type="Numeric" position="left" fields="Line" title="Organizational commitment" grid="false" steps="1" dashSize="0" minimum="0" maximum="42">
+          <apex:chartLabel font="0px Helvetica, sans-serif" />
+        </apex:axis>
+        <apex:lineSeries axis="left" xField="Score" yField="Line" strokeWidth="0" markerSize="0" highlight="false" />
+        <apex:scatterSeries axis="left" xField="Score" yField="Milestone" markerType="circle" markerSize="5" markerFill="#d72d18" highlight="false">
+          <apex:chartLabel field="Description" font="14px Helvetica, sans-serif" display="middle" />
+        </apex:scatterSeries>
+        <apex:scatterSeries axis="left" xField="Score" yField="Position" markerType="cross" markerSize="7" markerFill="#d72d18" highlight="false" >
+          <apex:chartLabel field="Description" font="bold 18px Helvetica, sans-serif" display="middle" />
+        </apex:scatterSeries>
+      </apex:chart>
+    </apex:PageBlockSection>
+
+    <apex:pageBlockSection columns="1" Title="Section 5: BSI solution offers:"  />
+    <apex:pageBlockSection columns="2">
+        <apex:outputText styleClass="subheading" value="Standards:" />
+        <br />
+        <apex:panelGrid >
+          <apex:dataTable value="{!myStandards}" var="item" columns="2">    
+            <apex:column value="{!item.Label}" styleClass="nowrap" />
+            <apex:column headerClass="centered" headerValue="  " styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+            </apex:column>
+          </apex:dataTable>
+        </apex:panelGrid>
+        <apex:inputTextarea value="{!Efq.S5_Standards_Notes__c}" label="" html-placeholder="Notes:" styleClass="half" disabled="true" />
+        <apex:outputText styleClass="subheading" value="Training:" />
+        <br />
+        <apex:panelGrid >
+          <apex:dataTable value="{!myTraining}" var="item" columns="3">    
+            <apex:column value="{!item.Label}" styleClass="nowrap" />
+            <apex:column headerClass="centered" headerValue="Public" styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+            </apex:column>
+            <apex:column headerClass="centered" headerValue="In-house" styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[1]}" disabled="true" />
+            </apex:column>
+          </apex:dataTable>
+        </apex:panelGrid>
+        <apex:inputTextarea value="{!Efq.S5_Training_Notes__c}" label="" html-placeholder="Notes:" styleClass="half" disabled="true" />
+        <apex:outputText styleClass="subheading" value="Business improvement tools:" />
+        <br />
+        <apex:panelGrid >
+          <apex:dataTable value="{!myImprovement}" var="item" columns="2">    
+            <apex:column value="{!item.Label}" styleClass="nowrap" />
+            <apex:column headerClass="centered" styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+            </apex:column>
+          </apex:dataTable>
+        </apex:panelGrid>
+        <apex:inputTextarea value="{!Efq.S5_Improvement_Notes__c}" label="" html-placeholder="Notes:" styleClass="half" disabled="true" />
+        <apex:outputText styleClass="subheading" value="Certification:" />
+        <br />
+        <apex:panelGrid >
+          <apex:dataTable value="{!myCertification}" var="item" columns="2">    
+            <apex:column value="{!item.Label}" styleClass="nowrap" />
+            <apex:column headerClass="centered" styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+            </apex:column>
+          </apex:dataTable>
+        </apex:panelGrid>
+        <apex:inputTextarea value="{!Efq.S5_Certification_Notes__c}" label="" html-placeholder="Notes:" styleClass="half" disabled="true" />
+        <apex:outputText styleClass="subheading" value="Other:" />
+        <br />
+        <apex:panelGrid >
+          <apex:dataTable value="{!myOther}" var="item" columns="2">    
+            <apex:column value="{!item.Label}" styleClass="nowrap" />
+            <apex:column headerClass="centered" styleClass="centered">
+              <apex:inputCheckbox value="{!item.Checked[0]}" disabled="true" />
+            </apex:column>
+          </apex:dataTable>
+        </apex:panelGrid>
+        <apex:inputTextarea value="{!Efq.S5_Other_Notes__c}" label="" html-placeholder="Notes:" styleClass="half" disabled="true" />
+    </apex:pageBlockSection>
+  </apex:pageBlock>
+
+</apex:form>
+</apex:page>

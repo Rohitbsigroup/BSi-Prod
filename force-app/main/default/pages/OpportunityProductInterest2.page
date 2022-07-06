@@ -1,0 +1,13 @@
+<apex:page standardController="Opportunity" extensions="OpportunityProductInterestExt">
+
+	<apex:outputField value="{!Opportunity.Product_Stream__c}" rendered="false" />
+	<apex:outputField value="{!Opportunity.Product_SubStream__c}" rendered="false" />
+	<apex:outputField value="{!Opportunity.Portfolio_Interests__c}" rendered="false" />
+	<apex:outputField value="{!Opportunity.Product_Area_Interests__c}" rendered="false" />
+	<apex:outputField value="{!Opportunity.Product_Interests__c}" rendered="false" />
+
+	<apex:form >
+		<c:ProductInterest2 objectRecord="{!oppExt}" editModeParm="{!editMode}"/>
+    </apex:form>
+
+</apex:page>

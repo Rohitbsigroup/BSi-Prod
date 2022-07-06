@@ -1,0 +1,40 @@
+html{min-width:460px;overflow-y:scroll;font-size:62.5%;line-height:1.35}
+.wrapper{position:relative;width:100%;margin:0 auto}
+.site-strap{display:none}
+ul.progress li{display:inline-block;width:unset;margin:unset;padding:10px;padding:1rem;text-align:center;font-size:16px;font-size:1.6rem}
+.progress .inactive-step{width:50px;width:5rem}
+.main{padding:30px;padding:3em}
+@media only screen and (max-width:420px){.main{padding:10px;padding:1em}
+}.listingTable{display:block;margin:15px 0 20px;width:100%;border-collapse:collapse;font-size:16px;font-size:1.6rem}
+.listingTableBody .listingTableRow{display:flex;border:0;padding-bottom:30px;padding-bottom:3rem;flex-wrap:wrap}
+.listingTableHeading{display:block;background-color:unset}
+.listingTableCell,.listingTableCellHeader{display:block;padding:0;border:0;text-align:left}
+.listingTableCell{width:100%}
+.listingTableCellHeader{display:none}
+.listingTableCellHeader.locationBox{display:block;margin-bottom:3rem}
+.listingTableBody{display:block}
+.listingTableRow:nth-child(even){background-color:unset}
+.listingTable .fixLines{white-space:inherit}
+.listingTable .center{text-align:left}
+.listingTable .tc-dates{-webkit-order:1;order:1}
+.listingTable .tc-venue{-webkit-order:2;order:2;width:fit-content}
+.listingTable .tc-language{-webkit-order:3;order:3;width:fit-content;display:inherit}
+.listingTable .tc-language::before{content:'\00a0('}
+.listingTable .tc-language::after{content:')'}
+.listingTable .tc-price{-webkit-order:5;order:5}
+.listingTable .tc-available{-webkit-order:4;order:4}
+.listingTable .tc-book{-webkit-order:6;order:6}
+.two-thirds{width:100%}
+.field-item label{display:block;float:left;padding:7px 0 0;color:#333;width:100%;text-align:unset;margin:0}
+.field-item .output-only{float:left;width:100%;margin:0;padding:7px 0 0 0}
+.field-item input,.field-item select,.field-item textarea{float:left;width:87%;margin:0;padding:9px 10px;height:auto}/*margin-left:10px;*/
+.field-item .tooltip-below{clear:both;width:100%;padding:8px 10px;font-size:15px;font-size:1.5rem;float:right;margin:0}
+.field-item .tooltip-inline{float:left;width:50%;margin:0 0 0 10px;padding:11px 0 0;font-size:15px;font-size:1.5rem}
+@media screen and (-webkit-min-device-pixel-ratio:0){.field-item select{-webkit-appearance:none;appearance:none;background:#fff url(dropdown-grey.gif) no-repeat right center;background-origin:content-box;padding-right:10px}
+.field-item select:hover{background:#fff url(dropdown-blue.gif) no-repeat right center;background-origin:content-box}
+}.inactive-step .step-label-1,.inactive-step .step-label-2,.inactive-step .step-label-3,.inactive-step .step-label-4,.inactive-step .step-label-5{visibility:hidden;overflow:hidden;text-overflow:unset;white-space:nowrap;padding-left:10px;padding-left:1rem}
+.inactive-step .step-label-1::before{content:'1';visibility:visible}
+.inactive-step .step-label-2::before{content:'2';visibility:visible}
+.inactive-step .step-label-3::before{content:'3';visibility:visible}
+.inactive-step .step-label-4::before{content:'4';visibility:visible}
+.inactive-step .step-label-5::before{content:'5';visibility:visible}

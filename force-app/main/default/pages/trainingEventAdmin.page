@@ -1,0 +1,50 @@
+<apex:page standardController="Training_Event__c" 
+    extensions="TrainingEventManagementController"
+    recordSetVar="events"
+    tabStyle="Training_Event__c"
+    sidebar="true" 
+    action="{!rotateExam}">
+    <style type="text/css">
+        .center {
+            text-align: center;
+        }
+        .exam {
+            background-color: #e3f3ff;
+        }
+        .noExam {
+        }
+    </style>
+    <apex:sectionHeader title="{!$Label.Training_Event_Exam_Rotation_Title}" />
+    <apex:form >
+       <apex:pageBlock title="Exam Rotation">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}"/>
+                <apex:commandButton action="{!confirm}" value="{!$Label.Confirm}" rendered="{!!errorFlag && !noRows}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageMessage summary="You don't appropriate permssion to execute Exam Rotation.  Please contact your system administrator." severity="warning" strength="1" rendered="{!errorFlag}" />
+            <apex:pageMessage summary="Please select at least 1 record. Use 'Cancel' button to go back to the list view" severity="error" strength="1" rendered="{!noRows}" />
+
+            <apex:pageMessage summary="{!errorsEvent}" severity="error" strength="1" rendered="{!errorsEvent != ''}"/>
+
+            <apex:pageBlockTable value="{!events}" var="event" rendered="{!!errorFlag && !noRows}" onRowMouseOut="hiOff(this);" onRowMouseOver="hiOff(this);">
+                <apex:column headerValue="{!$ObjectType.Training_Event__c.fields.Name.Label}" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam','noExam')}">
+                    <a href="/{!event.id}" id="{!event.id}" onblur="LookupHoverDetail.getHover('{!event.id}').hide();" onfocus="LookupHoverDetail.getHover('{!event.id}', '/{!event.id}/m?retURL=%2F{!event.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!event.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!event.id}', '/{!event.id}/m?retURL=%2F{!event.id}&isAjaxRequest=1').show();" target="_blank">{!event.Name}</a>
+                </apex:column>
+                <apex:column value="{!event.Event_status__c}" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam','noExam')}"/>
+                <apex:column value="{!event.Course__c}" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam','noExam')}"/>
+                <apex:column value="{!event.Start_date__c}" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam','noExam')}"/>
+                <apex:column value="{!event.Course__r.Course_Has_Exam__c}" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam','noExam')}" />
+                <apex:column headerValue="{!$ObjectType.Training_Event__c.fields.Exam_paper_reference__c.Label}" headerClass="center" styleClass="{!IF(event.Course__r.Course_Has_Exam__c,'exam center','noExam center')}">
+                    <apex:outputPanel rendered="{!event.Course__r.Course_Has_Exam__c}">
+                        <apex:inputField value="{!event.Exam_paper_reference__c}" style="width: 20px;" /> / <apex:outputLabel value="{!event.Course__r.Number_of_Exam_Papers__c}" />
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!!event.Course__r.Course_Has_Exam__c}">
+                        <apex:outputLabel value="No exam required."/>
+                    </apex:outputPanel>
+                </apex:column>
+            </apex:pageBlockTable> 
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

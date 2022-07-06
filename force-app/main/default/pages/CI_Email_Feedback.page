@@ -1,0 +1,15 @@
+<apex:page controller="CiFeedbackController" standardStylesheets="true">
+    <apex:sectionHeader title="CI Data" subtitle="{!objectName}" />
+    <apex:form >
+        <apex:pageBlock title="Send Feedback">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Send" disabled="{!isLocked}" action="{!send}" />
+                <apex:commandButton value="Cancel" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+            <apex:pageBlockSection columns="1" title="Please enter your comments here" collapsible="false">
+                <apex:inputTextarea id="body" value="{!emailBody}" disabled="{!isLocked}" style="width:99%; min-height: 250px" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

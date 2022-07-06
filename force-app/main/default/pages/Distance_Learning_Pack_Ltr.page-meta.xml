@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>27.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Letter to be used for sending Distance Learning Pack/Materials to the delegate after they have registered and paid for the course</description>
+    <label>Distance Learning Pack Ltr</label>
+</ApexPage>

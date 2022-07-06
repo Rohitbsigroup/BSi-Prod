@@ -1,0 +1,129 @@
+<apex:page standardcontroller="Territory__c" extensions="TerritoryRefreshController">
+	
+	<!-- CSS STYLE -->
+    <style type="text/css">
+    	.numGrid {
+            font-size: 15px;
+            font-weight: bold;
+            color: black;
+        }
+        .labelGrid {
+        	font-size: 11px;
+            font-weight: bold;
+            color: black;
+        }
+         .progressBar{
+            background-color: #f8f8f8;
+            border:1px solid #DDDDDD;
+            height: 19px;
+            width: 100%;
+            -moz-border-radius: 5px; 
+            -webkit-border-radius: 5px;
+        }
+        .progress{
+            background-color: #F7B64B;
+            border:1px solid #E78F08;
+            height: 100%;
+            margin: -1px;
+            text-align: center;
+            -moz-border-radius: 5px; 
+            -webkit-border-radius: 5px;
+            line-height: 18px;
+        }
+    </style>
+    
+	
+	
+	<apex:form id="theForm">
+	<apex:actionPoller rerender="batchstatus" interval="5"/>
+	<apex:pageBlock id="theBlock" mode="maindetail">
+	<center>
+	<apex:panelGrid columns="5" cellpadding="5" width="100%">
+		<apex:panelGroup >
+		<center>
+		<apex:outputText value="1. Account Estimate" styleClass="labelGrid"/><br/>
+		<apex:outputText value="{!IF(accEstimate == 10000, '> '&TEXT(accEstimate),TEXT(accEstimate))}" styleclass="numGrid"/>
+		</center>
+		</apex:panelGroup>
+		<apex:panelGroup >
+		<center>
+		<apex:outputText value="2. Contact Estimate" styleClass="labelGrid"/><br/>
+		<apex:outputText value="{!IF(conEstimate == 10000, '> '&TEXT(conEstimate),TEXT(conEstimate))}" styleclass="numGrid"/>
+		</center>
+		</apex:panelGroup>
+		<apex:panelGroup >
+		<center>
+		<apex:outputText value="3. Lead Estimate" styleClass="labelGrid"/><br/>
+		<apex:outputText value="{!IF(leaEstimate == 10000, '> '&TEXT(leaEstimate),TEXT(leaEstimate))}" styleclass="numGrid"/>
+		</center>
+		</apex:panelGroup>
+		<apex:panelGroup >		
+		<center>
+		<apex:outputText value="4. Site Estimate" styleClass="labelGrid"/><br/>
+		<apex:outputText value="{!IF(sitEstimate == 10000, '> '&TEXT(sitEstimate),TEXT(sitEstimate))}" styleclass="numGrid"/>
+		</center>
+		</apex:panelGroup>
+		<apex:panelGroup >
+		<center>
+		<apex:outputText value="5. Opportunity Estimate" styleClass="labelGrid"/><br/>
+		<apex:outputText value="{!IF(oppEstimate == 10000, '> '&TEXT(oppEstimate),TEXT(oppEstimate))}" styleclass="numGrid"/>
+		</center>
+		</apex:panelGroup>
+		
+		<apex:panelGroup ><center><apex:commandButton action="{!refreshAccount}" value="Refresh Account" rendered="{!!accPending}" reRender="theBlock"/>
+		<apex:image value="{!$Resource.icon_clock}" width="30" rendered="{!accPending}"/></center></apex:panelGroup>
+		<apex:panelGroup ><center><apex:commandButton action="{!refreshContact}" value="Refresh Contact" rendered="{!!conPending}" reRender="theBlock"/>
+		<apex:image value="{!$Resource.icon_clock}" width="30" rendered="{!conPending}"/></center></apex:panelGroup>
+		<apex:panelGroup ><center><apex:commandButton action="{!refreshLead}" value="Refresh Lead" rendered="{!!leaPending}" reRender="theBlock"/>
+		<apex:image value="{!$Resource.icon_clock}" width="30" rendered="{!leaPending}"/></center></apex:panelGroup>		
+		<apex:panelGroup ><center><apex:commandButton action="{!refreshSite}" value="Refresh Site" rendered="{!!sitPending}" reRender="theBlock"/>
+		<apex:image value="{!$Resource.icon_clock}" width="30" rendered="{!sitPending}"/></center></apex:panelGroup>
+		<apex:panelGroup ><center><apex:commandButton action="{!refreshOpportunity}" value="Refresh Opportunity" rendered="{!!oppPending}" reRender="theBlock"/>
+		<apex:image value="{!$Resource.icon_clock}" width="30" rendered="{!oppPending}"/></center></apex:panelGroup>
+		
+		<!--<apex:panelGroup rendered="{!!ISBLANK(perc1)}"><div class="progressBar">
+        	<div class="progress" style="width: {!perc1}%">
+            	{!perc1}%
+       		</div>
+       	</div></apex:panelGroup>
+       	<apex:panelGroup rendered="{!!ISBLANK(perc2)}"><div class="progressBar">
+        	<div class="progress" style="width: {!perc2}%">
+            	{!perc2}%
+       		</div>
+       	</div></apex:panelGroup>
+       	<apex:panelGroup rendered="{!!ISBLANK(perc3)}"><div class="progressBar">
+        	<div class="progress" style="width: {!perc3}%">
+            	{!perc3}%
+       		</div>
+       	</div></apex:panelGroup>
+       	<apex:panelGroup rendered="{!!ISBLANK(perc4)}"><div class="progressBar">
+        	<div class="progress" style="width: {!perc4}%">
+            	{!perc4}%
+       		</div>
+       	</div></apex:panelGroup>
+       	<apex:panelGroup rendered="{!!ISBLANK(perc5)}"><div class="progressBar">
+        	<div class="progress" style="width: {!perc5}%">
+            	{!perc5}%
+       		</div>
+       	</div></apex:panelGroup>-->
+                        
+	</apex:panelGrid>	
+	</center>	
+	<apex:outputPanel id="batchstatus" rendered="{!!ISBLANK(job.percentage)}">
+	<div class="progressBar">
+		<div class="progress" style="width: {!job.percentage}%">
+          	<apex:outputText value="{!job.percentage}%" styleclass="labelGrid"/>
+    	</div>
+    	<center>
+    	<apex:outputText value="Last Refresh Status: {!job.job.Status}" styleclass="labelGrid"/>
+    	<apex:outputText value=" ({!job.job.NumberOfErrors} failures)" styleclass="labelGrid" style="color:red;" rendered="{!IF(job.job.NumberOfErrors > 0,true, false)}"/>
+    	</center>
+    </div>
+    <br/>
+    
+    </apex:outputPanel>
+    	
+	</apex:pageBlock>
+	</apex:form>	
+	
+</apex:page>

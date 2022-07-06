@@ -1,0 +1,301 @@
+<apex:page controller="NewQuoteGridController" tabStyle="Quote__c" sidebar="false">
+
+	<script type="text/javascript">
+        function setFocusOnLoad() {} 
+	</script>
+	
+	<style>
+		tr.datarow {
+			font-size: 90%;
+			padding: 1px;
+		}
+		
+		select {
+		    font-family: inherit;
+		    font-size: inherit;
+		}
+
+		option {
+		    font-size: 90%;
+		}
+		
+		th.productCol { width: 100px; } 
+		td.productCol { width: 100px; vertical-align:top;}
+
+		th.productConfigureCol { width: 40px; }
+		td.productConfigureCol { width: 40px; vertical-align:top;}
+
+		th.cCodeCol { width: 70px; }
+		td.cCodeCol { width: 70px; vertical-align:top;text-align:center;}
+
+		th.imsCol { width: 42px; }
+		td.imsCol { width: 42px; vertical-align:top;}
+
+		th.sampAllowedCol { width: 42px; }		
+		td.sampAllowedCol { width: 42px; vertical-align:top;}
+
+		th.sampAppliedCol { width: 42px; } 
+		td.sampAppliedCol { width: 42px; vertical-align:top;} 
+
+		th.siteCol { width: 120px; }
+		td.siteCol { width: 125px; }
+
+		th.uploadCol { width: 60px; }
+		td.uploadCol { width: 60px; text-align:center;}
+		
+		th.siteTypeCol { width: 100px; }
+		td.siteTypeCol { width: 105px; }
+
+		th.tCodeCol { width: 42px; }
+		td.tCodeCol { width: 42px; }
+
+		th.sCodeCol { width: 53px; }
+		td.sCodeCol { width: 53px; }						
+
+		th.countryCol { width: 43px; }
+		td.countryCol { width: 45px; }
+
+		th.currencyCol { width: 53px; }
+		td.currencyCol { width: 53px; }
+
+		th.contactCollapsedCol { width: 40px; }
+		td.contactCollapsedCol { width: 43px; }
+		
+		th.contactExpandedCol { width: 99px; }
+		td.contactExpandedCol { width: 105px; }
+		
+		th.pricebookCol { width: 152px; }
+		td.pricebookCol { width: 159px; }
+
+		th.detailsCompleteCol { width: 41px; }
+		td.detailsCompleteCol { width: 41px; } 					
+	</style>
+	
+	<apex:sectionHeader subtitle="{!$Label.ProductSiteConfiguration}" title="{!$Label.ConfigureSitesProducts}" />
+
+	<apex:actionStatus id="status">
+		<apex:facet name="start">
+	        <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="200px" ImageUrl="{!$Resource.loading}"/>
+	    </apex:facet>
+	</apex:actionStatus>
+
+	<apex:form id="theForm">
+	
+		<apex:pageMessages id="pageMessages" />
+
+		<apex:actionFunction name="RefreshGrid" rerender="productSiteGrid" />
+		
+		<apex:pageBlock id="prodSites" mode="edit" title="{!$Label.ProductandSites}">
+			<apex:pageBlockButtons >	
+				<apex:commandButton action="{!Back}" value="{!$Label.Back}" rendered="{!editMode}" />
+				<apex:commandButton action="{!QuickSave}" value="{!$Label.QuickSave}" rerender="prodSites,pageMessages" rendered="{!editMode}" />				
+				<apex:commandButton action="{!Save}" value="{!$Label.Save}" rendered="{!editMode}" />
+				<apex:commandButton action="{!Close}" value="Close" rendered="{!!editMode}" />				
+<!--				<apex:commandButton action="{!ConfigureAll}" disabled="{!!CheckPricebooksSet}" value="{!$Label.ConfigureAll}" rerender="pageMessages" /> -->
+			</apex:pageBlockButtons>
+
+			<br />
+
+			<apex:pageBlockSection columns="1">	
+					<apex:outputField value="{!quote.Name}" ></apex:outputField>
+					<apex:outputField value="{!quote.Opportunity_Name__c}" ></apex:outputField>
+					<apex:outputField value="{!quote.Account__c}" ></apex:outputField>
+					<apex:outputText style="color:blue;font-weight:bold;" value="{!$Label.ReconfigureQuoteMessage}" />
+			</apex:pageBlockSection>
+
+			<br />
+			
+<!--			<apex:pageBlockSection columns="1" title="Product Information">-->
+				<apex:outputPanel id="productSiteGrid">
+					<table style="border-collapse:collapse;width:{!IF(ViewContacts,'1825','1425')}px;" class="list" border="0" cellpadding="0" cellspacing="0" >
+						<!-- Column Headers -->			
+						<thead class="rich-table-thead">
+							<tr class="headerRow" >
+								<th class="headerRow productCol">{!$Label.TH_Product}</th>
+								<th class="headerRow productConfigureCol">&nbsp;</th>							
+								<th class="headerRow cCodeCol">{!$Label.TH_C_Code}</th>
+								<th class="headerRow imsCol">{!$Label.TH_Combi} /<br /> {!$Label.TH_IMS}</th>
+								<th class="headerRow sampAllowedCol">{!$Label.TH_Sampling}<br />{!$Label.TH_Allowed}</th>
+								<th class="headerRow sampAppliedCol">{!$Label.TH_Sampling}<br />{!$Label.TH_Applied}</th>
+								<th class="headerRow siteCol">{!$Label.TH_Site}</th>
+								<th class="headerRow uploadCol">{!$Label.UploadFile}</th>
+								<th class="headerRow siteTypeCol">{!$Label.TH_Type}</th>
+								<th class="headerRow tCodeCol">{!$Label.TH_T_Code}</th>
+								<th class="headerRow sCodeCol">{!$Label.TH_S_Code}</th>												
+								<th class="headerRow countryCol">{!$Label.TH_Country}</th>
+								<th class="headerRow currencyCol">{!$Label.TH_Currency}</th>
+								<th class="headerRow pricebookCol">{!$Label.TH_Pricebook}</th>						
+								<th class="headerRow pricebookCol">{!$Label.TH_SecondaryPricebook}</th>
+								<apex:outputPanel layout="none" rendered="{!!ViewContacts}">
+									<th class="headerRow contactCollapsedCol" style="text-align:center;cursor:pointer;">
+										<apex:outputPanel >
+											<apex:actionSupport action="{!ShowContacts}" event="onclick" rerender="productSiteGrid" />
+											<apex:image value="/img/icon/people16.png" title="{!$Label.Show_Contacts}"/>
+										</apex:outputPanel>
+									</th>
+								</apex:outputPanel>
+		
+								<apex:outputPanel layout="none" rendered="{!ViewContacts}">
+									<th class="headerRow contactExpandedCol">
+										<apex:outputPanel >
+											<apex:actionSupport action="{!HideContacts}" event="onclick" rerender="productSiteGrid" />
+											{!$Label.TH_Main}<br />{!$Label.TH_Contact}&nbsp;																				
+											<apex:image value="/img/func_icons/cal/leftArrow.gif" style="cursor:pointer;float:right;" title="{!$Label.HideContacts}"/>								
+										</apex:outputPanel>
+									</th>
+									<th class="headerRow contactExpandedCol">
+										<apex:outputPanel >
+											<apex:actionSupport action="{!HideContacts}" event="onclick" rerender="productSiteGrid" />
+											{!$Label.TH_Booking}<br />{!$Label.TH_Contact}&nbsp;
+											<apex:image value="/img/func_icons/cal/leftArrow.gif" style="cursor:pointer;float:right;" title="{!$Label.HideContacts}"/>
+										</apex:outputPanel>
+									</th>
+									<th class="headerRow contactExpandedCol">
+										<apex:outputPanel >
+											<apex:actionSupport action="{!HideContacts}" event="onclick" rerender="productSiteGrid" />
+											{!$Label.TH_Invoice}<br />{!$Label.TH_Contact}&nbsp;
+											<apex:image value="/img/func_icons/cal/leftArrow.gif" style="cursor:pointer;float:right;" title="{!$Label.HideContacts}"/>									
+										</apex:outputPanel>
+									</th>
+									<th class="headerRow contactExpandedCol">
+										<apex:outputPanel >
+											<apex:actionSupport action="{!HideContacts}" event="onclick" rerender="productSiteGrid" />
+											{!$Label.TH_Credit}<br />{!$Label.TH_Contact} &nbsp;
+											<apex:image value="/img/func_icons/cal/leftArrow.gif" style="cursor:pointer;float:right;" title="{!$Label.HideContacts}"/>									
+										</apex:outputPanel>
+									</th>														
+								</apex:outputPanel>
+		
+								<th class="headerRow detailsCompleteCol" >{!$Label.TH_Complete}</th>
+							</tr>
+						</thead>
+						<!-- Categories & Products -->				
+						<tbody>
+							<apex:repeat value="{!Products}" var="product">
+								<tr class="datarow">
+									<td class="datacell productCol"><apex:outputText value="{!product.name}" /></td>
+	
+									<td class="datacell productConfigureCol" style="text-align:center;">
+										<apex:commandButton status="status" style="width:55px;" rendered="{!editMode}" disabled="{!!CheckPricebooksSet}" id="configureProduct" rerender="pageMessages" action="{!ConfigureProduct}" value="{!$Label.Configure}" >
+											<apex:param value="{!product.Id}" name="configureQuoteProductId" assignTo="{!selectedProductId}" /> 
+										</apex:commandButton>									
+	
+										<apex:commandButton status="status" rendered="{!!editMode}" id="viewConfigureProduct" rerender="pageMessages" action="{!ConfigureProduct}" value="{!$Label.View}" >
+											<apex:param value="{!product.Id}" name="viewQuoteProductId" assignTo="{!selectedProductId}" /> 
+										</apex:commandButton>
+									</td>
+		
+									<td class="datacell cCodeCol" ><apex:outputText value="{!product.CCode}" /></td>
+									
+									<td class="datacell imsCol" style="text-align:center;">
+										<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.IMS}" />
+									</td>
+		
+									<td class="datacell sampAllowedCol" style="text-align:center;">
+										<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.VerifiedForSampling}" />
+									</td>
+			
+									<td class="datacell sampAppliedCol" style="text-align:center;">
+										<apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.ValidForSampling}" />
+									</td>
+																
+									<td colspan="{!IF(ViewContacts,'14','11')}" style="padding:0px;margin:0px;"> 							
+										<table style="border-collapse:collapse;" border="1" class="list" cellpadding="0" cellspacing="0">
+											<apex:repeat value="{!Sites}" var="site">
+												<apex:repeat value="{!product.SitesMap[site.Index]}" var="productSite">
+													<apex:outputPanel layout="none" rendered="{!productSite.Selected}" >
+														<tr class="datarow">
+															
+															<td class="datacell siteCol"><apex:outputText value="{!productSite.Site.Name}" /></td>
+															
+															<td class="datacell uploadCol">
+																<apex:outputText value="N/A" rendered="{!editMode && !product.FileUpload}" />												
+																<apex:commandButton status="status" style="width:55px;{!IF(productSite.FileUploaded,'background:lightgreen;','')}" rendered="{!editMode && product.FileUpload}" disabled="{!!CheckPricebooksSet}" id="uploadFile" rerender="pageMessages" action="{!UploadProduct}" value="{!$Label.UploadFile}" >
+																	<apex:param value="{!productSite.qpId}" name="ufQuoteProductId"  assignTo="{!selectedQuoteProductId}" /> 
+																	<apex:param value="{!product.Id}"       name="ufProductId"       assignTo="{!selectedProductId}" />
+																</apex:commandButton>	
+															</td>
+															
+															<td class="datacell siteTypeCol"><apex:outputText value="{!productSite.Site.Type}" /></td>
+															<td class="datacell tCodeCol"><apex:outputText value="{!productSite.Site.TCodePrefix}" style="cursor:help;" title="{!productSite.Site.TCode}" /></td>
+															<td class="datacell sCodeCol"><apex:outputText value="{!productSite.Site.SCode}" /></td>
+		<!--													<td class="datacell pCodeCol"><apex:outputText value="{!productSite.Site.PCode}" /></td>-->																													
+															<td class="datacell countryCol" style="text-align:center;">
+																<apex:outputText value="{!productSite.Site.Country}" />
+															</td>
+															
+															<td class="datacell currencyCol" style="text-align:center;">
+																<apex:selectList disabled="{!!editMode}" value="{!productSite.CurrencyCode}" multiselect="false" size="1" required="true">
+																	<apex:selectOptions value="{!CurrencyCodeItems}" />
+																</apex:selectList>
+															</td>
+															
+															<td class="datacell pricebookCol" style="text-align:center;{!IF(productSite.PricebookId==null,'background-color:red;','')}">															
+																<apex:selectList disabled="{!!editMode}" id="Pricebook" label="Pricebook: {!product.name} - {!productSite.Site.Name}" value="{!productSite.PricebookId}" multiselect="false" size="1" required="true">
+																	<apex:selectOptions value="{!PricebookItems}" />
+																</apex:selectList>
+																<apex:image value="/img/msg_icons/warning16.png" rendered="{!productSite.PricebookId==null}" title="Select a Pricebook and click Quick Save" />
+															</td>
+	
+															<td class="datacell pricebookCol" style="text-align:center;{!IF(productSite.SecondaryPricebookId==null,'background-color:red;','')}">															
+																<apex:selectList disabled="{!!editMode}" id="SecondaryPricebook" label="Pricebook: {!product.name} - {!productSite.Site.Name}" value="{!productSite.SecondaryPricebookId}" multiselect="false" size="1" required="true">
+																	<apex:selectOptions value="{!PricebookItems}" />
+																</apex:selectList>
+																<apex:image value="/img/msg_icons/warning16.png" rendered="{!productSite.PricebookId==null}" title="Select a Pricebook and click Quick Save" />
+															</td>
+															
+															<apex:outputPanel layout="none" rendered="{!!ViewContacts}">
+																<td class="datacell contactCollapsedCol" style="text-align:center;">
+																	<apex:image value="/img/icon/profile16.png" rendered="{!productSite.HasSelectedContacts}" style="cursor:pointer;" title="{!productSite.SelectedContacts}" >
+																		<apex:actionSupport action="{!ShowContacts}" event="onclick" rerender="productSiteGrid" />
+																	</apex:image>
+									
+																	<apex:image value="/img/msg_icons/warning16.png" rendered="{!productSite.HasUnselectedContacts}" style="cursor:pointer;" title="{!productSite.UnselectedContacts}" >
+																		<apex:actionSupport action="{!ShowContacts}" event="onclick" rerender="productSiteGrid" />
+																	</apex:image>
+																</td>	
+															</apex:outputPanel>
+											
+															<apex:outputPanel layout="none" rendered="{!ViewContacts}">						
+																<td class="datacell contactExpandedCol" style="text-align:center">
+																	<apex:selectList disabled="{!!editMode}" value="{!productSite.MainContact}" multiselect="false" size="1">
+																		<apex:selectOptions value="{!ContactItems}" />
+																	</apex:selectList>
+																</td>
+																<td class="datacell contactExpandedCol" style="text-align:center">
+																	<apex:selectList disabled="{!!editMode}" value="{!productSite.BookingContact}" multiselect="false" size="1">
+																		<apex:selectOptions value="{!ContactItems}" />
+																	</apex:selectList>
+																</td>							
+																<td class="datacell contactExpandedCol" style="text-align:center">
+																	<apex:selectList disabled="{!!editMode}" value="{!productSite.InvoiceContact}" multiselect="false" size="1">
+																		<apex:selectOptions value="{!ContactItems}" />
+																	</apex:selectList>
+																</td>									
+																<td class="datacell contactExpandedCol" style="text-align:center">
+																	<apex:selectList disabled="{!!editMode}" value="{!productSite.CreditContact}" multiselect="false" size="1">
+																		<apex:selectOptions value="{!ContactItems}" />
+																	</apex:selectList>
+																</td>								
+															</apex:outputPanel>						
+					
+															<td class="datacell detailsCompletedCol" style="text-align:center;">
+																<apex:image value="/img/msg_icons/info16.png" style="cursor:help;" rendered="{!!productSite.Completed}" title="{!$Label.Configurationincomplete}" />
+																<apex:image value="/img/msg_icons/confirm16.png" style="cursor:help;" rendered="{!productSite.Completed}" title="{!$Label.ConfigurationCompleted}"/>
+															</td>
+														</tr>
+													</apex:outputPanel>
+												</apex:repeat>
+			 									
+											</apex:repeat>										
+										</table>
+									</td>
+								</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+				</apex:outputPanel>
+<!--			</apex:pageBlockSection>				-->
+		</apex:pageBlock>
+	</apex:form>		
+</apex:page>

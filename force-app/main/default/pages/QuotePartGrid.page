@@ -1,0 +1,465 @@
+<apex:page controller="QuotePartGridController" tabStyle="Quote__c" sidebar="false" id="thePage">
+ 
+    <script type="text/javascript">
+        function setFocusOnLoad() {}
+    
+        function noenter(ev)  {
+            if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        function loseFocus(ev, elemId)  {
+            if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+                document.getElementById(elemId).blur();
+                return false;r
+            } else {
+                return true;
+            }
+        }
+                
+        function hideButtons() {
+            var elem1 = document.getElementById("hideButtons");
+            var elem2 = document.getElementById("showButtons");             
+            elem1.style.display = "inline";
+            elem2.style.display = "none";
+        }
+        function showButtons() {
+            var elem1 = document.getElementById("hideButtons");
+            var elem2 = document.getElementById("showButtons");             
+            elem1.style.display = "none";
+            elem2.style.display = "inline";
+        }
+        
+    </script>
+    
+    <style>
+        tr.datarow {
+            padding:1px;
+        }
+
+        table.fixed { table-layout:fixed; }
+        table.fixed td { overflow: hidden; }
+
+        <!-- COLUMNS -->
+        th.productCol { width:110px; }
+        td.productCol { width:110px; }
+
+        th.siteCol { width:100px; }
+        td.siteCol { width:93px; }
+
+        th.orderCol { width:51px; }
+        td.orderCol { width:50px; } 
+        
+        th.customerCodeCol { width:200px; }
+        td.customerCodeCol { width:193px; }                 
+
+        th.priceBookCol { width:176px; text-align:left; }
+        td.priceBookCol { width:166px; text-align:left; }   
+
+        th.currencyCol { width:77px; }
+        td.currencyCol { width:75px; }      
+        
+        th.listPriceCol { width:75px; text-align:right;}
+        td.listPriceCol { width:74px; text-align:right;}    
+
+        th.listPriceConvertedCol { width:100px; text-align:right;}
+        td.listPriceConvertedCol { width:95px; text-align:right;}   
+
+        th.priceCol { width:113px; text-align:right; }
+        td.priceCol { width:109px; text-align:right; }  
+        
+        th.discountCol { width:117px; text-align:right; }
+        td.discountCol { width:115px; text-align:right; }   
+
+        th.PriceDiscount { width:115px; text-align:right;}
+        td.PriceDiscount { width:114px; text-align:right;}  
+
+        th.qtyCol { width:44px; }
+        td.qtyCol { width:42px; }
+
+        th.totalCol { width:75px; text-align:right; }
+        td.totalCol { width:74px; text-align:right; } 
+
+        th.trueDiscount { width:100px; text-align:right; }
+        td.trueDiscount { width:100px; text-align:right; } 
+
+        th.includeInBundleCol { width:45px; text-align:left; }
+        td.includeInBundleCol { width:43px; text-align:left; }
+    </style>
+    
+    <apex:sectionHeader subtitle="Prices and Discounts" title="Quote Parts" />
+
+    <apex:actionStatus id="status">
+        <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="200px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+    </apex:actionStatus>
+
+    <!-- WARNINGS -->
+    <apex:outputpanel rendered="{!ShowGlobalDiscountMsg}">
+        <table width="100%" style="background-color:#FF1493;color:#fff;"><tr>
+            <td style="vertical-align:middle;" width="35px"></td>
+            <td style="vertical-align:middle;text-align:center;font-weight:bold;color:#fff;">
+            Your quote includes sites in at least one location that is not your home country. If you do not know their local discount policy please refer to the
+            <a target="_blank" style="color:#fff" href="https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fteams.microsoft.com%2Fl%2Ffile%2F632A2D45-CDD5-4499-8706-3F8A3A940DE5%3FtenantId%3D54946ffc-68d3-4955-ac70-dca726d445b4%26fileType%3Ddocx%26objectUrl%3Dhttps%253A%252F%252Fbsigroup.sharepoint.com%252Fsites%252FGlobalPricingTeamandIntercompanyGuidance%252FShared%2520Documents%252FGeneral%252FIntercompany%2520Pricing%252FSystem%2520Certification%2520Global%2520Discount%2520Guidance%25202020.docx%26baseUrl%3Dhttps%253A%252F%252Fbsigroup.sharepoint.com%252Fsites%252FGlobalPricingTeamandIntercompanyGuidance%26serviceName%3Dteams%26threadId%3D19%3Af5a8e4587add4ad6965d23abaff54b25%40thread.tacv2%26groupId%3D7566ea96-98d0-4d1c-9968-0abbdebe5b31&data=02%7C01%7CPrasad.JN%40bsigroup.com%7Cc23ee300e25c467ab24e08d84f1cc587%7C54946ffc68d34955ac70dca726d445b4%7C0%7C0%7C637346332274529881&sdata=hUAy4zTprRRF0zsn7fiRc6xwQ93EgrEJXeFgBzNBMi0%3D&reserved=0">Global Discount Guide</a>
+            . If you don’t have access you’ll be prompted to request it. If you wish to exceed these discount levels you will require approval by email from the local BSI Commercial Manager, Regional MD or COO.
+            </td> 
+        </tr></table>
+    </apex:outputpanel>
+    <apex:outputpanel rendered="{!HasHalfDays}">
+        <table width="100%" style="background-color:#C25454;"><tr>
+            <td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+            <td style="vertical-align:middle;font-weight:bold;">{!$Label.HalfDaysForUKIE}</td> 
+        </tr></table>
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!HasNoPriceBookEntryies}">
+        <table width="100%" style="background-color:#C25454;"><tr>
+            <td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+            <td style="vertical-align:middle;font-weight:bold;">{!$Label.BG_NO_PRICEBOOK_ERROR}</td> 
+        </tr></table>
+    </apex:outputpanel>
+
+    <apex:form id="theForm">
+
+        <apex:pageMessages id="pageMessages" />
+
+        
+        <apex:pageBlock mode="edit" id="thePageBlock">
+            <apex:pageBlockButtons location="top" > 
+
+                <div id="showButtons" >
+                    <apex:commandButton action="{!Cancel}" value="Cancel" />
+                    <apex:commandButton action="{!QuickSave}" value="Quick Save" rerender="productPricesGrid,pageMessages" status="status" />               
+                    <apex:commandButton action="{!Save}" value="Save" status="status" />
+                </div>
+
+                <div id="hideButtons" style="display:none" >
+                    <apex:outputText value="{!$Label.CompletePriceChange}" style="font-weight:bold;color:green;" />
+                </div>
+            </apex:pageBlockButtons>
+                    
+            <apex:pageBlockSection id="thePageBlockSection" title="Product Prices and Discounts Table" columns="1">
+            
+
+                
+                Filter
+                <apex:panelGrid columns="5" id="componentGrid">
+                    <!-- <c:bg_FacetedSearch delegate="{!searchController}" object="Quote_Part__c" field="Product2__r.ProductArea__c" /> -->
+                    <c:bg_FacetedSearch delegate="{!searchController}" object="Quote_Part__c" field="Product_Name__c" />
+                    <c:bg_FacetedSearch delegate="{!searchController}" object="Quote_Part__c" field="Quote_Product__r.Site_Name__c" />           
+                    <c:bg_FacetedSearch delegate="{!searchController}" object="Quote_Part__c" field="Phase__c" />
+                    <c:bg_FacetedSearch delegate="{!searchController}" object="Quote_Part__c" field="FeeType__c" />
+                    
+                </apex:panelGrid>
+                
+                <apex:outputPanel layout="block">
+                    <apex:commandButton action="{!removeFilters}" value="{!$Label.bg_Remove_Filters}" rerender="productPricesGrid,componentGrid,pageMessages,grandTotalDiscount" />
+                    <apex:commandButton action="{!applyFilters}" value="{!$Label.bg_apply_Filters}" status="status" rerender="productPricesGrid,componentGrid,pageMessages" /> 
+                </apex:outputPanel>
+                
+                    
+                <apex:pageBlockSectionItem >                
+                    
+                    <apex:outputPanel id="bundleActions" rendered="{!editMode}">
+                            <apex:selectList value="{!selectedReferenceSetting}" multiselect="false" size="1" style="float: left">
+                                <apex:selectOptions value="{!referenceSettings}"/>
+                                <apex:actionSupport event="onchange" action="{!resetBundleActionFields}" reRender="bundleActions" />    
+                            </apex:selectList>
+                        
+                        <apex:outputPanel id="roundDiscounts" style="float:right;">         
+                            <apex:outputLabel value="Round Discount Amount" for="roundDiscounts" styleClass="labelCol" />
+                            <apex:actionRegion >
+                                <apex:inputCheckbox value="{!roundDiscounts}">
+<!-- ASD ADDED ACTION -->           <apex:actionSupport event="onchange" action="{!CalculateGrandTotals}" rerender="discount,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,PriceDiscount" status="status" />
+                                </apex:inputCheckbox>   
+                            </apex:actionRegion>
+                        </apex:outputPanel> 
+                        
+                        <apex:outputPanel >                 
+                            <apex:selectList value="{!selectedDiscountDisplayOption}" multiselect="false" size="1" style="float: right">
+                                <apex:selectOptions value="{!DiscountDisplayOptions}"/>
+                                <apex:actionSupport event="onchange" action="{!toggleShowDiscountAmount}" reRender="discount,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,PriceDiscount" status="status"/>    
+                            </apex:selectList>
+                        </apex:outputPanel>             
+                                                
+                        <apex:selectList value="{!selectedBundleActionOption}" multiselect="false" size="1" style="float: left" rendered="{! selectedReferenceSetting=$Label.bg_Bundle_Action_Discount}">
+                            <apex:selectOptions value="{!bundleActionOptions}"/>
+                            <!-- <apex:actionSupport event="onchange" action="{!addTag}" reRender="selectedItems, availableOptions" /> -->  
+                        </apex:selectList>
+                        <apex:inputText value="{!bundleActionAmount}" style="float: left" rendered="{! OR(selectedReferenceSetting=$Label.bg_Bundle_Action_Discount, selectedReferenceSetting=$Label.bg_Bundle_Action_Sales_Price )}"/>
+                        <apex:commandButton action="{!applyBundleAction}" value="{!$Label.bg_Apply_Bundle_Action}" style="float: left" disabled="{! OR(selectedReferenceSetting=$Label.bg_Bundle_Action_Default, selectedReferenceSetting='')}" reRender="productPricesGrid,bundleActions" status="status"/>                        
+                    </apex:outputPanel>
+                    
+                                            
+                </apex:pageBlockSectionItem>
+
+                <apex:outputPanel id="productPricesGrid">
+                
+                    <table style="border-collapse:collapse;width:1603px;" class="list" border="0" cellpadding="0" cellspacing="0" >
+    <!--                     Column Headers             -->
+                            <thead>
+                            <tr class="headerRow" >
+                                <th class="headerRow productCol">Product</th>
+                                <th class="headerRow siteCol">Location</th>
+                                <th class="headerRow orderCol"><span class="helpButton" id="order-column-_help"><img src="/s.gif" class="helpOrb" />Order<script type="text/javascript">sfdcPage.setHelp('order-column', '{!$Label.QuotePartGrid_Order_Help_Text}');</script></span></th> 
+                                <th class="headerRow includeInBundleCol">{!$Label.Multi_Record_Action_Label}</th>
+                                <th class="headerRow customerCodeCol">Line Item Description</th>
+                                <th class="headerRow priceBookCol">Pricebook</th>
+                                <th class="headerRow currencyCol">Currency</th>
+                                <th class="headerRow listPriceCol">List Price</th>
+                                <th class="headerRow listPriceConvertedCol">Unit Price</th>
+                                <th class="headerRow priceCol">Sales Price</th>
+                                <th class="headerRow discountCol">Discount Applied</th>
+                                <th class="headerRow PriceDiscount">Price after discount</th>
+                                <th class="headerRow qtyCol">Qty</th>
+                                <th class="headerRow totalCol">Total Price</th>
+                                <th class="headerRow trueDiscount">True Discount</th>
+                                <!--<th class="headerRow totalCol">Total ({!quote.CurrencyISOCode})</th>-->
+                            </tr>
+                        </thead>
+                        <!-- Categories & Products -->
+                        <tbody>
+                            <apex:repeat value="{!ProductWrappers}" var="product">
+                                <tr class="datarow">
+                                    <td class="datacell productCol"><apex:outputText value="{!product.name}" /></td>
+    
+                                    <td colspan="14" style="padding:0px;">                          
+                                        <table style="border-collapse:collapse;" border="1" class="list fixed" cellpadding="0" cellspacing="0">
+                                            <apex:repeat value="{!product.SiteWrappers}" var="site">
+                                                <tr>
+                                                    <td class="datacell siteCol"><apex:outputText value="{!site.name}" /></td>
+        
+                                                    <td style="padding:0px;">
+                                                        <table style="border-collapse:collapse;" border="1" class="list fixed" cellpadding="0" cellspacing="0">                         
+                                                            <apex:repeat value="{!site.QuotePartWrappers}" var="qpw">
+                                                                <tr style="{!IF(qpw.QuotePart.Price_Book__c = null,'background: #dddddd;','')}">
+                                                                    <td class="datacell orderCol" style="font-size:12px;vertical-align:middle;">
+                                                                        <apex:inputField value="{!qpw.QuotePart.BOMOrder__c}" style="width:20px;" />
+                                                                    </td>
+                                                                    <td class="datacell includeInBundleCol" style="vertical-align:middle;text-align: left;">
+                                                                        <apex:inputCheckbox value="{!qpw.includeInBundleAction}" />
+                                                                    </td>
+                                                                    <td class="datacell customerCodeCol" style="font-size:12px;vertical-align:middle;">
+                                                                        <apex:outputText value="{!qpw.QuotePart.Customer_Code__c}" />
+                                                                        <br />
+                                                                        <apex:outputText value="{!qpw.QuotePart.Description__c}" style="font-size:8pt;font-style:italic;" />
+                                                                        
+                                                                        <apex:outputPanel layout="none" rendered="{!OR(qpw.QuotePart.IsTraining__c, qpw.QuotePart.IsPartBuilder__c)}">
+                                                                            <br />
+                                                                            <apex:outputText value="{!qpw.QuotePart.Info__c}" style="font-size:8pt;font-style:italic;" />
+                                                                        </apex:outputPanel>
+
+                                                                        <apex:outputPanel id="addNotes" layout="block" style="float:right;">
+                                                                            <apex:actionRegion >
+                                                                                <apex:commandLink rerender="addNotes,lineNotes" rendered="{!!qpw.showNotes}" status="status">
+                                                                                    <apex:param name="showNote" value="true" assignTo="{!qpw.showNotes}" />
+                                                                                    <apex:image value="/img/func_icons/util/pencil12.gif" title="Add Notes" />
+                                                                                </apex:commandLink>
+                                                                            </apex:actionRegion>
+                                                                        </apex:outputPanel>
+                                                                                
+                                                                        <apex:outputPanel id="lineNotes" layout="block">
+                                                                            <apex:outputPanel rendered="{!qpw.showNotes}" >
+                                                                                <apex:actionRegion >
+                                                                                    <apex:outputLabel value="Notes" for="notes" styleClass="labelCol" style="vertical-align:top;" />
+                                                                                    <apex:inputTextArea id="notes" cols="39" rows="2" value="{!qpw.QuotePart.Notes__c}" />  
+                                                                                
+                                                                                    <apex:commandLink action="{!qpw.ClearNotes}" rerender="addNotes,lineNotes" rendered="{!qpw.showNotes}" status="status">
+                                                                                        <apex:image value="/img/func_icons/remove12.gif" style="vertical-align:top;" title="Delete Notes"/>
+                                                                                    </apex:commandLink>
+                                                                                </apex:actionRegion>
+                                                                            </apex:outputPanel>
+                                                                        </apex:outputPanel>
+                                                                    </td>                                                                                                                   
+
+                                                                    <td class="datacell priceBookCol" style="font-size:12px;text-align:center;vertical-align:middle;">
+
+                                                                        <apex:outputField value="{!qpw.QuotePart.Price_Book__c}" rendered="{!!editMode}" />
+
+                                                                        <apex:actionRegion rendered="{!editMode}" >                                                                                                         
+                                                                            <apex:selectList value="{!qpw.QuotePart.Price_Book__c}" multiselect="false" size="1" id="basePriceBook" disabled="{!qpw.QuotePart.Product2__r.IsPriceCalculated__c}">
+                                                                                <apex:selectOptions value="{!qpw.AvailablePricebooks}" />
+                                                                                <apex:actionSupport event="onchange" action="{!changeSinglePriceBook}" rerender="pageMessages, productPricesGrid" status="status">
+                                                                                    <apex:param value="{!qpw.QuotePart.Id}" name="pricebookChange" assignTo="{!selectedQuotePartId}" />
+                                                                                </apex:actionSupport>
+                                                                            </apex:selectList>
+                                                                            <apex:image value="/img/alohaSkin/help_orange.png" title="{!$Label.PriceCalculatedByConfigurator}" rendered="{!qpw.QuotePart.Product2__r.IsPriceCalculated__c}" />
+                                                                        </apex:actionRegion>
+                                                                    </td>
+                                                                    
+                                                                    <td class="datacell currencyCol" style="font-size:12px;text-align:center;vertical-align:middle;">
+                                                                        <apex:outputPanel id="currencyAvailable">
+                                                                            <apex:outputField value="{!qpw.QuotePart.CurrencyIsoCode}" rendered="{!!editMode}" />
+                                                                            <apex:actionRegion rendered="{!editMode}">
+                                                                                <apex:selectList disabled="{!IF(qpw.QuotePart.Price_Book__c = null, true, false)}" value="{!qpw.QuotePart.CurrencyIsoCode}" multiselect="false" size="1" id="baseCurrency">
+                                                                                    <!--<apex:selectOptions value="{!CurrencyCodeItems}" />-->
+                                                                                    <apex:selectOptions value="{!qpw.AvailableCurrencies}" />
+                                                                                    <apex:actionSupport event="onchange" action="{!changeSingleCurrency}" rerender="pageMessages, productPricesGrid" status="status">
+                                                                                        <apex:param value="{!qpw.QuotePart.Id}" name="currencyChange" assignTo="{!selectedQuotePartId}" />
+                                                                                    </apex:actionSupport>
+                                                                                </apex:selectList>
+                                                                            </apex:actionRegion>
+                                                                        </apex:outputPanel>
+                                                                    </td>   
+                                                                                                                                        
+                                                                    <td class="datacell listPriceCol" style="font-size:12px;text-align:right;vertical-align:middle;">
+                                                                        <apex:outputPanel id="listprice">
+                                                                            <apex:outputText rendered="{!IF(qpw.QuotePart.List_Price__c = 0, true, false)}" value="{0, number, ###,###}">
+                                                                                <apex:param value="{!qpw.QuotePart.List_Price__c}" />
+                                                                            </apex:outputText>
+                                                                            <apex:outputText rendered="{!IF(qpw.QuotePart.List_Price__c = 0, false, true)}" value="{0, number, ###,###.00}">
+                                                                                <apex:param value="{!qpw.QuotePart.List_Price__c}" />
+                                                                            </apex:outputText>
+<!--                                                                            <apex:outputField value="{!qpw.QuotePart.List_Price__c}" /> -->
+                                                                        </apex:outputPanel>
+                                                                    </td>
+
+                                                                    <td class="datacell listPriceConvertedCol" style="font-size:12px;text-align:right;vertical-align:middle;">
+                                                                        <apex:outputPanel id="listpriceConverted">
+                                                                            <apex:outputText rendered="{!IF(qpw.QuotePart.List_Price__c = 0, true, false)}" value="{0, number, ###,###}">
+                                                                                <apex:param value="{!qpw.QuotePart.Converted_list_Price__c}" />
+                                                                            </apex:outputText>
+                                                                            <apex:outputText rendered="{!IF(qpw.QuotePart.List_Price__c = 0, false, true)}" value="{0, number, ###,###.00}">
+                                                                                <apex:param value="{!qpw.QuotePart.Converted_list_Price__c}" />
+                                                                            </apex:outputText>
+<!--                                                                            <apex:outputField value="{!qpw.QuotePart.Converted_list_Price__c}" /> -->
+                                                                        </apex:outputPanel>
+                                                                    </td>
+
+                                                                    <td class="datacell priceCol" style="font-size:12px;vertical-align:middle;text-align:right;}">
+                                                                        <apex:outputPanel layout="block" id="price" style="{!IF((CEILING(qpw.QuotePart.Price__c) > CEILING(qpw.QuotePart.Converted_list_Price__c)),'background-color:#F88017','')}">                
+                                                                            <apex:image style="vertical-align:middle;" value="/img/sort_asc_arrow.gif" title="Price increase of {!qpw.QuotePart.Price__c - qpw.QuotePart.Converted_list_Price__c} {!qpw.QuotePart.CurrencyIsoCode}" rendered="{!CEILING(qpw.QuotePart.Price__c) > CEILING(qpw.QuotePart.Converted_list_Price__c)}" />
+                                                                            <apex:outputPanel >
+                                                                                <apex:outputText rendered="{!AND(!editMode, !showDecimals)}" style="font-size:12px;text-align:right;width:80px;" value="{0, number, ###,###}">
+                                                                                    <apex:param value="{!qpw.RoundedPrice}" />
+                                                                                </apex:outputText>
+                                                                                <apex:outputText rendered="{!AND(!editMode, showDecimals)}" style="font-size:12px;text-align:right;width:80px;" value="{0, number, ###,###.00}">
+                                                                                    <apex:param value="{!qpw.Price}" />
+                                                                                </apex:outputText>
+                                                                            </apex:outputPanel>
+                                                                            <apex:actionRegion >
+                                                                                <apex:outputPanel id="priceValue">
+                                                                                    <apex:outputText value="0" rendered="{!IF(qpw.QuotePart.Price_Book__c = null, true, false)}"/>
+                                                                                    <apex:outputPanel rendered="{!IF(qpw.QuotePart.Price_Book__c = null, false, true)}">
+                                                                                        <apex:inputText rendered="{!AND(editMode, !showDecimals)}" style="font-size:12px;text-align:right;width:80px;" value="{!qpw.RoundedPrice}" onkeypress="return loseFocus(event, '{!$Component.priceValue}');" onfocus="hideButtons();" onblur="showButtons();">
+                                                                                            <apex:actionSupport event="onchange" action="{!CalculateGrandTotals}" rerender="price,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,discount,trueDiscount,PriceDiscount" status="status" />
+                                                                                        </apex:inputText>
+                                                                                        <apex:inputText rendered="{!AND(editMode, showDecimals)}" style="font-size:12px;text-align:right;width:80px;" value="{!qpw.Price}" onkeypress="return loseFocus(event, '{!$Component.priceValue}');" onfocus="hideButtons();" onblur="showButtons();">
+                                                                                            <apex:actionSupport event="onchange" action="{!CalculateGrandTotals}" rerender="price,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,discount,trueDiscount,PriceDiscount" status="status" />
+                                                                                        </apex:inputText>
+                                                                                    </apex:outputPanel>
+                                                                                </apex:outputPanel>
+                                                                            </apex:actionRegion>
+                                                                        </apex:outputPanel>
+                                                                    </td>
+
+                                                                                                                                                
+                                                                    <td class="datacell discountCol" style="text-align:right;vertical-align:middle;">
+                                                                        
+                                                                        <apex:outputText value="0" rendered="{!IF(qpw.QuotePart.Price_Book__c = null, true, false)}"/>
+                                                                        <apex:outputPanel rendered="{!IF(qpw.QuotePart.Price_Book__c = null, false, true)}" layout="block" id="discount" style="{!IF(AND(!ISNULL(qpw.QuotePart.Discount_Percentage__c), qpw.QuotePart.Discount_Percentage__c != 0),'background-color:#F88017','')}">
+                                                                            <apex:image style="vertical-align:middle;" value="/img/sort_desc_arrow.gif" title="Discount reduction" rendered="{!AND(!ISNULL(qpw.QuotePart.Discount_Percentage__c), qpw.QuotePart.IsDiscountable__c, (qpw.QuotePart.Discount_Percentage__c < 0))}" />
+                                                                            <apex:image style="vertical-align:middle;" value="/img/sort_asc_arrow.gif" title="Discount increase" rendered="{!AND(!ISNULL(qpw.QuotePart.Discount_Percentage__c), qpw.QuotePart.IsDiscountable__c, (qpw.QuotePart.Discount_Percentage__c > 0))}" />
+
+                                                                            <apex:inputField id="discountValue" onkeypress="return loseFocus(event, '{!$Component.discountValue}');" onfocus="hideButtons();" onblur="showButtons();" style="font-size:12px;text-align:right;width:60px;" value="{!qpw.QuotePart.Discount_Percentage__c}" rendered="{!AND(editMode, qpw.QuotePart.IsDiscountable__c, !showDiscountAmount)}">
+                                                                                <apex:actionSupport event="onchange" action="{!CalculateGrandTotals}" rerender="discount,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,trueDiscount,PriceDiscount" status="status" />
+                                                                            </apex:inputField>
+
+                                                                            <apex:inputText id="discountAmount" onkeypress="return loseFocus(event, '{!$Component.discountAmount}');" onfocus="hideButtons();" onblur="showButtons();" style="font-size:12px;text-align:right;width:60px;" value="{!qpw.DiscountAmount}" rendered="{!AND(editMode, qpw.QuotePart.IsDiscountable__c, showDiscountAmount)}">
+                                                                                <apex:actionSupport event="onchange" action="{!CalculateGrandTotals}" rerender="discount,totalPrice,totalQuotePrice,grandTotalPrice,grandTotalDiscount,pageMessages,trueDiscount,PriceDiscount" status="status" />
+                                                                            </apex:inputText>
+
+                                                                            <apex:outputField style="font-size:12px;text-align:right;width:40px;" value="{!qpw.QuotePart.Discount_Percentage__c}" rendered="{!AND(OR(!editMode, !qpw.QuotePart.IsDiscountable__c), !showDiscountAmount)}" />
+                                                                            
+                                                                            <apex:outputText style="font-size:12px;text-align:right;width:40px;" value="{!qpw.DiscountAmount}" rendered="{!AND(OR(!editMode, !qpw.QuotePart.IsDiscountable__c), showDiscountAmount)}" />
+                                                                        </apex:outputPanel>
+                                                                    </td>
+
+                                                                    <td class="datacell PriceDiscount" style="vertical-align:middle;">
+                                                                        <apex:outputPanel id="PriceDiscount">
+                                                                            <apex:outPutText value="{!qpw.Price - qpw.DiscountAmount}" />
+                                                                        </apex:outputPanel>
+                                                                    </td>
+
+                                                                    <td class="datacell qtyCol" style="vertical-align:middle;">
+<!--                                                                        <apex:image value="{!$Resource.icon_calendar}" width="20" height="20" /> -->
+                                                                        <apex:outputText value="{!SUBSTITUTE(TEXT(qpw.QuotePart.Number__c),'.00','')}" style="position:relative;top:-6px;left:9px;font-weight:bold" rendered="{!TEXT(qpw.QuotePart.Number__c)!='0.5'}"/>
+                                                                        <apex:outputText value="{!SUBSTITUTE(TEXT(qpw.QuotePart.Number__c),'0.5','1/2')}" style="position:relative;top:-4px;left:6px;font-size:9px;font-weight:bold" rendered="{!TEXT(qpw.QuotePart.Number__c)=='0.5'}"/>
+                                                                    </td>
+                                                                                                                                            
+                                                                    <td class="datacell totalCol" style="font-size:12px;text-align:right;vertical-align:middle;">
+                                                                        <apex:outputPanel id="totalPrice">                                                                  
+                                                                            <apex:outputText rendered="{!!showDecimals}" value="{0, number, ###,###}">
+                                                                                <apex:param value="{!qpw.TotalPrice}" />
+                                                                            </apex:outputText>                                                                                                                                  
+                                                                            <apex:outputText rendered="{!showDecimals}" value="{0, number, ###,###.00}">
+                                                                                <apex:param value="{!qpw.TotalPrice}" />
+                                                                            </apex:outputText>                                                                                                                                  
+                                                                        </apex:outputPanel>
+                                                                    </td>
+                                                                    
+                                                                    <td class="datacell trueDiscount" style="font-size:12px;vertical-align:middle;">
+                                                                        <apex:outputPanel id="trueDiscount">
+                                                                            <apex:outputField value="{!qpw.QuotePart.True_discount__c}"/>
+                                                                        </apex:outputPanel>
+                                                                    </td>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                        </table>                                                    
+                                                    </td>                                               
+                                                </tr>
+                                            </apex:repeat>                                      
+                                        </table>
+                                    </td>
+                                </tr>
+                            </apex:repeat>
+                            <tr>
+                                <td class="datacell">&nbsp;</td>
+                                <td class="datacell" colspan="9" style="font-weight:bold;text-align:right;">Grand Total ({!quote.CurrencyIsoCode})</td>
+                                <td class="datacell" style="text-align:right;padding-right:8px;font-weight:bold;">
+                                    <apex:outputPanel id="grandTotalDiscount">
+
+                                        <apex:outputPanel rendered="{!showDiscountAmount}">
+                                            <apex:outputText rendered="{!!showDecimals}" value="{0, number, ###,###,##0}">
+                                                <apex:param value="{!GrandTotalDiscountAmount}" />
+                                            </apex:outputText>                                      
+                                            <apex:outputText rendered="{!showDecimals}" value="{0, number, ###,###,##0.00}">
+                                                <apex:param value="{!GrandTotalDiscountAmount}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel rendered="{!!showDiscountAmount}">
+                                            <apex:outputText value="{0, number, ##0.00}%">
+                                                <apex:param value="{!GrandTotalDiscount}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>                                 
+
+                                    </apex:outputPanel>
+                                </td>
+                                <td class="datacell">&nbsp;</td>
+                                <td class="datacell">&nbsp;</td>
+                                <td class="datacell" style="text-align:right;padding-right:4px;font-weight:bold;">
+                                    <apex:outputPanel id="grandTotalPrice">
+                                        <apex:outputText rendered="{!!showDecimals}" value="{0, number, ###,###,##0}">
+                                            <apex:param value="{!GrandTotalPrice}" />
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!showDecimals}" value="{0, number, ###,###,##0.00}">
+                                            <apex:param value="{!GrandTotalPrice}" />
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+
+        </apex:pageBlock>
+    </apex:form>        
+
+</apex:page>

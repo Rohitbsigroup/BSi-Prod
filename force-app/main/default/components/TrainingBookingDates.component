@@ -1,0 +1,52 @@
+<!--
+10th Sept 2018 Nebula Task 18752754 (PK) - Changes to the formatting to support new line characters instead of break tags.
+-->
+<apex:component layout="none">
+    <apex:attribute name="event" description="Training Event object" type="Training_Event__c" required="true" />
+    <apex:attribute name="format" description="Format is table or string" type="String" required="true" />
+<!--     <apex:outputPanel layout="none" rendered="{!AND(event.Training_Events__r.size = 0, event.Modules2__r.size = 0)}"> -->
+        <apex:variable var="hasSplit" value="{!event.Split_Date_Event__c}" />
+        <apex:variable var="hasRange" value="{!AND(NOT(hasSplit), event.End_Date3__c > event.Start_date__c)}" />
+        <apex:variable var="hasRange1" value="{!AND(hasSplit, event.End_Date_of_Section_1__c > event.Start_date__c)}" />
+        <apex:variable var="hasRange2" value="{!AND(hasSplit, event.End_Date3__c > event.Start_Date_of_Section_2__c)}" />
+        <apex:outputField value="{!event.Start_date__c}"/>
+        <apex:outputText value=" - " rendered="{!OR(hasRange, hasRange1)}"/>
+        <apex:outputField value="{!event.End_Date_of_Section_1__c}" rendered="{!hasRange1}"/>
+        <!-- 18752754 --><apex:outputText value="{!IF(format="table", SUBSTITUTE($Label.NewLine, 'a', '') + '&' + SUBSTITUTE($Label.NewLine, 'a', ''), ' & ')}" rendered="{!hasSplit}" />
+        <apex:outputField value="{!event.Start_Date_of_Section_2__c}" rendered="{!hasSplit}"/>
+        <apex:outputText value=" - " rendered="{!hasRange2}"/>
+        <apex:outputField value="{!event.End_Date3__c}" rendered="{!OR(hasRange, hasRange2)}"/>
+<!--     </apex:outputPanel> -->
+    <apex:variable var="loop" value="{!0}" />
+    <apex:repeat value="{!event.Training_Events__r}" var="m">
+        <apex:variable var="loop" value="{!loop+1}" />
+        <apex:variable var="hasSplit" value="{!m.Split_Date_Event__c}" />
+        <apex:variable var="hasRange" value="{!AND(NOT(hasSplit), m.End_Date3__c > m.Start_date__c)}" />
+        <apex:variable var="hasRange1" value="{!AND(hasSplit, m.End_Date_of_Section_1__c > m.Start_date__c)}" />
+        <apex:variable var="hasRange2" value="{!AND(hasSplit, m.End_Date3__c > m.Start_Date_of_Section_2__c)}" />
+        <apex:outputField value="{!m.Start_date__c}"/>
+        <apex:outputText value=" - " rendered="{!OR(hasRange, hasRange1)}"/>
+        <apex:outputField value="{!m.End_Date_of_Section_1__c}" rendered="{!hasRange1}"/>
+        <!-- 18752754 --><apex:outputText value="{!IF(format="table", SUBSTITUTE($Label.NewLine, 'a', '') + '&' + SUBSTITUTE($Label.NewLine, 'a', ''), ' & ')}" rendered="{!hasSplit}" />
+        <apex:outputField value="{!m.Start_Date_of_Section_2__c}" rendered="{!hasSplit}"/>
+        <apex:outputText value=" - " rendered="{!hasRange2}"/>
+        <apex:outputField value="{!m.End_Date3__c}" rendered="{!OR(hasRange, hasRange2)}"/>
+        <!-- 18752754 --><apex:outputText value="{!IF(format="table", SUBSTITUTE($Label.NewLine, 'a', ''), ', ')}" rendered="{!OR(event.Training_Events__r.size > loop, event.Modules2__r.size > 0)}" />
+    </apex:repeat>
+    <apex:variable var="loop" value="{!0}" />
+    <apex:repeat value="{!event.Modules2__r}" var="m">
+        <apex:variable var="loop" value="{!loop+1}" />
+        <apex:variable var="hasSplit" value="{!m.Split_Date_Event__c}" />
+        <apex:variable var="hasRange" value="{!AND(NOT(hasSplit), m.End_Date3__c > m.Start_date__c)}" />
+        <apex:variable var="hasRange1" value="{!AND(hasSplit, m.End_Date_of_Section_1__c > m.Start_date__c)}" />
+        <apex:variable var="hasRange2" value="{!AND(hasSplit, m.End_Date3__c > m.Start_Date_of_Section_2__c)}" />
+        <apex:outputField value="{!m.Start_date__c}"/>
+        <apex:outputText value=" - " rendered="{!OR(hasRange, hasRange1)}"/>
+        <apex:outputField value="{!m.End_Date_of_Section_1__c}" rendered="{!hasRange1}"/>
+        <!-- 18752754 --><apex:outputText value="{!IF(format="table", SUBSTITUTE($Label.NewLine, 'a', '') + '&' + SUBSTITUTE($Label.NewLine, 'a', ''), ' & ')}" rendered="{!hasSplit}" />
+        <apex:outputField value="{!m.Start_Date_of_Section_2__c}" rendered="{!hasSplit}"/>
+        <apex:outputText value=" - " rendered="{!hasRange2}"/>
+        <apex:outputField value="{!m.End_Date3__c}" rendered="{!OR(hasRange, hasRange2)}"/>
+        <!-- 18752754 --><apex:outputText value="{!IF(format="table", SUBSTITUTE($Label.NewLine, 'a', ''), ', ')}" rendered="{!event.Modules2__r.size > loop}"/>
+    </apex:repeat>
+</apex:component>

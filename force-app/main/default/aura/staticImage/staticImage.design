@@ -1,0 +1,22 @@
+<design:component> 
+    <design:attribute name="imageName"
+                      label="Image Source (Name of Static Resource)"
+                      default=""
+                      description="To specify an image (stored as SF static resource); If responsive images is checked: provide a comma-separated list of 3 images (ordered by small,medium,large)"/>
+
+    <design:attribute name="hasSubDir"
+                      label="Use Community Sub-Directory"
+                      default="false"
+                      description="If checked, then add Sub-Directory such as /ISF/ dynamically to base-url"/>
+
+    <design:attribute name="isResponsive"
+                      label="Has Responsive Images"
+                      default="false"
+                      description="If checked, then your static resource shall hold multiple images. Supporting SMALL, MEDIUM or LARGE images"/>
+
+    <design:attribute name="url"
+                      label="Image Url"
+                      default=""
+                      description="Url to link to when clicking on image."/>
+
+</design:component>

@@ -1,0 +1,142 @@
+<apex:page controller="ContactRoleController" tabstyle="Opportunity">
+<!--
+<apex:sectionHeader subtitle="Manage Contact Roles" title="Contact Roles grouped by Site"/>
+	
+	<style type="text/css">
+		.smallheader {
+			position: absolute; 
+			margin-top: 5px;
+			margin-left: 20px;
+			font-size: 12px;
+			font-weight: bold;
+			text-align: center;
+			color: black;
+		}
+		.text {
+			font-family: "Courier",Times,serif;
+			font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.noteHeader {
+			background-image: url('{!URLFOR($Resource.coolhover,'coolhover/calendarbar.png')}');
+			background-repeat: repeat-x;
+			height: 20px;
+		}
+		.noteRow {
+			background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-middle.png')}');
+			background-repeat: repeat;
+			background-color:#f6f6f6;
+			color: black;
+			font-size: 12px;
+			padding-left: 5px;
+			margin-top: -11px;
+		}
+		.noteBottom {
+			background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-bottom-trsp.png')}');
+			background-repeat: repeat-x;
+			height: 20px;
+		}
+	</style>
+	
+	<apex:pageMessages />
+	
+	<apex:form id="theForm">
+		<apex:pageBlock title="Select Contact Roles" >
+		<apex:pageBlockButtons >
+			<apex:commandButton action="{!back}" value="{!$Label.Cancel}"/>
+			<apex:commandButton action="{!saveAll}" value="{!$Label.Save}"/>
+		</apex:pageBlockButtons>
+		<apex:outputpanel id="primary">
+		<table width="100%" style="background-color: #E1E6EE;">
+		<tr>
+		<td width="50px"><apex:image value="{!$Resource.icon_contact}" height="35"/></td>
+		<td style="font-weight:bold;text-align:left;vertical-align:middle;">Primary Contact: <b style="color:#A23233;">{!primaryName} </b></td>
+		<td align="left" style="vertical-align:middle;">
+		<apex:commandLink reRender="primary" style="text-decoration:none;float:right;" title="No Primary" >
+			<apex:image value="{!$Resource.icon_deselected}" width="25"/>
+			<apex:param value="None selected" assignTo="{!primaryName}" name="pn"/>
+			<apex:param value="" assignTo="{!primaryId}" name="pd"/>
+		</apex:commandLink>
+		</td>
+		</tr>
+		</table>
+        </apex:outputpanel>
+		<br/>
+		<table width="100%">
+		<tr>
+		<td width="70%">
+		<table style="background-color:#F8F8F8;padding:5px;border-collapse:collapse;border-bottom: 1px dashed #c0bdbd;">
+		<tr>
+			<td><apex:image value="{!$Resource.icon_warning}" width="25" rendered="{!noSites}"/></td>
+			<td style="vertical-align:middle;"><apex:outputText value="There are no Sites related to this Opportunity." styleclass="text" rendered="{!noSites}"/></td>
+    	</tr>
+		<apex:repeat value="{!siteGroups}" var="s">
+			<tr style="border-top: 1px dashed #c0bdbd;">
+			<td width="40%" style="text-align:left;vertical-align:middle;background-color:#F8F8F8;">
+				<table width="100%" style="padding: 5px;">
+				<tr>
+				<td colspan="2" style="font-weight:bold;text-align:left;vertical-align:middle;">{!s.site.Name}</td>
+				</tr>
+				<tr>
+				<td width="50px"><apex:image value="{!$Resource.icon_map}" height="25"/></td>
+				<td style="text-align:left;vertical-align:middle;" class="text">{!s.site.Street__c} {!s.site.City__c} {!s.site.Postcode__c}</td>
+				</tr>
+				</table>
+			</td>
+			<td width="60%" style="vertical-align:middle;padding:5px;">
+				<table><tr>
+       				<td><apex:image value="{!$Resource.icon_warning}" width="25" rendered="{!s.empty}"/></td>
+					<td style="text-align:left;vertical-align:middle;"><apex:outputText value="No Contact available for this Site." styleclass="text" rendered="{!s.empty}"/></td>
+       			</tr></table>
+				<apex:pageblockTable value="{!s.croles}" var="cr" rendered="{!!s.empty}">
+					<apex:column headerValue="Name" width="150">
+						<apex:outputField value="{!cr.contact.Contact__r.Name}"/>
+					</apex:column>
+					<apex:column headerValue="Role">
+						<apex:selectList value="{!cr.role}" size="1" id="contactrole">
+		                	<apex:selectOptions value="{!Roles}"/>
+		            	</apex:selectList>
+					</apex:column>
+					<apex:column >
+						<apex:commandLink styleclass="btn" value="Set Primary" reRender="primary" style="text-decoration:none;">
+						<apex:param value="{!cr.contact.Contact__r.Name}" assignTo="{!primaryName}" name="pn"/>
+						<apex:param value="{!cr.contact.Contact__c}" assignTo="{!primaryId}" name="pd"/>
+						</apex:commandLink>
+					</apex:column>
+				</apex:pageblockTable>
+			</td>
+			</tr>
+		</apex:repeat>
+		</table>
+		</td>
+		<td width="30%">
+			<apex:image value="{!$Resource.line_separator}" height="40" style="margin-bottom: -23px;margin-left: 60%"/>
+			<div >
+			<div class="noteHeader"/>
+			<div class="noteRow">
+			<table >
+				<th colspan="2" height="30px"><apex:outputText value="Existing Roles" style="font-weight:bold;height:20px"/></th>
+       			<tr>
+       				<td><apex:image value="{!$Resource.icon_warning}" width="25" rendered="{!noExisting}"/></td>
+					<td><apex:outputText value="Select a Contact Role from the left table" styleclass="text" rendered="{!noExisting}"/></td>
+       			</tr>
+       			<apex:repeat value="{!existingRoles}" var="r">
+       				<tr>
+					<td><apex:outputText value="{!r.Contact__r.Name}" styleclass="text" style="{!IF(r.OppPrimary__c,'color:#A23233','')}"/></td>
+					<td><apex:inputField value="{!r.OppRole__c}" styleclass="text" style="{!IF(r.OppPrimary__c,'color:#A23233','')}"/></td>
+					</tr>
+				</apex:repeat>
+			</table>
+			<br/>
+			</div>
+			<div class="noteBottom" style="margin-top:-11px">
+	       	</div>
+		</div>
+		</td>
+		</tr>
+		</table>
+		</apex:pageBlock>
+	</apex:form>
+	-->
+</apex:page>

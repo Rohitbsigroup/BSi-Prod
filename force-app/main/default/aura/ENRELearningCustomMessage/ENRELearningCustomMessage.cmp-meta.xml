@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AuraDefinitionBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>53.0</apiVersion>
+    <description>This is used to show the message from a customer label when the course is an E-Learning or Exam in Litmos</description>
+</AuraDefinitionBundle>

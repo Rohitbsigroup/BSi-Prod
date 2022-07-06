@@ -1,0 +1,213 @@
+<apex:page controller="CustomerSelfQuoteController" sidebar="false" showHeader="false">
+    <!-- CSS STYLE -->
+    <style type="text/css">
+        .bubble {
+            position:relative;
+            padding:15px;
+            margin:20px 0 0.5em;
+            color:#333;
+            background:#eee;
+            /* css3 */
+            -webkit-border-radius:10px;
+            -moz-border-radius:10px;
+            border-radius:10px;
+            width: 80%;
+        }
+        .bubble p{
+            font-size: 15px;
+            font-family: Cambria,Georgia,sans-serif;
+            line-height: 1.25em;
+        }
+        /* display of quote author */
+        .bubblep {
+            padding-left:15px; 
+            font:11px Arial, sans-serif;
+            color: #A23233;
+        }
+        .note {
+            font-size: 15px;
+            font-family: Cambria,Georgia,sans-serif;
+            line-height: 1.25em;
+            padding-left:15px;
+            padding-top:5px;
+            border: 3px solid #d6d1ca;
+            background:#eee;
+            -webkit-border-radius:10px;
+            -moz-border-radius:10px;
+            border-radius:10px;
+        }
+        .header {
+            position: absolute; 
+            margin-top: 8px;
+            margin-left: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Calibri';
+            text-align: center;
+            //color: #ECC25A;
+        }
+        .btnlabel {
+            position: relative;
+            left: 120px;
+            top: -18px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #183F71;
+            text-align: left;
+        }
+        .section {
+            color: #ECC25A;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .required {
+            color: #A23233;
+        }
+        .confirmbox {
+			background-image: url({!$Resource.texture_forgotpswconfirm});
+			height: 217px;
+			width: 346px;
+			vertical-align:middle;
+			position: fixed;
+			top: 150px;
+			left: 36%;
+			z-index:99;
+		}
+		.insidebox {
+			width: 250px;
+			height: 217px;
+		}
+        body {
+        	background: #383838;
+        	//background-image:url({!$Resource.texture_bluebg});
+        	//background-repeat:repeat;
+        }
+        .roundedbox {
+        	-webkit-border-radius: 15px;
+        	-moz-border-radius:15px;
+            border-radius:15px;
+        	border: 6px solid #d6d1ca;
+        	-webkit-box-shadow: 0 4px 5px rgba(0,0,0,.3);
+        }
+        .messageC {
+			position: relative;
+			top: 95px;
+			font: 15px 'Calibri';
+			width: 310px;
+		}
+    </style>
+    
+    <apex:form id="theForm">
+    <center>
+    <div style="width:75%">
+    <br/>
+    <br/>
+    <apex:panelGrid cellpadding="5" cellspacing="5" columns="2" width="100%" bgcolor="#eae9e3" styleClass="roundedbox" rendered="{!!isGuest}">
+        <apex:image value="{!$Resource.logo_BSI}" height="30"/>
+        <apex:outputLink value="{!$Page.SiteLogin}" style="font: 15px 'Calibri';color:grey;text-decoration:none;float:right;">
+	 		Log out
+	 	</apex:outputLink>
+    </apex:panelGrid>
+    <apex:outputText value="{!$Label.CustomerPortalPageTitle}" style="position:relative;top:-43px;font: bold 20px 'Calibri'"/>
+    <br/>
+    <br/>
+
+        <div>
+        <!-- QUOTE DETAILS VIEW -->        
+        <apex:outputPanel rendered="{!IF(noQuote && isGuest, true, false)}">
+        	<div class="confirmbox">
+        	<div class="insidebox">
+	 		<apex:outputText styleClass="messageC" value="{!$Label.CustomerLoginWarning}"/>
+	 		</div>
+	 		<apex:outputLink value="{!$Page.SiteLogin}" style="font: 15px 'Calibri';position:fixed;top:320px;left:46%;color:grey;text-decoration:none">
+	 			{!$Label.site.go_to_login_page}
+	 		</apex:outputLink>
+	 		</div>
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{!IF(noQuote && !isGuest, true, false)}">
+            <div class="confirmbox">
+            <div class="insidebox">
+	 		<apex:outputText styleClass="messageC" style="top:" value="{!$Label.CustomerNoPendingQuote}"/>
+	 		</div>
+	 		<apex:image value="{!$Resource.icon_selected}" width="30" style="position:fixed;top:320px;left:50%;"/>
+	 		</div>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!!ISBLANK(errorMessage)}">
+            <div class="confirmbox"> 
+            	<div class="insidebox">         	
+	 			<apex:outputText styleClass="messageC" value="{!errorMessage}"/>
+	 			</div>
+	 			<apex:image value="{!$Resource.icon_warning}" width="30" style="position:fixed;top:320px;left:50%;"/>
+	 		</div>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!!noQuote}">
+        <div style="background-color:#eae9e3;padding:10px" class="roundedbox">    
+        <center>
+       
+        <apex:outputPanel rendered="{!!noQuote}" >
+            <table width="100%" style="padding:5px;"><tr>
+            <td align="center" style="vertical-align:middle;"><apex:outputText value="Press here to download the PDF: " style="font: 14px 'Calibri';"/>
+            <apex:outputLink style="font: 14px 'Calibri';" target="_blank" value="{!URLFOR($Action.Attachment.Download,pdf.id)}">
+                Download
+            </apex:outputLink></td>
+            </tr></table>
+        </apex:outputPanel>
+        <br/>
+            <object data="/servlet/servlet.FileDownload?file={!pdf.id}" type="application/pdf" width="60%" height="500px" >
+                <embed src="/servlet/servlet.FileDownload?file={!pdf.id}" width="100%" height="500px"/>
+            </object>
+        </center>  
+        </div> 
+        </apex:outputPanel>
+        
+        <br/><br/>
+        
+        <!--COMMENTS AND APPROVE/DECLINE BUTTON -->
+        <apex:outputPanel id="approveSection" rendered="{!!noQuote}">
+        <div style="background-color:#eae9e3;padding:10px" class="roundedbox">
+        
+        <apex:outputText value="{!$Label.CustomerChangesMessage}" style="font: 14px 'Calibri';"/>
+
+        <apex:repeat value="{!comments}" var="c">
+            <blockquote class="bubble" style="{!IF(c.OwnerId == $User.Id,'border: 3px solid #d6d1ca;','background-color:#d6d1ca;')}">
+                <p>{!c.Body}</p>
+            </blockquote>
+            <apex:outputText value="{!IF(c.OwnerId == $User.Id,'You '&c.Title&' this quote','BSI')} on {0,date,EEE dd MMM yyyy 'at' HH:mm}" styleclass="bubblep" style="{!IF(c.OwnerId == $User.Id,'padding-right:15px;color:#40A74A','')}">
+                <apex:param value="{!c.CreatedDate}"/>
+            </apex:outputText>
+            <br/>
+        </apex:repeat>
+        <br/>
+        
+		<apex:inputTextArea value="{!userComment.Body}" id="message" onclick="init();" style="width:80%;height:110px" styleclass="note"/>
+        <br/><br/><br/>
+        
+        <table style="background-color:#d6d1ca;padding:2px;-webkit-border-radius: 15px;">
+        <tr>
+        <td style="vertical-align:middle;"><apex:image value="{!$Resource.icon_info}" width="30" title=""/></td>
+        <td style="vertical-align:middle;"><apex:outputLabel value="{!$Label.Disclaimer}" for="sites" style="font-family:'Calibri';font-weight:bold;"/></td>
+        <td style="vertical-align:middle;"><apex:inputCheckbox value="{!quoteToApprove.ValidationCheck__c}"/></td>
+        </tr>
+        </table>   
+        <br/><br/>           
+        <center>
+            <apex:commandLink id="btnApprove" action="{!approveQuote}" style="text-decoration: none;">
+                <apex:outputText value="{!$Label.Approve}" styleclass="btnlabel" style="left:125px"/>
+                <apex:image value="{!$Resource.btn_approve}" height="50"/>
+            </apex:commandLink>
+            <apex:commandLink id="btnDecline" action="{!declineQuote}" style="text-decoration: none;margin-left:-20px;">
+                <apex:outputText value="{!$Label.Reject}" styleclass="btnlabel"/>
+                <apex:image value="{!$Resource.btn_reject}" height="50"/>
+            </apex:commandLink>
+        </center>
+        <br/><br/>
+        </div>
+        </apex:outputPanel>
+    
+    </div>    
+    </div>
+    </center>
+    <br/><br/>
+    </apex:form>
+</apex:page>

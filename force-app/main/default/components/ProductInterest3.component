@@ -1,0 +1,229 @@
+<apex:component controller="ProductInterestComponentController3" allowDML="true">
+
+    <style type="text/css">
+        .panelColumns td {
+            vertical-align: top;
+        }
+    </style>
+
+    <apex:attribute name="objectRecord" description="Object Reference" assignTo="{!objRecord}" required="true" type="sobject"/>
+    <apex:attribute name="editModeParm" description="Edit Mode" assignTo="{!editMode}" required="true" type="boolean"/>
+
+    <apex:attribute name="companySizeParam" description="Company Size" assignTo="{!companySize}" required="false" type="integer"/>
+    <apex:attribute name="countryParam" description="Country" assignTo="{!country}" required="false" type="string"/>
+    <apex:attribute name="sectorParam" description="Sector" assignTo="{!sector}" required="false" type="string"/>
+    <apex:attribute name="certStageParam" description="Certification Stage" assignTo="{!certStage}" required="false" type="string"/>
+    <apex:attribute name="customerBuyingStageParam" description="Customer Buying Stage" assignTo="{!customerBuyingStage}" required="false" type="string"/>  
+
+      <script type="text/javascript">
+          window.onload = function () { 
+              document.getElementById('j_id0:j_id11:j_id12:j_id13:thePageBlock:searchText').blur();
+          }
+
+      </script>
+
+    <!-- RELOAD THE PAGE SCRIPT -->
+    <apex:outputPanel id="reloadPanel" >
+        <apex:outputPanel rendered="{!reloadNeeded}">
+            <script type="text/javascript">
+                // Redirect the top level window
+                window.top.location.href = '{!reloadPageURL}';
+            </script>
+        </apex:outputPanel>
+    </apex:outputPanel>
+
+    <apex:pageMessages id="pageMessages" />
+
+    <apex:actionStatus id="busyStatus">
+        <apex:facet name="start">
+<!--            <apex:image url="/img/loading32.gif" width="20px" height="20px" /> -->
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="150px" ImageUrl="{!$Resource.loading}" />
+        </apex:facet>
+        <apex:facet name="stop"><div style="height:20px;" /></apex:facet>
+    </apex:actionStatus>
+
+    <apex:actionFunction name="searchProductInterestFunction" action="{!SearchProductInterest}" />
+
+    <apex:pageBlock mode="maindetail" id="thePageBlock" >
+
+        <apex:pageBlockButtons location="top">
+            <apex:commandButton action="{!viewSearch}"    id="viewSearchButton"    rendered="{!viewMode=2}" value="Show Search   " rerender="thePageBlock,pageMessages" status="busyStatus" />
+            <apex:commandButton action="{!viewSelection}" id="viewSelectionButton" rendered="{!viewMode=1}" value="Show Selection" rerender="thePageBlock,pageMessages" status="busyStatus" />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+            <apex:commandButton rendered="{!editMode}" action="{!save}" id="editSaveButton" value="{!$Label.UpdateProductsInterests}" rerender="pageMessages,reloadPanel" status="busyStatus" />
+            &nbsp;
+            <apex:commandButton rendered="{!editMode}" action="{!cancel}" id="editCancelButton" value="{!$Label.Cancel}" rerender="pageMessages,reloadPanel" status="busyStatus" />
+        </apex:pageBlockButtons>
+        <br />
+        <apex:outputPanel id="mainPanel">
+            <apex:outputPanel rendered="{!viewMode=1}">
+                <apex:outputLabel value="Search" for="searchText" styleclass="labelCol" />
+                <apex:outputPanel >
+                    <apex:inputText id="searchText" value="{!searchText}" onkeydown="if(event.keyCode==13){this.blur();searchProductInterestFunction();}" />
+                    &nbsp;
+                    <apex:commandButton id="searchButton" value="Search" action="{!SearchProductInterest}" rerender="results" status="busyStatus" />
+<!--                    &nbsp; -->
+<!--                    <apex:commandLink rendered="{!searchText!=''}" value="Clear" action="{!ClearSearchText}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" />                                  -->
+                </apex:outputPanel>
+            </apex:outputPanel>
+            
+            <div style="height:3px;" >&nbsp;</div> 
+
+            <apex:outputPanel id="results" layout="block" style="height:350px" >
+
+                <apex:panelGrid columns="2" styleClass="panelColumns">
+                
+                <apex:panelGroup >
+                <apex:pageBlockTable value="{!pagedResultsWrappers}" var="sr" style="width:800px">
+
+    <!-- <apex:column value="{!sr.obj.Division__c}" />  -->
+    <!-- 
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="Division" for="divisionSelectList" styleclass="labelCol"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+     -->
+                    <apex:column value="{!sr.obj.Stream2__c}" width="150">
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="{!$ObjectType.Lead.fields.Product_Stream__c.label}" for="streamSelectList" styleclass="labelCol"/>
+                                <apex:outputPanel rendered="{!viewMode=1}">
+                                    <br />                                  
+                                    <apex:selectList id="streamSelectList" value="{!filterStream}" multiselect="false" size="1" rendered="{!viewMode=1}">
+                                        <apex:selectOptions value="{!streamFilterOptions}" />
+                                        <apex:actionSupport event="onchange" action="{!SelectFilter}" rerender="results,pageMessages" status="busyStatus" />
+                                    </apex:selectList>
+                                    &nbsp;
+                                    <apex:commandLink rendered="{!filterStream!=''}" action="{!ClearStream}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus">
+                                        <apex:image value="/img/func_icons/remove12.gif" />
+                                    </apex:commandLink>                                 
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:facet>                       
+                    </apex:column>
+                    
+                    <apex:column value="{!sr.obj.Portfolio2__c}" width="150">
+                        <apex:facet name="header">                      
+                            <apex:outputPanel >
+                                <apex:outputLabel value="{!$ObjectType.Lead.fields.Portfolio_Interests__c.label}" for="portfolioSelectList" styleclass="labelCol"/>
+                                <apex:outputPanel rendered="{!viewMode=1}">
+                                    <br />                                  
+                                    <apex:selectList id="portfolioSelectList" value="{!filterPortfolio}" multiselect="false" size="1" rendered="{!viewMode=1}">
+                                        <apex:selectOptions value="{!portfolioFilterOptions}" />
+                                        <apex:actionSupport event="onchange" action="{!SelectFilter}" rerender="results,pageMessages" status="busyStatus" />
+                                    </apex:selectList>
+                                    &nbsp;
+                                    <apex:commandLink rendered="{!filterPortfolio!=''}" action="{!ClearPortfolio}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus">
+                                        <apex:image value="/img/func_icons/remove12.gif" />                                 
+                                    </apex:commandLink>                                 
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+    
+                    <apex:column width="150">
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="{!$ObjectType.Lead.fields.Product_Area_Interests__c.label}" for="themeSelectList" styleclass="labelCol"/>
+                                <apex:outputPanel rendered="{!viewMode=1}">
+                                    <br />
+                                    <apex:selectList id="themeSelectList" value="{!filterTheme}" multiselect="false" size="1" rendered="{!viewMode=1}">
+                                        <apex:selectOptions value="{!themefilterOptions}" />
+                                        <apex:actionSupport event="onchange" action="{!SelectFilter}" rerender="results,pageMessages" status="busyStatus" />
+                                    </apex:selectList>
+                                    &nbsp;
+                                    <apex:commandLink rendered="{!filterTheme!=''}" action="{!ClearTheme}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" >
+                                        <apex:image value="/img/func_icons/remove12.gif" />                                 
+                                    </apex:commandLink>
+                                </apex:outputPanel>
+                            </apex:outputPanel>     
+                        </apex:facet>
+                        
+                        <apex:outputField value="{!sr.obj.Family2__c}" />
+                    </apex:column>                      
+
+                    <apex:column width="150">
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="{!$ObjectType.Lead.fields.Sector_Interests__c.label}" for="sectorSelectList" styleclass="labelCol"/>
+                                <apex:outputPanel rendered="{!viewMode=1}">
+                                    <br />
+                                    <apex:selectList id="sectorSelectList" value="{!filterSector}" multiselect="false" size="1" rendered="{!viewMode=1}">
+                                        <apex:selectOptions value="{!sectorfilterOptions}" />
+                                        <apex:actionSupport event="onchange" action="{!SelectFilter}" rerender="results,pageMessages" status="busyStatus" />
+                                    </apex:selectList>
+                                    &nbsp;
+                                    <apex:commandLink rendered="{!filterSector!=''}" value="Clear" action="{!ClearSector}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" >
+                                        <apex:image value="/img/func_icons/remove12.gif" />
+                                    </apex:commandLink>
+                                </apex:outputPanel>
+                            </apex:outputPanel>     
+                        </apex:facet>
+                        
+                        <apex:outputField value="{!sr.obj.Sector2__c}" />
+                    </apex:column>                      
+    
+                    <apex:column width="300">
+                        <apex:facet name="header">
+                            <apex:outputLabel value="{!$ObjectType.Lead.fields.Product_Interests__c.label}" styleclass="labelCol" />
+                        </apex:facet>
+
+                        <apex:inputCheckbox id="selectSearchProduct" value="{!sr.selected}" rendered="{!viewMode=1}" >
+                            <apex:actionSupport event="onchange" action="{!SelectProduct}" rerender="selectedSuggestedProducts,pageMessages" status="busyStatus" >
+                                <apex:param value="{!sr.obj.Id}" name="selectedId" assignTo="{!selectedId}" />
+                            </apex:actionSupport>
+                        </apex:inputCheckbox>
+
+                        <apex:inputCheckbox id="unselectSearchProduct" value="{!sr.selected}" rendered="{!viewMode=2}">
+                            <apex:actionSupport event="onchange" action="{!SelectProduct}" rerender="results,pageMessages" status="busyStatus" >
+                                <apex:param value="{!sr.obj.Id}" name="selectedId" assignTo="{!selectedId}" />
+                            </apex:actionSupport>
+                        </apex:inputCheckbox>
+
+                        <apex:outputField value="{!sr.obj.Product__c}" />
+                    </apex:column>
+                </apex:pageBlockTable>
+
+                <div style="height:3px;" >&nbsp;</div> 
+                <div style="text-align:center">
+                    <apex:outputPanel >
+                        <apex:commandLink rendered="{!hasPrevious}" value="<<" action="{!First}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" />
+                        &nbsp;
+                        <apex:commandLink rendered="{!hasPrevious}" value="Previous" action="{!Previous}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" />
+                        &nbsp;<apex:outputText value="{!pageIndex}" />&nbsp;of&nbsp;<apex:outputText value="{!TotalPages}" />&nbsp;
+                        <apex:commandLink rendered="{!hasNext}" value="Next" action="{!Next}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" />
+                        &nbsp;
+                        <apex:commandLink rendered="{!hasNext}" value=">>" action="{!Last}" rerender="results,pageMessages" style="font-size:11px;" status="busyStatus" />
+                    </apex:outputPanel>
+
+                    
+                    <div style="float:right">
+                        {!recordCount}&nbsp; 
+                        <apex:outputText value="product(s) found."    rendered="{!viewMode=1}" />   
+                        <apex:outputText value="product(s) selected." rendered="{!viewMode=2}" />           
+                    </div>
+                </div>
+                </apex:panelGroup>
+                
+                <apex:panelGroup >
+                    <apex:outputLabel value="Suggested Products" for="selectedSuggestedProducts" styleclass="labelCol" />
+                    <div style="overflow:auto;width:300px;height:150px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+                        <apex:selectCheckboxes id="selectedSuggestedProducts" value="{!selectedSuggestedProducts}" layout="pageDirection" style="font-size:11px;">
+                            <apex:selectOptions value="{!suggestedProductItems}" />
+                            <apex:actionSupport event="onchange" action="{!SelectSuggestedProduct}" rerender="results,pageMessages" status="busyStatus" />
+                        </apex:selectCheckboxes>
+                    </div>
+                </apex:panelGroup>
+
+                </apex:panelGrid>
+                
+            </apex:outputPanel>
+        </apex:outputPanel>
+
+    </apex:pageBlock>
+
+</apex:component>

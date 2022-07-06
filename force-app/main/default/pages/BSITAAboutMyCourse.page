@@ -1,0 +1,308 @@
+<apex:page standardController="Enrollment__c" extensions="CertificateController" showHeader="false" pageStyle="all" lightningStylesheets="true"  
+        contentType="{!renderedContentType}" renderAs="{!renderingService}">
+
+<!-- JS 20210903 added rendered as to try to use stylesheet for page only -->         
+<apex:panelGroup rendered="{! renderingService != 'PDF' }">        
+    <apex:stylesheet value="{!$Resource.Aboutmycoursecss}"/>
+</apex:panelGroup>   
+<apex:panelGroup rendered="{! renderingService = 'PDF' }">        
+    <apex:stylesheet value="{!$Resource.AboutmycoursecssPDF}"/>
+</apex:panelGroup>   
+ 
+<!-- renderAs="PDF" -->
+    <head>
+    <meta http-equiv="Content-Type" content="{! renderedContentType }" />   
+
+<!-- JS 20210903 added rendered as to try to use inline style for PDF only -->   
+
+<!--         
+02/04/2020 - JS - Created based on JIv4 
+14/05/2020 - JS - Added a css to resolve formating issues
+10/07/2020 - JS - Further work for PDF
+01/09/2020 - JS - Updates for Exams and E-Learning
+28/10/2020 - JS - Update to show Mimeo based on timing
+-->
+</head>
+
+<body>
+
+<!-- JS 20210903 added extra logic rendered as to hide for non EN - WILL DO AFTER TESTED ABOVE-->    
+    <apex:form rendered="{! renderingService != 'PDF' }"
+               style="text-align: right; margin-right: 10px;">
+               
+        <apex:commandLink action="{! saveToPdf }" value="{!$Label.CLP_Save_as_PDF}">
+            <apex:param assignTo="{! renderedFileName }" 
+                value="{!IF(
+                            NOT(
+                                OR( Enrollment__c.Training_Event__r.Event_Country__c ='TW',
+                                    Enrollment__c.Training_Event__r.Event_Country__c ='JP',
+                                    Enrollment__c.Training_Event__r.Event_Country__c ='CN',
+                                    Enrollment__c.Training_Event__r.Event_Country__c ='TH',
+                                    Enrollment__c.Training_Event__r.Event_Country__c ='VN',
+                                    Enrollment__c.Training_Event__r.Event_Country__c ='KR' 
+                                  )
+                                ),
+                             Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c,
+                             'About my course'
+                             )                           
+                             }.pdf"/> <!-- JS was pagename  -->
+        </apex:commandLink>
+        <hr/>        
+    </apex:form>
+    
+<!--JS - replace image with just logo-->
+        <apex:form rendered="{! renderingService = 'PDF' }">
+         <apex:image value="{!URLFOR($Resource.CLP_BSIBanner)}" width="18.5cm" 
+             style="position: static;"/>            
+        
+        </apex:form>   
+    
+<!--contentType: <apex:outputText value=" {! renderedContentType }"/><br/>-->
+
+<!----Course name and Start Date-->
+      <p>
+          <apex:outputtext styleClass="big" value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c}"/> 
+          <apex:outputtext styleClass="big" rendered="{!IF(Enrollment__c.Training_Event__r.Event_Country__c ='CN',true,false)}" Value="课程"/>
+      </p>
+
+<!--For all courses this shows the translation of "date(s)" shows course dates -->        
+      <p><apex:outputPanel rendered="{!NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='E-Learning')}" >
+            <apex:outputtext styleClass="med" value="{!Enrollment__c.Training_Translations__r.Date_s__c}"/>:&nbsp;
+         </apex:outputPanel> 
+         <!--JS 20181207 updated course dates component position-->
+           <apex:outputText rendered="{!NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='E-Learning')}" >
+             <c:Course_Dates format="{!Enrollment__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Enrollment__c.Training_Event__r.Course_Duration_Days__c}" 
+                start1="{!Enrollment__c.Training_Event__r.Start_date__c}" 
+                end1="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" 
+                start2="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" 
+                end3="{!Enrollment__c.Training_Event__r.End_Date3__c}" 
+                country="{!Enrollment__c.Training_Event__r.Event_Country__c}"
+                module="{!Enrollment__c.Training_Event__r.Module_Event__c}"
+                split="{!Enrollment__c.Training_Event__r.Split_Date_Event__c}"
+                source="email"
+            /> 
+           </apex:outputText>
+      </p>
+      
+<!----Course details info for the product under the heading "your BSI Training Academy Course Details". -->       
+
+      <h3>{!Enrollment__c.Training_Translations__r.Course_Details_Headline__c}</h3>
+     
+      <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.Course_Details_Text__c}"/></p>
+
+<apex:outputPanel rendered="{!OR(NOT(Enrollment__c.Training_Event__r.Course__r.Training_Product_Type__c ='Exam'),NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='E-Learning'))}" >
+    <!---- Text from product under the heading "Why we developed the course". -->  
+      
+          <h3>{!Enrollment__c.Training_Translations__r.Why_We_Developed_Course__c}</h3>
+          
+          <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.Why_We_Developed_Course__c}"/></p>
+    
+    <!---- Text in Outcomes field from product under the heading "When the course is finished, you should be able to" -->
+    
+          <h3>{!Enrollment__c.Training_Translations__r.Outcomes__c}</h3>
+          
+          <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.Course_Outcomes__c}"/></p>            
+</apex:outputPanel> <!-- End of hiding the Why we developed and outcomes for exams and ELearning-->
+
+    
+<!-- Text in Schedule field from product under the heading "The course schedule". FOR ALL Countries JS updated to show schedule on event if populated -->
+<apex:outputPanel rendered="{!NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='E-Learning')}" >
+          <h3>{!Enrollment__c.Training_Translations__r.Schedule__c}</h3>
+            <p>      
+            <apex:outputField rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.ScheduleTE__c))}" value="{!Enrollment__c.Training_Event__r.ScheduleTE__c}"/>      
+            <apex:outputField rendered="{!ISBLANK(Enrollment__c.Training_Event__r.ScheduleTE__c)}" value="{!Enrollment__c.Training_Event__r.Course__r.Schedule__c}"/>       
+            </p>           
+                                   
+    <!-- MD 5th Sept 2017: Extra text shown if delegate is opted in to take an Online Exam after the Course -->
+    <!-- JS 15042020 Need to update??-->
+        <apex:outputpanel rendered="{!Enrollment__c.RelatedTrainingDelegate__r.Online_Exam__c}">
+          <p><h3>{!Enrollment__c.Training_Translations__r.Certificate_of_Achievement__c}</h3></p>
+          <p><apex:outputfield value="{!Enrollment__c.Training_Translations__r.Online_Exam_Booked__c}"/></p>
+        </apex:outputpanel>
+           
+    <!--Venue heading (if not VL)-->        
+            <apex:outputpanel rendered="{!NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='Virtual Learning')}"> 
+               <h3>{!Enrollment__c.Training_Translations__r.The_venue__c}</h3> 
+               <p>{!Enrollment__c.Training_Translations__r.Event_Location_Headline__c} <apex:outputText rendered="{!NOT(OR(Enrollment__c.Training_Event__r.Event_Country__c = 'SG',Enrollment__c.Training_Event__r.Event_Country__c = 'HK',Enrollment__c.Training_Event__r.Event_Country__c = 'NL',Enrollment__c.Training_Event__r.Event_Country__c = 'TH'))}"> {!Enrollment__c.Training_Event__r.Training_Venue__r.Name}</apex:outputText><apex:outputText rendered="{!Enrollment__c.Training_Event__r.Event_Country__c = 'IT'}"> : </apex:outputText>                
+               </p>
+    
+            <!--PC 20180816 component for Training Venue -->
+            <c:Training_Venue enrollment="{!Enrollment__c}" ver="HTML"/>
+              
+    <!----New Section for Venue Information for UK and SG 10122019-->
+            <apex:outputPanel rendered="{!AND(NOT(ISBLANK(Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Information__c)),Enrollment__c.Training_Event__r.Event_Country__c = 'UK')}"> 
+                <h3>About the venue</h3>
+                <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Information__c}"/></p>
+            </apex:outputPanel>        
+            <apex:outputPanel rendered="{!AND(NOT(ISBLANK(Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Information__c)),Enrollment__c.Training_Event__r.Event_Country__c = 'SG')}"> 
+                <h3>Meals and Refreshments</h3>
+                <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Information__c}"/></p>
+            </apex:outputPanel>
+            </apex:outputPanel> <!-- Closing the outputpanel to hide venue information for VL courses-->     
+
+    <!-- CLL - Virtual - VL log in details from the training event and translations and remote learning JS 202005276-->
+         <apex:outputPanel rendered="{!OR(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='Virtual Learning',AND(Enrollment__c.Remote_Attendance__c,Enrollment__c.Training_Event__r.Course__r.Remote_Option__c))}">  
+                   <h3>{!Enrollment__c.Training_Translations__r.Login_Details__c}</h3>
+                   <p>
+                   <apex:outputText escape="false" rendered="{!NOT(ISBLANK(Enrollment__c.Training_Translations__r.VL_Login_Text__c))}" value="{!Enrollment__c.Training_Translations__r.VL_Login_Text__c}<br/><br/>" />
+                   <apex:outputText escape="false" value="{!Enrollment__c.Training_Event__r.VL_Login__c}"/>
+                   </p>    
+         </apex:outputPanel>        
+            
+
+    <!-- Text for "What to do in the next few weeks" All Countries.  JS updated 22/10/2018 - only rendered if there is text on either the course or training translations -->
+            
+               <apex:outputPanel rendered="{!NOT(AND(ISBLANK(Enrollment__c.Training_Event__r.Course__r.What_To_Do_Before_Course__c),ISBLANK(Enrollment__c.Training_Translations__r.Joining_Instructions_Text2__c)))}"> 
+                  
+                  <h3><apex:outputField value="{!Enrollment__c.Training_Translations__r.What_To_Do_Before_Course__c}"/></h3>
+                  <p>             
+                  <apex:outputPanel rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.Course__r.What_To_Do_Before_Course__c))}"> 
+                      <apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.What_To_Do_Before_Course__c}"/><br/>
+                  </apex:outputPanel>              
+                  <apex:outputpanel rendered="{!OR(NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='Virtual Learning'),NOT(ISBLANK(Enrollment__c.Training_Translations__r.Joining_Instructions_Text2__c)))}"> 
+                     <apex:outputField value="{!Enrollment__c.Training_Translations__r.Joining_Instructions_Text2__c}"/>
+                  </apex:outputPanel>
+                  </p>
+               </apex:outputPanel> 
+                
+    <!-- JS COURSE MATERIALS adding code for UK 20180409 - UK show the PreRequisites if they are populated and course<=7 days away 18032020 Added Mimeo Materials field so can use outside uk 08042020 adjusted for regional cll -->          
+               <apex:outputPanel rendered="{!NOT(Enrollment__c.Training_Event__r.Master_Training_Event__r.Regional_CLL_Event__c)}"> <!-- 08042020 adjusted for regional cll-->
+               <apex:outputPanel rendered="{!AND(
+                                        Enrollment__c.Mimeo_Access_Email_Sent__c = true,
+                                        (Enrollment__c.Course_Start_Date__c - TODAY() <= 10),
+                                        OR(
+                                           Enrollment__c.Training_Event__r.Event_Country__c = 'UK',
+                                           Enrollment__c.Training_Event__r.Course__r.Mimeo_Materials__c
+                                           ),
+                                        NOT(ISBLANK(Enrollment__c.Training_Event__r.Course__r.TrainingPreRequisites__c))
+                                        )}">    
+                   <h3>{!Enrollment__c.Training_Translations__r.Course_Materials__c}</h3>
+                   <p>
+                   <apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.TrainingPreRequisites__c}"/>
+                   <apex:outputtext escape="false" rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.Bespoke_Pre_course_Materials__c))}"><br/><br/></apex:outputtext>
+                   <apex:outputField rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.Bespoke_Pre_course_Materials__c))}" value="{!Enrollment__c.Training_Event__r.Bespoke_Pre_course_Materials__c}"/>
+                   <apex:outputtext escape="false" rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.Bespoke_Pre_course_Materials__c))}"><br/></apex:outputtext> 
+                   </p>              
+               </apex:outputPanel>
+               </apex:outputPanel>
+    
+    <!----Text from the product under the  heading "when you arrive at the BSI Training Academy" and Joining_Instructions_Text3__c from translations Not shown for VL  -->
+         <apex:outputPanel rendered="{!NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c ='Virtual Learning')}">
+             <apex:outputPanel rendered="{!NOT(AND(ISBLANK(Enrollment__c.Training_Event__r.Course__r.When_You_Arrive__c),ISBLANK(Enrollment__c.Training_Translations__r.Joining_Instructions_Text3__c)))}">
+                 <h3><apex:outputField value="{!Enrollment__c.Training_Translations__r.When_you_arrive__c}"/></h3>    
+                      <p>
+                      <apex:outputPanel rendered="{!NOT(ISBLANK(Enrollment__c.Training_Translations__r.Joining_Instructions_Text3__c))}"> 
+                          <apex:outputField value="{!Enrollment__c.Training_Translations__r.Joining_Instructions_Text3__c}"/><br/>
+                      </apex:outputPanel>
+                      
+                      <apex:outputpanel rendered="{!NOT(ISBLANK(Enrollment__c.Training_Event__r.Course__r.When_You_Arrive__c))}"> 
+                         <apex:outputField value="{!Enrollment__c.Training_Event__r.Course__r.When_You_Arrive__c}"/><br/>
+                      </apex:outputPanel>
+                  </p>
+             </apex:outputPanel>
+          </apex:outputPanel>            
+    
+    <!-- Opening of outputPanel for showing directions if Public and hiding directions if In-House EB - added hiding for VL too 17/02/2017-->  
+    <apex:outputPanel rendered="{!AND(Enrollment__c.Training_Event__r.Training_Venue__r.Public_Venue__c,NOT(Enrollment__c.Training_Event__r.Course__r.Course_Format__c='Virtual Learning'))}">
+    
+    <!---- "Directions to the venue"-->
+    
+          <p><apex:outputText styleClass="big" value="{!Enrollment__c.Training_Translations__r.Directions_to_the_venue__c}"/><br/></p>
+    
+    
+    <!----venue directions info from training venue---->
+    
+           <apex:outputPanel rendered="{!NOT(OR(Enrollment__c.Training_Event__r.Training_Venue__r.Driving_directions__c='NA',LEN(Enrollment__c.Training_Event__r.Training_Venue__r.Driving_directions__c)<3))}">
+              <p><h3><apex:outputField value="{!Enrollment__c.Training_Translations__r.Driving_directions__c}"/></h3></p>     
+              <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Driving_directions__c}"/></p>
+          </apex:outputPanel>
+    
+          <apex:outputPanel rendered="{!NOT(OR(Enrollment__c.Training_Event__r.Training_Venue__r.Public_directions__c='NA',LEN(Enrollment__c.Training_Event__r.Training_Venue__r.Public_directions__c)<3))}">
+              <p><h3><apex:outputField value="{!Enrollment__c.Training_Translations__r.Rail_directions__c}"/></h3></p>     
+              <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Public_directions__c}"/></p>
+          </apex:outputPanel>
+    
+          <apex:outputPanel rendered="{!NOT(OR(Enrollment__c.Training_Event__r.Training_Venue__r.Air_directions__c='NA',LEN(Enrollment__c.Training_Event__r.Training_Venue__r.Air_directions__c)<3))}">
+              <p><h3><apex:outputField value="{!Enrollment__c.Training_Translations__r.Air_directions__c}"/></h3></p>
+              <p><apex:outputField value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Air_directions__c}"/></p>
+          </apex:outputPanel>
+    
+    
+    <!---- venue location map and taxi info text logo from training venue and translations ---->
+    
+          <p>
+    <!-- Shows an image of the map when Maps and Location is switched on in org - only shows on the VF page in the portal, not on the PDF downloaded JS 21/07/2020 commented out - perhaps switch on later if maps turned on
+    <!-- If no manual coordinates,uses the address fields
+         <apex:map rendered="{! AND(renderingService != 'PDF',Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c ='Use address')}" 
+                    width="600px" height="400px" 
+                    mapType="roadmap" zoomLevel="{!Enrollment__c.Training_Event__r.Training_Venue__r.Google_Map_Zoom_Level__c}"
+                    center="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Street__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_city__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_State__c}"> 
+              <apex:mapMarker title="{!Enrollment__c.Training_Event__r.Training_Venue__r.Name}"
+                    position="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Street__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_city__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_State__c}"
+              />                                          
+          </apex:map>
+    <!-- If manual coords been added 
+          <apex:map rendered="{! AND(renderingService != 'PDF',Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c !='Use address')}" 
+                    width="600px" height="400px" mapType="roadmap" 
+                    zoomLevel="{!Enrollment__c.Training_Event__r.Training_Venue__r.Google_Map_Zoom_Level__c}"
+                    center="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Street__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_city__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_State__c}"> 
+               <apex:mapMarker title="{!Enrollment__c.Training_Event__r.Training_Venue__r.Name}"
+                    position="{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_Street__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_city__c},{!Enrollment__c.Training_Event__r.Training_Venue__r.Venue_State__c}"
+               />     
+          </apex:map> <br/><br/>
+    -->
+    
+    <!-- Shows a link to the map  --> 
+    <!-- If no manual coordinates,uses the address fields-->          
+          <apex:outputLink rendered="{!Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c !='Use address'}"   
+                           value="{!Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c}" 
+                           id="theLinklatlong">
+                           {!Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c}
+          </apex:outputLink>
+    <!-- If manual coords been added - notes - URLENCODE shows a + for a space so ended up using substitute which allowed me to incorporat in a formula  -->               
+    
+           <apex:outputLink rendered="{!Enrollment__c.Training_Event__r.Training_Venue__r.Map_Link__c ='Use address'}"   
+                           value="{!Enrollment__c.Training_Event__r.Training_Venue__r.MapQuery__c}" 
+                           id="theLinkaddress">
+                           {!Enrollment__c.Training_Event__r.Training_Venue__r.MapQuery__c}
+                           </apex:outputLink>
+              
+          </p>
+    
+    </apex:outputPanel>  
+</apex:outputPanel>   <!-- Closing the outputpanel to hide schedule and venue information what to do before the course etc for E-Learning courses-->   
+
+      
+<!--Academy Manager name-->
+
+            <apex:outputpanel rendered="{!NOT(OR(Enrollment__c.Training_Translations__r.Name = 'China (Chinese)',Enrollment__c.Training_Translations__r.Name = 'Malaysia (English)',Enrollment__c.Training_Translations__r.Name = 'Malaysia (Malay)',Enrollment__c.Training_Translations__r.Name = 'Philippines (English)'))}">   
+                  <p><apex:outputField value="{!Enrollment__c.Training_Translations__r.Academy_Manager__c}"/></p>
+            </apex:outputpanel> 
+            
+            <apex:outputpanel rendered="{!Enrollment__c.Training_Translations__r.Name = 'India (English)'}">   
+                  <p><apex:outputField value="{!Enrollment__c.Training_Translations__r.Online_Booking_Received_Extra_Info_text__c}"/></p>
+            </apex:outputpanel>
+            
+            <apex:outputpanel rendered="{!Enrollment__c.Training_Translations__r.Name = 'China (Chinese)'}">
+            <p>  
+              <!--JS 20181212 component for signatures -->
+              <c:Email_Signatures translation="{!Enrollment__c.Training_Translations__r.Name}" Region="{!Enrollment__c.Training_Event__r.China_Region__c}" ver="HTML"/>
+            </p>
+            </apex:outputpanel>
+            <apex:outputpanel rendered="{!OR(Enrollment__c.Training_Translations__r.Name = 'Malaysia (English)',Enrollment__c.Training_Translations__r.Name = 'Malaysia (Malay)')}">
+            <p>  
+              <!--JS 20181212 component for signatures -->
+              <c:Email_Signatures translation="{!Enrollment__c.Training_Translations__r.Name}" Region="{!Enrollment__c.Training_Event__r.MY_Region__c}" ver="HTML"/>
+            </p>
+            </apex:outputpanel>
+            <!--JS 201960625 adding PH to component for signatures -->
+            <apex:outputpanel rendered="{!Enrollment__c.Training_Translations__r.Name = 'Philippines (English)'}">
+                <p>                  
+                  <c:Email_Signatures translation="{!Enrollment__c.Training_Translations__r.Name}" Region="{!Enrollment__c.Training_Event__r.PH_Region__c}" ver="HTML"/>
+                </p>
+            </apex:outputpanel> 
+
+</body> 
+
+</apex:page>

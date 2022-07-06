@@ -1,0 +1,69 @@
+<apex:page showHeader="false" controller="BluePrint_Quote_Controller">
+    
+    <script type="text/javascript">
+        var BaseHostUrl = "https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}";
+        /*var BaseHostUrl = "http://localhost:63555";*/
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/ui.combobox.css" /> 
+    <link href="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/blueprint.css" rel="stylesheet" type="text/css" />
+    <link href="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/css/redmond/jquery-ui-1.9.2.custom.css" rel="stylesheet" type="text/css" />
+    <link href="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/css/custom/custom.css" rel="stylesheet" type="text/css" />
+
+    <!--  
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/js/jquery-1.8.3.min.js" type="text/javascript"></script>
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/js/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script> 
+    
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery.hoverIntent.minified.js"></script>
+
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/json2.js" type="text/javascript"></script> 
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/jquery.combobox.js" type="text/javascript"></script>
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/RenderControls.js" type="text/javascript"></script> 
+    
+    
+     --> 
+    <script src="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/Config.js" type="text/javascript"></script>
+    <apex:includeScript value="{!$Resource.Blueprint}"/>
+    
+    <!-- <script src="https://ed-win8.jatech.local/jquery/cluetip/jquery.cluetip.js" type="text/javascript"></script>  -->
+    <link href="https://{!$Setup.BPSettings__c.BluePrint_Server_URL__c}/{!$Setup.BPSettings__c.Blueprint_Server_Path__c}/jquery/cluetip/jquery.cluetip.css" rel="stylesheet" type="text/css" />
+    
+
+    
+    
+    <script type="text/javascript">
+         
+        $(document).ready(function () {
+            //salesforceLogin(ProductCode, QuoteId, ReturnUrl, ServerURL, SessionId)
+            /*salesforceLogin("a0pL0000005Q4dJ",
+                "a0sL0000002rF3S",
+                "https://bsi--dev3--c.cs87.my.salesforce.com/apex/NewQuoteGrid?accid=001L000000HqIYoIAN&oppid=006L0000004M27QIAS&quoid=a0sL0000002rF3SIAU",
+                "https://bsi--dev3--c.cs87.my.salesforce.com/services/Soap/u/16.0/00DL000000283JrMAI",
+                "{!$Api.Session_ID}");
+            */  
+              
+              salesforceLogin("{!$CurrentPage.parameters.ProductCode}",
+                "{!$CurrentPage.parameters.qid}",
+                "{!$CurrentPage.parameters.retUrl}",
+                "{!$Setup.BPSettings__c.SalesforceURL__c}",
+                "{!$Api.Session_ID}",
+                "{!$CurrentPage.parameters.Mode}",
+                //"{!$CurrentPage.parameters.Language}",
+                "{!bluePrintLanguage}",
+                "{!$CurrentPage.parameters.Action}",              
+                "{!$CurrentPage.parameters.UpdateQuoteStructure}",
+                "{!$CurrentPage.parameters.Approved}",
+                "");
+        });
+    </script>
+<div id="bpGeneralParams" class="ui-widget ui-widget-content ui-corner-all">
+  <input type="button" value="Save" class="ui-widget-content bpButton" id="bpSaveButton"/> <input type="button"  class="ui-widget-content bpButton" value="Cancel" id="bpCancelButton"/>
+</div>
+<div id="myForm">
+  <div id="tabs">
+    <ul>
+    </ul>
+  </div>
+</div>
+<div id="dialog"></div>
+<div id="progress" class="hidden"><img src="{!$Resource.Progress}" alt="Please wait..." /><p class="messageText">Loading, Please Wait.</p></div>
+</apex:page>

@@ -1,0 +1,14 @@
+<apex:page standardController="User" extensions="emq_OutofOffice">
+	<apex:form >
+		<apex:outputPanel rendered="{!outofOffice}">
+			<div style="background:#ff0000;color: #fff;padding: 5px;text-align:center;">
+				You have set out of office, <apex:commandLink action="{!unsetOutofOffice}" value="Unset" id="unset" style="color: #fff" onclick="location.reload();" />
+			</div>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!!outofOffice}">
+			<div style="background:#2a7505;color: #fff;padding: 5px;text-align:center;">
+				If you are going on holiday, <apex:commandLink action="{!setOutofOffice}" value="Set out of office" id="set" style="color: #fff" onclick="location.reload();" />
+			</div>
+		</apex:outputPanel>
+	</apex:form>
+</apex:page>

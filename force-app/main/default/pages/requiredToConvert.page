@@ -1,0 +1,73 @@
+<apex:page standardController="Lead">
+	<!-- CSS STYLE -->
+	<style type="text/css">
+	.textHeader {
+		font: bold 15px "American Typewriter";
+		position:  relative;
+		top: 9px;
+		color: #fdfdfd;		
+		text-shadow: 1px 1px 2px #605d5d;
+	}
+	.textDone {
+		font: italic 14px "American Typewriter";
+		position:  relative;
+		left: 95px;
+		top: 11px;	
+		color: #9a9494;
+		text-decoration: line-through;
+	}
+	.textUndone {
+		font: 14px "American Typewriter";
+		position:  relative;
+		left: 95px;
+		top: 11px;
+	}
+	.shopHeader {
+		background: url({!URLFOR($Resource.texture_shoplist,'shoplistheader.png')});
+		width: 400px;
+		height:  60px;
+	}
+	.shopRowDone {
+		background: url({!URLFOR($Resource.texture_shoplist,'shoplistdone.png')});
+		width: 400px;
+		height:  34px;
+	}
+	.shopRowUndone {
+		background: url({!URLFOR($Resource.texture_shoplist,'shoplistnotdone.png')});
+		width: 400px;
+		height:  34px;
+	}
+	</style>
+
+	<div class="shopHeader">
+		<center><apex:outputText value="Required To Convert" styleClass="textHeader"/></center>
+	</div>
+	<apex:outputPanel layout="block" style="position:relative;overflow:scroll;width:500px;height:700px" rendered="{!Lead.RecordType.DeveloperName!='Training_Leads'}">
+	<apex:repeat value="{!$ObjectType.Lead.FieldSets.RequiredToConvert}" var="field">
+		<!-- DONE -->
+		<apex:outputPanel rendered="{!!ISBLANK(Lead[field])}">
+		<div class="shopRowDone"><apex:outputText value="{!$ObjectType.Lead.fields[field].label}" styleClass="textDone"/></div>
+		</apex:outputPanel>
+		<!-- NOT DONE -->
+		<apex:outputPanel rendered="{!ISBLANK(Lead[field])}">
+		<div class="shopRowUndone"><apex:outputText value="{!$ObjectType.Lead.fields[field].label}" styleClass="textUndone"/></div>
+		</apex:outputPanel>
+	</apex:repeat>
+	<div class="shopBottom"></div>
+	</apex:outputPanel>
+	<!-- new outputPanel for Training Leads -->
+	<apex:outputPanel layout="block" style="position:relative;overflow:scroll;width:500px;height:700px" rendered="{!Lead.RecordType.DeveloperName='Training_Leads'}">
+	<apex:repeat value="{!$ObjectType.Lead.FieldSets.RequiredToConvert_Training}" var="field">
+		<!-- DONE -->
+		<apex:outputPanel rendered="{!!ISBLANK(Lead[field])}">
+		<div class="shopRowDone"><apex:outputText value="{!$ObjectType.Lead.fields[field].label}" styleClass="textDone"/></div>
+		</apex:outputPanel>
+		<!-- NOT DONE -->
+		<apex:outputPanel rendered="{!ISBLANK(Lead[field])}">
+		<div class="shopRowUndone"><apex:outputText value="{!$ObjectType.Lead.fields[field].label}" styleClass="textUndone"/></div>
+		</apex:outputPanel>
+	</apex:repeat>
+	<div class="shopBottom"></div>
+	</apex:outputPanel>
+
+</apex:page>

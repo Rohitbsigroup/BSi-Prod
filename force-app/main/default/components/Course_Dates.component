@@ -1,0 +1,64 @@
+<apex:component access="global">
+    <apex:attribute name="format" type="String" description="date format" required="true" access="global"/>
+    <apex:attribute name="duration" type="Integer" description="Course duration days" required="true" access="global"/>
+    <apex:attribute name="start1" type="Date" description="Start date of section 1" required="true" access="global"/>
+    <apex:attribute name="end1" type="Date" description="End date of section 1" required="true" access="global"/>
+    <apex:attribute name="start2" type="Date" description="Start date of section 2" required="true" access="global"/>
+    <apex:attribute name="end3" type="Date" description="End date of section 2" required="true" access="global"/>
+    <apex:attribute name="country" type="String" description="Event country" required="true" access="global"/>
+    <apex:attribute name="module" type="Boolean" description="Module Event" required="true" access="global"/>
+    <apex:attribute name="split" type="Boolean" description="Split date event" required="true" access="global"/>
+    <apex:attribute name="source" type="String" description="email or cert" required="true" access="global"/>
+
+  <!--shows issue date on certificates for UK modular courses includes six sigma-->
+   
+  <apex:outputText rendered="{!AND(country = 'UK',module,source='certificate')}" value="{0,date,{!format}}"> 
+        <apex:param value="{!TODAY()}"/>
+  </apex:outputText>
+
+  <!-- For when not UK Modular course --> 
+  <apex:panelGroup rendered="{!NOT(AND(country = 'UK',module,source='certificate'))}">
+
+    <!-- For 1 Day Course -->
+
+    <apex:outputText rendered="{!duration <= 1}" value="{0,date,{!format}}">
+        <apex:param value="{!start1}"/>
+    </apex:outputText>
+
+    <!-- For NOT Split Dates AND >1 Day -->
+
+    <apex:outputText rendered="{!AND(duration > 1,NOT(split))}" value="{0,date,{!format}} - {1,date,{!format}}">
+        <apex:param value="{!start1}"/>
+            <apex:param value="{!end3}"/>
+    </apex:outputText>
+    
+    <!-- For Split Dates-->
+
+    <apex:panelGroup rendered="{!AND(duration > 1, split)}">
+        <apex:outputText rendered="{!AND((duration > 2),(end3 - start2 > 0),(end1 - start1 > 0))}" value="{0,date,{!format}} - {1,date,{!format}} & {2,date,{!format}} - {3,date,{!format}}">
+                <apex:param value="{!start1}"/>
+                <apex:param value="{!end1}"/>
+                <apex:param value="{!start2}"/>
+                <apex:param value="{!end3}"/>
+            </apex:outputText>
+    
+            <apex:outputText rendered="{!AND(((duration > 2)),(end3 - start2 = 0),(end1 - start1 > 0))}" value="{0,date,{!format}} - {1,date,{!format}} & {2,date,{!format}}">
+                <apex:param value="{!start1}"/>
+                <apex:param value="{!end1}"/>
+                <apex:param value="{!end3}"/>
+            </apex:outputText>
+    
+            <apex:outputText rendered="{!AND((duration > 2),(end3 - start2 > 0),(end1 - start1 = 0))}" value="{0,date,{!format}} & {1,date,{!format}} - {2,date,{!format}}">
+                <apex:param value="{!start1}"/>
+                <apex:param value="{!start2}"/>
+                <apex:param value="{!end3}"/>
+            </apex:outputText>
+    
+            <apex:outputText rendered="{!(duration = 2)}" value="{0,date,{!format}} & {1,date,{!format}}">
+                <apex:param value="{!start1}"/>
+                <apex:param value="{!end3}"/>
+            </apex:outputText>
+    </apex:panelGroup>
+  </apex:panelGroup>
+
+</apex:component>

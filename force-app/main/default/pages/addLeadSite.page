@@ -1,0 +1,179 @@
+<apex:page id="thePage" standardController="Lead" extensions="AddLeadSiteController" standardstylesheets="true">
+
+	<script type="text/javascript">
+        function setFocusOnLoad() {} 
+	</script>
+
+    <!-- SCRIPT FOR POSTCODE ANYWHERE -->
+    <apex:includeScript value="{!$Page.pca__EditPageSettings}"/>
+    <apex:includeScript value="{!$Resource.pca__LookupComponent}"/>
+    <apex:includeScript value="{!$Resource.pca__EditPageLauncher}"/>
+    <!--<apex:include pageName="pca__Component"/>-->
+    
+    <!-- CSS STYLE -->
+    <style type="text/css">
+        .smallheader {
+            position: absolute; 
+            margin-top: 8px;
+            margin-left: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }
+        .added {
+            font-family: "Courier",Times,serif;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: left;
+            color: grey;
+        }
+        .inserted {
+            font-family: "Courier",Times,serif;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: left;
+            color: black;
+        }
+        .del {
+            width: 25px;
+            display: none;
+        }
+        .edit {
+            width: 25px;
+            display: none;
+        }
+    </style>
+    
+    <!-- SCRIPT FOR HIDING-SHOWING DELETE ICON -->
+    <apex:includeScript value="{!$Resource.jquery}"/>
+
+       
+	<apex:actionStatus id="status">
+        <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+	</apex:actionStatus>
+
+    <apex:form id="theForm">        
+		<!-- RELOAD THE PAGE SCRIPT -->
+		<apex:outputPanel id="reloadPanel" rendered="{!reloadNeeded}" >
+		    <script type="text/javascript">
+		        // Redirect the top level window
+		        window.top.location.href = '{!pageURL}';
+		    </script>   
+		</apex:outputPanel>
+
+		<script type="text/javascript">
+	         $(document).ready(function(){
+	             //var firstsrc = "";
+	             //$("#delbtn").click(function() {
+	                 //alert("Are you sure you want to delete?");
+	             //});           
+	             
+	             $('.del').hide(); 
+	             $('.edit').hide();
+	             $("#sl li").hover(
+	               function(){
+	                 var idx = $('#sl li').index(this);
+	                 //firstsrc = $(".temp").eq(idx).attr("src");
+	                 $(".del").eq(idx).show("200");
+	                 $(".edit").eq(idx).show("200");
+	                 //$(".temp").eq(idx).attr("src","{!$Resource.icon_edit}");
+	               },
+	               function(){
+	                 var idx = $('#sl li').index(this);
+	                 $(".del").eq(idx).hide("200");
+	                 $(".edit").eq(idx).hide("200");
+	                 //$(".temp").eq(idx).attr("src",firstsrc);
+	               }
+	             );
+	         });
+		</script>
+
+        <apex:actionFunction name="showAddSite" reRender="theForm" status="status" immediate="true"/>
+
+        <table width="100%">
+        	<tr>
+		        <td width="65%" valign="top">
+		        <!--<apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%">
+		            <apex:outputPanel >
+		            <apex:image value="{!$Resource.icon_map}" height="30"/>
+		            <apex:outputText value="Add New Sites" styleclass="smallheader"/>
+		            </apex:outputPanel>
+		        </apex:panelGrid>-->
+			        <apex:outputPanel id="newSite">        
+				        <apex:pageBlock id="theBlock" mode="maindetail">
+					        <table width="100%" style="{!IF(isDisabled,'opacity:0.5','')}">
+					        	<tr>
+							        <td style="vertical-align:top;">
+								        <apex:pageBlockSection columns="1">
+									        <apex:inputField value="{!site.Name}" required="true"/>
+									        <apex:inputField value="{!site.Type__c}" required="true"/>
+									        <apex:inputField value="{!site.Industry__c}"/>
+									        <apex:inputField value="{!site.TCodeDescr__c}"/>
+									        <apex:inputField value="{!site.SkipDupeChecker__c}"/>
+									        <apex:inputField value="{!site.NumberEmployees__c}"/>
+							        	</apex:pageBlockSection>
+	        
+								        <apex:pageMessage summary="{!errorMessage}" severity="warning" strength="2" rendered="{!showError}"/>
+							        </td>
+							        <td width="65%" style="vertical-align:top;">	        
+	        							<apex:pageBlockSection columns="1">
+							<!--	        <apex:include pageName="pca__Component" />-->
+									        <pca:Address id="postcodeAny" License="WD73-WW63-JC22-AP27"
+												Country="{!site.Country__c}"
+												Street="{!site.Street__c}"
+												City="{!site.City__c}" 
+												State="{!site.State__c}" 
+												Zip="{!site.Postcode__c}" />
+									        <script type="text/javascript">
+									            pca_Load();
+									        </script>
+<!--								        <apex:inputField id="als_countryiso2" value="{!site.Country_Code__c}" required="true" />-->
+<!--								        <apex:inputField id="als_country" value="{!site.Country__c}" />-->
+<!--								        <apex:inputField id="als_street" value="{!site.Street__c}" />-->
+<!--								        <apex:inputField id="als_city" value="{!site.City__c}" />    -->
+<!--								        <apex:inputField id="als_state" value="{!site.State__c}" />-->
+<!--								        <apex:inputField id="als_postalcode" value="{!site.Postcode__c}" />        -->
+	        							</apex:pageBlockSection>     
+								        <apex:commandButton action="{!addSite}" value="{!$Label.AddSite}" status="status" reRender="theForm" style="float:right;" rendered="{!!isEdit}"/>
+								        <apex:commandButton action="{!editComplete}" value="{!$Label.Done}" status="status" reRender="theForm" style="float:right;" rendered="{!isEdit}"/>    
+										<br /><br />
+							        	<apex:commandButton action="{!saveAll}" value="{!$Label.UpdateSites}" reRender="theForm" status="status" style="float:right;" immediate="true"/> 
+		        					</td>
+		        				</tr>
+		        			</table>
+		     			</apex:pageBlock>
+		        	</apex:outputPanel>
+        		</td>
+        		<td valign="top">
+			        <apex:outputPanel id="siteList" layout="block" style="overflow:auto;width:100%;height:300px;{!IF(isDisabled,'opacity:0.5','')}">
+				        <ul id="sl" style="list-style-type: none;padding: 0;margin-left: 0;">
+					        <apex:repeat value="{!newSites}" var="s">
+					            <li style="list-style:none;margin-left:0;margin-bottom:2px" id="site{!s.index}">
+						            <apex:panelGrid columns="4" cellpadding="2">
+						                <img src="{!IF(s.site.Id == null,$Resource.icon_markeradd,$Resource.icon_marker)}" style="width:25px;"/>
+						                <apex:actionRegion >
+							                <apex:commandLink action="{!editSite}" reRender="newSite" status="status">
+							                    <apex:image value="{!$Resource.icon_edit}" styleClass="edit"/>
+							                    <apex:param name="index" assignTo="{!toEdit}" value="{!s.index}"/>
+							                </apex:commandLink>
+						                </apex:actionRegion>
+						                <apex:outputText escape="false" value="{!s.site.Name} ({!s.site.Type__c})<br/>{!s.site.Street__c}, {!s.site.City__c} {!s.site.State__c} {!s.site.Postcode__c},  {!s.site.Country__c}" styleclass="{!IF(s.site.Id == null, 'added', 'inserted')}"/>
+						                <apex:outputText value="({!$Label.ExistingAccountSite})" rendered="{!s.site.Account__c!=null}" style="font-weight:bold;font-size:10px;" />
+						                <apex:commandLink rendered="{!s.site.Account__c=null}" id="delbtn" action="{!removeSite}" onclick="if (!confirm('{!$Label.ConfirmDelete}')) return;" reRender="theForm" immediate="true">
+						                    <apex:image value="{!$Resource.icon_markerdel}" styleclass="del"/>
+						                    <apex:param name="index" assignTo="{!toRemove}" value="{!s.index}"/>
+						                </apex:commandLink>
+						            </apex:panelGrid>
+					            </li>
+					        </apex:repeat>
+				        </ul>
+				        <apex:pageMessages />
+			        </apex:outputPanel>
+	        	</td>
+	        </tr>
+        </table>
+    </apex:form>
+</apex:page>

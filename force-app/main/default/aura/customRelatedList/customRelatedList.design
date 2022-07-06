@@ -1,0 +1,51 @@
+<design:component>
+    <design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!recordId}"
+                      description="Record Id of the current Enrollment"/>
+    
+    <design:attribute name="type"
+                      label="Type"
+                      datasource="List View,Related List"
+                      description="To Specify what type of Source" />
+
+    <design:attribute name="fieldList"
+                      label="Fields"
+                      default="Name"
+                      description="List of Fields of this object: provided Comma-separated"/>
+
+    <design:attribute name="object"
+                      label="Object Name"
+                      default="Enrollment__c"
+                      description="Salesforce Object which this component queries"/>
+
+    <design:attribute name="parentObject"
+                      label="Parent Object Name"
+                      default="Training_Event__c"
+                      description="Salesforce Parent Object which this component queries"/>
+
+    <design:attribute name="whereFilter"
+                      label="Filter"
+                      default=""
+                      description="Specify a filter added to the SOQL WHERE statement"/>
+
+    <design:attribute name="orderBy"
+                      label="Order By"
+                      default="CreatedDate DESC"
+                      description="Specify the Sort-Order"/>
+
+    <design:attribute name="urlExtension"
+                      label="URL Extension"
+                      description="To Specify a sub-url to link to the lightning pages rather than detail pages"/>
+
+    <design:attribute name="editableFields"
+                      label="Editable Fields"
+                      default="Name"
+                      description="List of Editable Fields of this object: provided Comma-separated"/>
+
+    <design:attribute name="hideListOnNoResults"
+                      label="Hide List On No Results"
+                      default="false"
+                      description="Do not show empty list message"/>
+
+</design:component>

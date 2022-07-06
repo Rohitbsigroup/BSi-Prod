@@ -1,0 +1,183 @@
+<apex:component controller="ProductInterestComponentController2" allowDML="true" >
+
+	<apex:attribute name="objectRecord" description="Object Reference" assignTo="{!objRecord}" required="true" type="sobject"/>
+	<apex:attribute name="editModeParm" description="Edit Mode" assignTo="{!editMode}" required="true" type="boolean"/>
+
+	<!-- RELOAD THE PAGE SCRIPT -->
+    <apex:outputPanel id="reloadPanel" >
+    	<apex:outputPanel rendered="{!reloadNeeded}">
+	    	<script type="text/javascript">
+	        	// Redirect the top level window
+	            window.top.location.href = '{!reloadPageURL}';
+	       	</script>
+       	</apex:outputPanel>    
+   	</apex:outputPanel>
+   			
+	<apex:pageMessages id="pageMessages" />
+    
+	<apex:actionStatus id="busyStatus">
+		<apex:facet name="start">
+			<apex:image url="/img/loading32.gif" width="20px" height="20px" />                       
+		</apex:facet>
+		<apex:facet name="stop"><div style="height:20px;" /></apex:facet>
+	</apex:actionStatus>
+
+   	<apex:pageBlock mode="maindetail">
+		<apex:pageBlockButtons location="top">
+			<apex:commandButton rendered="{!editMode}" action="{!save}" id="editSaveButton" value="{!$Label.UpdateProductsInterests}" rerender="pageMessages,reloadPanel" status="busyStatus" />
+            <apex:commandButton rendered="{!editMode}" action="{!cancel}" id="editCancelButton" value="{!$Label.Cancel}" rerender="selections" status="busyStatus" />
+        </apex:pageBlockButtons>
+
+        <apex:panelGrid columns="1">
+			<apex:panelGroup id="selections" rendered="{!editMode}">
+				<apex:panelGrid columns="5">
+					<apex:panelGroup >
+						<apex:outputLabel value="Stream" for="selectedStreams" styleclass="labelCol" />
+						<div style="overflow:auto;width:135px;height:130px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+				            <apex:selectCheckboxes id="selectedStreams" value="{!selectedStreams}" layout="pageDirection" style="font-size:11px;" >
+				                <apex:selectOptions value="{!StreamItems}" />
+				                <apex:actionSupport event="onchange" rerender="listButtons,selections" status="busyStatus" />
+				            </apex:selectCheckboxes>
+			            </div>
+			            <apex:commandLink id="toggleShowStreams" value="Show {!IF(showAllStreams,'selected','all')}" action="{!ShowStreams}" rerender="selectedStreams,toggleShowStreams" style="font-size:11px;" status="busyStatus" />
+						&nbsp;
+						<apex:commandLink value="Clear" action="{!ClearSelectedStreams}" rerender="selectedStreams" style="font-size:11px;" status="busyStatus" />
+		            </apex:panelGroup>
+	            
+		            <apex:panelGroup >
+			            <apex:outputLabel value="SubStream" for="selectedSubStreams" styleclass="labelCol" />				            
+						<div style="overflow:auto;width:180px;height:130px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+				            <apex:selectCheckboxes id="selectedSubStreams" value="{!selectedSubstreams}" layout="pageDirection" style="font-size:11px;">
+				                <apex:selectOptions value="{!SubStreamItems}" />
+				                <apex:actionSupport action="{!SelectListSubstream}" event="onchange" rerender="listButtons,selections" status="busyStatus" />
+				            </apex:selectCheckboxes>
+			            </div>
+						<apex:commandLink id="toggleShowSubStreams" value="Show {!IF(showAllSubStreams,'selected','all')}" action="{!ShowSubStreams}" rerender="selectedSubStreams,toggleShowSubStreams" style="font-size:11px;" status="busyStatus" />
+						&nbsp;
+			            <apex:commandLink value="Clear" action="{!ClearSelectedSubStreams}" rerender="selectedSubStreams" style="font-size:11px;" status="busyStatus"/>
+		            </apex:panelGroup>
+	            
+		            <apex:panelGroup >				      
+						<apex:outputLabel value="Portfolio" for="selectedPortfolios" styleclass="labelCol" />
+						<div style="overflow:auto;width:180px;height:130px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+				            <apex:selectCheckboxes id="selectedPortfolios" value="{!selectedPortfolios}" layout="pageDirection" style="font-size:11px;">
+				                <apex:selectOptions value="{!PortfolioItems}" />
+				                <apex:actionSupport action="{!SelectListPortfolio}" event="onchange" rerender="listButtons,selections" status="busyStatus" />
+				            </apex:selectCheckboxes>
+			            </div>
+						<apex:commandLink id="toggleShowPortfolios" value="Show {!IF(showAllPortfolios,'selected','all')}" action="{!ShowPortfolios}" rerender="selectedPortfolios,toggleShowPortfolios" style="font-size:11px;" status="busyStatus" />				            
+						&nbsp;				            
+						<apex:commandLink value="Clear" action="{!ClearSelectedPortfolios}" rerender="selectedPortfolios" style="font-size:11px;" status="busyStatus" />
+		            </apex:panelGroup>
+	            
+		            <apex:panelGroup >
+		            	<apex:outputLabel value="Family" for="selectedFamilies" styleclass="labelCol" />				            
+						<div style="overflow:auto;width:180px;height:130px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+				            <apex:selectCheckboxes id="selectedFamilies" value="{!selectedFamilies}" layout="pageDirection" style="font-size:11px;">
+				                <apex:selectOptions value="{!FamilyItems}" />
+				                <apex:actionSupport action="{!SelectListFamily}" event="onchange" rerender="listButtons,selections" status="busyStatus" />
+				            </apex:selectCheckboxes>
+			            </div>
+						<apex:commandLink id="toggleShowFamilies" value="Show {!IF(showAllFamilies,'selected','all')}" action="{!ShowFamilies}" rerender="selectedFamilies,toggleShowFamilies" style="font-size:11px;" status="busyStatus" />				            				            
+						&nbsp;				            
+						<apex:commandLink value="Clear" action="{!ClearSelectedFamilies}" rerender="selectedFamilies" style="font-size:11px;" status="busyStatus" />
+		            </apex:panelGroup>
+	            
+		            <apex:panelGroup >				
+		            	<apex:outputLabel value="Products" for="selectedProducts" styleclass="labelCol" />			                        
+						<div style="overflow:auto;width:250px;height:130px;border-style:solid;border-color:#C0C0C0;border-width:1px;">
+				            <apex:selectCheckboxes id="selectedProducts" value="{!selectedProducts}" layout="pageDirection" style="font-size:11px;">
+				                <apex:selectOptions value="{!ProductItems}" />
+				                <apex:actionSupport action="{!SelectListProduct}" event="onchange" rerender="listButtons,selections" status="busyStatus" />
+				            </apex:selectCheckboxes>
+			            </div>
+						<apex:commandLink id="toggleShowProducts" value="Show {!IF(showAllProducts,'selected','all')}" action="{!ShowProducts}" rerender="selectedProducts,toggleShowProducts" style="font-size:11px;" status="busyStatus"/>				            				            
+	 							&nbsp;
+						<apex:commandLink value="Clear" action="{!ClearSelectedProducts}" rerender="selectedProducts" style="font-size:11px;" status="busyStatus"/>			            
+		            </apex:panelGroup>
+	            
+            	</apex:panelGrid>
+            
+			</apex:panelGroup>
+        </apex:panelGrid>
+        
+        <br />
+                
+        <apex:panelGrid columns="2">
+			<apex:outputPanel id="allSelectLists">
+				<apex:pageBlockSection columns="1" rendered="{!editMode}">
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:350px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Product_Stream__c.label}" for="streamSelectList"/>
+						<apex:outputPanel >
+							<apex:selectList id="streamSelectList" value="{!selectedStream}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!StreamOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectStream}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							&nbsp;
+							<apex:commandLink rendered="{!selectedStream!=''}" value="Clear" action="{!ClearStream}" rerender="allSelectLists,listButtons,pageMessages" style="font-size:11px;" status="busyStatus" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+				
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:350px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Product_SubStream__c.label}" for="subStreamSelectList"/>
+						<apex:outputPanel >
+							<apex:selectList id="subStreamSelectList" value="{!selectedSubStream}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!SubStreamOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectSubStream}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							&nbsp;
+							<apex:commandLink rendered="{!selectedSubStream!=''}" value="Clear" action="{!ClearSubStream}" rerender="allSelectLists,listButtons,pageMessages" style="font-size:11px;" status="busyStatus" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+				
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:350px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Portfolio_Interests__c.label}" for="portfolioSelectList"/>
+						<apex:outputPanel >
+							<apex:selectList id="portfolioSelectList" value="{!selectedPortfolio}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!PortfolioOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectPortfolio}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							&nbsp;
+							<apex:commandLink rendered="{!selectedPortfolio!=''}" value="Clear" action="{!ClearPortfolio}" rerender="allSelectLists,listButtons,pageMessages" style="font-size:11px;" status="busyStatus" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+				
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:350px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Product_Area_Interests__c.label}"/>
+						<apex:outputPanel >
+							<apex:selectList id="familySelectList" value="{!selectedFamily}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!FamilyOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectFamily}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							&nbsp;
+							<apex:commandLink rendered="{!selectedFamily!=''}" value="Clear" action="{!ClearFamily}" rerender="allSelectLists,listButtons,pageMessages" style="font-size:11px;" status="busyStatus" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+				
+					<apex:pageBlockSectionItem labelstyle="width:150px;" datastyle="width:350px;">
+						<apex:outputLabel value="{!$ObjectType.Lead.fields.Standards__c.label}"/>
+						<apex:outputPanel >
+							<apex:selectList id="productSelectList" value="{!selectedProduct}" multiselect="false" size="1">
+				                <apex:selectOptions value="{!ProductOptions}" />
+				                <apex:actionSupport event="onchange" action="{!SelectProduct}" rerender="allSelectLists,listButtons,pageMessages" status="busyStatus" />
+							</apex:selectList>
+							&nbsp;
+							<apex:commandLink rendered="{!selectedProduct!=''}" value="Clear" action="{!ClearProduct}" rerender="allSelectLists,listButtons,pageMessages" style="font-size:11px;" status="busyStatus" />
+						</apex:outputPanel>
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			
+			<apex:panelGroup id="listButtons" rendered="{!editMode}">
+				<br/>
+				<apex:commandbutton value="Add" action="{!AddSelection}" rerender="selections,listButtons" style="width:70px;" status="busyStatus" />                    
+				<br/><br/>
+				<apex:commandbutton value="{!$Label.RemoveAll}" disabled="{!AND(selectedStreams.size=0,selectedSubStreams.size=0,selectedPortfolios.size=0,selectedFamilies.size=0,selectedProducts.size=0)}" action="{!RemoveAll}" rerender="selections,listButtons" style="width:70px;" status="busyStatus" /> 
+			</apex:panelGroup>
+
+
+
+		</apex:panelGrid>
+	</apex:pageBlock>    
+
+</apex:component>

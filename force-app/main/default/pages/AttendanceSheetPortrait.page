@@ -1,0 +1,214 @@
+<apex:page renderAs="pdf" standardController="Training_Event__c" showHeader="false" pageStyle="all">
+<head>
+<style type="pdf" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+ 
+ @page{
+     @top-left-corner {
+    content: element(header);
+    }
+    size: A4 portrait;
+    margin-top:7cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:1cm;
+    @bottom-left {                  
+    content: element(footer);      
+    }    
+ }
+
+table {
+    -fs-table-paginate: paginate;
+}
+
+th {
+    font-weight:bold;font-size: 11pt;
+}
+
+div.footer {
+   display: block;
+   padding: 0px;                       
+   position: running(footer);
+   line-height: 10px;
+   color: #A9A9A9;                 
+}
+
+div.header {
+   display: block;                     
+   position: running(header);
+}
+
+
+</style>
+</head>
+<!---- this sets the background template image for the sheet ----> 
+
+<div class="header" >
+<table table-layout="fixed">
+<img src="{!URLFOR($Resource.BSI_Letter_New_Brand_A4_Protrait_Banner)}" width="21cm" height="3.5" />
+
+<table align="left" width="21cm" valign="top" style="top: 0cm; line-height: 12pt;padding: 8px;">
+    <tr>
+        <td width=".5cm"/> 
+        <td style="font-size: 13pt; text-align: center;" >  <apex:outputText escape="false" value=" {!Training_Event__c.Course_Name_for_Certificate__c}"></apex:outputText></td>
+         <td width=".5cm"/>
+    </tr>
+    </table>
+
+    <table align="left" width="21cm" valign="top" style="top: 0cm; line-height: 14pt;padding: 12px;">
+    <tr>  
+     <td width="1cm"/> 
+     <td width="6cm" >Date: &nbsp;&nbsp;
+    <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c, false,true)}">
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c<=1,true,false)}" value="{0,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                      </apex:outputText>
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c>1,true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                          <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                      </apex:outputText>
+                                </apex:outputpanel>
+                                
+                                <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c,true,false)}">
+                                
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy} - {3,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c =0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c =0)),true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy} - {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                
+                                   <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=2,true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=1,true,false)}" value="{0,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                    </Apex:outputText>
+                                
+                                </apex:outputpanel>
+                                </td>
+
+     <td width="8cm">Venue:&nbsp;&nbsp;<apex:outputText escape="false" value=" {!Training_Event__c.Training_Venue__r.Name}"></apex:outputText></td>
+     <td width="5cm">Time:&nbsp;&nbsp; _______ to _______</td>
+     <td width="1cm"></td>
+    </tr>
+    <tr>
+      <td width="1cm"></td>  
+     <td  width="6cm">Instructor:&nbsp;&nbsp;<apex:outputText escape="false" value=" {!Training_Event__c.Trainer__r.Name}"></apex:outputText></td>
+     <td width="8cm"></td>
+     <td width="5cm">Day:&nbsp;&nbsp;&nbsp; _________________</td>      
+     <td width="1cm"/> 
+    </tr>
+    </table>
+
+    <table align="left" width="21cm" valign="top" style="top: 0cm; line-height: 12pt;padding: 5px;">
+    <tr>
+        <td width=".5cm"/> 
+        <td style="color:#ff0000;font-size: 11pt;text-decoration: underline;text-align: center;">Please mark your attendance and verify your name is correctly spelt, as certificates will be issued accordingly</td>
+        <td width=".5cm"/> 
+    </tr>
+    </table>
+
+</table>
+</div>
+
+<div class="footer" >
+  <table width="40%" align="left" valign="middle" table-layout="fixed">
+<tr>
+    <td width ="0.5cm" >     </td>  
+    <td><apex:outputField value="{!Training_Event__c.Name}"/></td>
+    <td><apex:outputField value="{!Training_Event__c.SAP_SMO_number__c}"/></td>
+</tr>
+</table>
+</div>
+
+<body>
+
+    
+ 
+                  
+    <table align="left" cellpadding="5" cellspacing="0" styleclass="table"  border="0.1" style=" top: 2.5cm; text-align: center; font-size:10pt;padding: 8px;">
+    
+            <THEAD>
+
+                <tr >
+                
+                    <th width="1cm" style="border:0px solid #000000;border-right:0;">  </th>
+                
+                    <th width="1.5cm" style="border:1px solid #000000;border-right:0;">No. </th>
+                    
+                    <th width="5cm" style="text-align:left;border:1px solid #000000;border-right:0;">Participant Name</th>
+
+                    <th width="10cm" style="text-align:left;border:1px solid #000000;border-right:0;">Company Name</th>
+                   
+                    <th width="9cm" style="border:1px solid #000000;">Signature</th>
+
+                    <th width="1cm" style="border:0px solid #000000;border-right:0;">  </th>
+ 
+                    
+                </tr>
+            </THEAD>
+
+                <apex:variable var="cnt" value="{!1}" /> 
+                <apex:repeat value="{!Training_Event__c.Enrollments__r}" var="cx">
+
+
+            <TBODY>
+              <!-- try to render rows if enr not cancelled -->
+              <apex:outputPanel layout="none" rendered="{!cx.Booking_status__c != 'Cancelled - BSI'}">
+                
+                <tr >
+                
+                    <td height="1cm" width="1cm" style="border:0px solid #000000;border-top:0;border-right:0;"></td>
+            
+            
+                    <td style="border:1px solid #000000;border-top:0;border-right:0;"><apex:outputText value="{0, number,###}">  <apex:param value="{!cnt}"/></apex:outputText></td>
+
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.Name}</td>
+
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.Account.Name}</td>
+
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;">
+                     
+                    <td height="1cm" width="1cm" style="border:0px solid #000000;border-top:0;border-right:0;"></td>
+
+                     <!--<apex:outputText rendered="{!IF(cnt=5,true,false)}" value="OK" escape="false" />-->
+                     <!--
+                     Notice how above can get to a particular row count. Might use Modulus to get divsion by 10 mod = 0 to break and repeat some sections.  Might want to move all the titling in a 'header'
+                     and use -->
+                      <!--This creates a page break between each certificate -->            
+                      <!--              
+                      <table height="0">
+                      <tr><td>
+                      <div style="page-break-before:always"></div>
+                      </td></tr>
+                      </table>
+                       -->
+                      </td>          
+                  </tr>
+                </apex:outputPanel>
+
+            </TBODY>
+
+            <apex:variable var="cnt" value="{!cnt+1}"/>
+            </apex:repeat>
+    
+    </table>
+                
+ 
+</body>
+</apex:page>

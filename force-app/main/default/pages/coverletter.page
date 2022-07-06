@@ -1,0 +1,155 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false">
+
+<head>
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: "Arial Unicode MS" "Sans-Serif";
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+
+
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'),true,false)}" value="<br/><br/>"/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0"> 
+<apex:outputText >{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>
+<apex:outputText rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Italy (Italiano)'),true,false)}"><br/> </apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Account.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingStreet}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCity}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Mailing_District__c}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingPostalCode}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCountry}</apex:outputText>
+</apex:panelGrid>
+
+<apex:outputText escape="false" rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)', Enrollment__c.Translation_Formula__c = 'China (Chinese)'),false,true)}" value="<br/><br/>"/>
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Italy (Italiano)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = false),true,false)}" value="Oggetto: Invio attestato del corso {!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"/>
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Italy (Italiano)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = true),true,false)}" value="Oggetto: Invio attestato del corso {!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"/>
+<br/><br/>
+<apex:outputText rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Japan (Japanese)'),true,false)}" value="{!Enrollment__c.Delegate_name__r.Name} {!Enrollment__c.Training_Translations__r.Dear__c},"/> 
+<apex:outputText rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'),false,true)}" value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Name},"/> 
+<br/><br/>
+
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = false)&&(NOT(IF((OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)', Enrollment__c.Translation_Formula__c = 'India (English)')),true,false))),true,false)}" value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = true)&&(NOT(IF((OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)', Enrollment__c.Translation_Formula__c = 'India (English)')),true,false))),true,false)}" value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = false)&&(Enrollment__c.Translation_Formula__c = 'India (English)'),true,false)}" value="Ref:- {!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = true)&&(Enrollment__c.Translation_Formula__c = 'India (English)'),true,false)}" value="Ref:- {!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)'),false,true)}"> <br/><br/> </apex:outputText>
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'),true,false)}" value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Salutation} {!Enrollment__c.Delegate_name__r.LastName},<br/><br/>"/>
+
+
+<apex:outputpanel rendered="{!IF(((Enrollment__c.Booking_status__c='Booked - Resit')&&(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),true,false)}">
+    <apex:outputText escape="false" value="{!Enrollment__c.Training_Translations__r.IRCA_validation_explanation__c}"></apex:outputText>
+    <apex:outputText value="   {!day(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c)} - {!day(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c)}/{!month(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c)}/{!year(Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c)}"/><br/><br/>
+</apex:outputpanel>
+
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)'),false,true)}" value="{!Enrollment__c.Training_Translations__r.Cover_Letter_Text__c}"></apex:outputText>
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)'),true,false)}" value="{!Enrollment__c.Training_Translations__r.Cover_Letter_Text_Char__c}"></apex:outputText>
+<apex:outputText rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'China (Chinese)'),false,true)}"> <br/><br/> </apex:outputText>
+
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Japan (Japanese)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = false),true,false)}" value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText styleClass="size14" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Japan (Japanese)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = true),true,false)}" value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} - {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)}"></apex:outputText>
+<apex:outputText escape="false" styleClass="size14" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Thailand (Thai)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = false),true,false)}" value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c} <br/> ในวันที่อบรม {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)} - {!day(Enrollment__c.Training_Event__r.End_Date3__c)}/{!month(Enrollment__c.Training_Event__r.End_Date3__c)}/{!year(Enrollment__c.Training_Event__r.End_Date3__c)}"></apex:outputText>
+<apex:outputText escape="false" styleClass="size14" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Thailand (Thai)')&&(Enrollment__c.Training_Event__r.Course__r.Bespoke_Event__c = true),true,false)}" value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} <br/> ในวันที่อบรม {!day(Enrollment__c.Training_Event__r.Start_date__c)}/{!month(Enrollment__c.Training_Event__r.Start_date__c)}/{!year(Enrollment__c.Training_Event__r.Start_date__c)} - {!day(Enrollment__c.Training_Event__r.End_Date3__c)}/{!month(Enrollment__c.Training_Event__r.End_Date3__c)}/{!year(Enrollment__c.Training_Event__r.End_Date3__c)}"></apex:outputText>
+<br/>
+<apex:image rendered="{!IF(Enrollment__c.Training_Translations__r.Name = 'Australia (English)',true,false)}" height="1.5cm" width="2cm" url="{!Enrollment__c.Training_Translations__r.Cover_Letter_Signature__c}"/><br/>
+
+<apex:outputText escape="false" rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)', Enrollment__c.Translation_Formula__c = 'Turkey (Türkçe)'),true,false)}" value="{!Enrollment__c.Training_Translations__r.Cover_Letter_Signoff__c}"/>
+<apex:outputText escape="false" rendered="{!IF((NOT(IF((OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)', Enrollment__c.Translation_Formula__c = 'India (English)', Enrollment__c.Translation_Formula__c = 'Turkey (Türkçe)')),true,false))),true,false)}" value="{!$User.FirstName} {!$User.LastName} <br/>Tel: {!$User.Phone}<br/>Email: {!$User.Email}"/>
+<apex:outputText escape="false" rendered="{!IF(Enrollment__c.Translation_Formula__c = 'India (English)',true,false)}" value="{!$User.FirstName} {!$User.LastName} <br/>{!Enrollment__c.Training_Event__r.Indian_Office_Number__c}<br/>Email: {!$User.Email}"/>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(OR(Enrollment__c.Training_Event__r.China_Region__c = "EC:SH", Enrollment__c.Training_Event__r.China_Region__c="EC:Other")),true,false)}">
+<br/><br/>地区 : 上海 EC:SH
+<br/>联系人 : Sophia Zhu(朱晓燕)
+<br/>邮箱 : Sophia.zhu@bsigroup.com
+<br/>电话 : +86 (0)21 23160217
+<br/>地址 : 上海市南京西路388号仙乐斯广场10楼1006-1011室
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(Enrollment__c.Training_Event__r.China_Region__c = "EC:SU"),true,false)}">
+<br/><br/>地区 : 苏州 EC:SU
+<br/>联系人 : Eleanor Cai(蔡佳乐)
+<br/>邮箱 : Eleanor.cai@bsigroup.com
+<br/>电话 : +86 (0)512 6875 9220
+<br/>地址 : 苏州市 高新区 狮山路28号 高新广场1802室
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(OR(Enrollment__c.Training_Event__r.China_Region__c = "NC:BJ", Enrollment__c.Training_Event__r.China_Region__c="NC:Other")),true,false)}">
+<br/><br/>地区 : 北京 NC:BJ
+<br/>联系人 : Evelyn Zhang(张静)
+<br/>邮箱 : Evelyn.zhang@bsigroup.com
+<br/>电话 : +86 (0)10 8507 2912
+<br/>地址 : 北京市朝阳区建国门外大街甲24号东海中心2008室
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(Enrollment__c.Training_Event__r.China_Region__c = "NC:QD"),true,false)}">
+<br/><br/>地区 : 青岛 NC:QD
+<br/>联系人 : Anne Wu(吴宁宁）
+<br/>邮箱 : Anne.wu@bsigroup.com
+<br/>电话 : +86 (0)532 8090 6918
+<br/>地址 : 青岛市市南区东海西路15号英德隆大厦22层B户
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(Enrollment__c.Training_Event__r.China_Region__c = "NC:TJ"),true,false)}">
+<br/><br/>地区 : 天津 NC:TJ
+<br/>联系人 : Echo Zhi （只通）
+<br/>邮箱 : Echo.zhi@bsigroup.com
+<br/>电话 : +86 (0)22 5852 1901
+<br/>地址 : 天津市和平区南京路75号天津国际大厦2308室
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(OR(Enrollment__c.Training_Event__r.China_Region__c = "SC:GZ", Enrollment__c.Training_Event__r.China_Region__c="SC:Other")),true,false)}">
+<br/><br/>地区 : 广州 SC:GZ
+<br/>联系人 : Ivy Ru(茹晓兰)
+<br/>邮箱 : Ivy.ru@bsigroup.com
+<br/>电话 : +86 (0)20 8516 8192
+<br/>地址 : 广州市天河路208号粤海天河城大厦12楼1209室
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(Enrollment__c.Training_Event__r.China_Region__c = "SC:SZ"),true,false)}">
+<br/><br/>地区 : 深圳 SC:SZ
+<br/>联系人 : Wheaty CAI(蔡穗芬)
+<br/>邮箱 : Wheaty.cai@bsigroup.com
+<br/>电话 : +86 (0)755 32900126
+<br/>地址 : 深圳市深南大道6008号特区报业大厦29楼AB区
+</apex:outputpanel>
+
+<apex:outputpanel rendered="{!IF((Enrollment__c.Translation_Formula__c = 'China (Chinese)')&&(CONTAINS(Enrollment__c.Training_Event__r.China_Region__c, 'SW')),true,false)}">
+<br/><br/>地区 : 重庆 SW
+<br/>联系人 : Blair Chen(陈鹏博)
+<br/>邮箱 : Blair.chen@bsigroup.com
+<br/>电话 : +86 (0)23 6768 6708
+<br/>地址 : 重庆市北部新区金开大道68号金开协信中心4栋4-8
+</apex:outputpanel>
+
+</apex:page>

@@ -1,0 +1,4 @@
+<apex:page standardController="Training_Translations__c" recordSetVar="Enrollments" sidebar="false">
+  <apex:sectionHeader title="Training Translations"/>
+  <apex:enhancedList type="Training_Translations__c" height="600" rowsPerPage="25" id="AccountList" />
+</apex:page>

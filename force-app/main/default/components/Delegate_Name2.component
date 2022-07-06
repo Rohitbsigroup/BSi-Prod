@@ -1,0 +1,120 @@
+<apex:component access="global">
+    <!--JS 20180823 added additional logic to enable component to be used with CQI IRCA/all certs
+        JS 20180828 changed CN to show only Chinese and TW to use cert language option as per country requests
+        JS 20180111 changed CN to be able to use cert language option and grouped conditions to tidy up
+    -->
+    
+    
+    
+    <apex:attribute name="pq" description="PQ" type="Personal_Qualification__c" access="global"/>
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+    <apex:attribute name="source" type="String" description="course or qual" required="true" access="global"/>
+
+    <Apex:panelGroup rendered="{!source='qual'}">
+    <!-- (NOT DE JP TW KR VN CN SG MY HK) -->
+    <apex:outputText rendered="{!NOT(OR(pq.Training_Translations__r.Name='Korea (Korean)', enrollment.Training_Translations__r.Name='Vietnam (Vietnamese)', pq.Training_Translations__r.Name='China (Chinese)', pq.Training_Translations__r.Name='Taiwan (Chinese)', pq.Training_Translations__r.Name='Japan (Japanese)', pq.Training_Translations__r.Name='Germany (Deutsch)', pq.Training_Translations__r.Name='Singapore (English)', pq.Training_Translations__r.Name='Malaysia (English)', pq.Training_Translations__r.Name='Hong Kong (English)'))}" 
+        value="{!pq.Delegate__r.Name}" styleClass="size22"/>
+
+    <!-- Germany -- for Herr and Frau Dr, displays the salutation-->
+    <apex:panelGroup rendered="{!pq.Training_Translations__r.Name='Germany (Deutsch)'}">
+        <apex:outputText rendered="{!NOT(OR(pq.Delegate__r.Salutation='Herr Dr.', pq.Delegate__r.Salutation='Frau Dr.'))}" 
+            value="{!pq.Delegate__r.Salutation} {!pq.Delegate__r.Name}" styleClass="size22"/>
+        <apex:outputText rendered="{!OR(pq.Delegate__r.Salutation='Herr Dr.', pq.Delegate__r.Salutation='Frau Dr.')}" 
+            value="Dr. {!pq.Delegate__r.Name}" styleClass="size22"/>
+    </apex:panelGroup>
+
+    <!-- Japan -- for non IRCA shows Local Name 殿 and English name -->
+    <apex:panelGroup rendered="{!pq.Training_Translations__r.Name='Japan (Japanese)'}">    
+        <apex:outputText escape="false" rendered="{!pq.Certificate_Language__c='Local'}" 
+            value="{!pq.Delegate__r.LastNameLocal}  {!pq.Delegate__r.FirstNameLocal} 殿<br/>" styleClass="size22"/> 
+        <apex:outputText value="{!pq.Delegate__r.FirstName} {!pq.Delegate__r.LastName}" styleClass="size22"/>   
+    </apex:panelGroup>
+
+    <!-- Taiwan, Korea & Vietnam -- shows names dependent on cert language on PQ -->
+    <apex:panelGroup rendered="{!OR(pq.Training_Translations__r.Name='Taiwan (Chinese)', pq.Training_Translations__r.Name='Korea (Korean)', pq.Training_Translations__r.Name='Vietnam (Vietnamese)')}">  
+    <!-- English/Both-->
+        <apex:outputText escape="false" rendered="{!OR(pq.Certificate_Language__c='English', pq.Certificate_Language__c='Both')}"
+            value="{!pq.Delegate__r.FirstName} {!pq.Delegate__r.LastName}<br/>" styleClass="size22"/>
+    <!-- Local/Both -->
+        <apex:outputText escape="false" rendered="{!OR(pq.Certificate_Language__c='Local', pq.Certificate_Language__c='Both')}" 
+            value="{!pq.Delegate__r.LastNameLocal}{!pq.Delegate__r.FirstNameLocal}" styleClass="size22"/>
+    </apex:panelGroup>
+    
+    <!--  China -- shows names dependent on cert language on PQ -->
+    <apex:panelGroup rendered="{!pq.Training_Translations__r.Name='China (Chinese)'}">  
+    <!-- English/Both-->
+        <apex:outputText escape="false" rendered="{!OR(pq.Certificate_Language__c='English', pq.Certificate_Language__c='Both')}"
+            value="{!pq.Delegate__r.LastName} {!pq.Delegate__r.FirstName}<br/>" styleClass="size22"/>
+    <!-- Local/Both -->
+        <apex:outputText escape="false" rendered="{!OR(pq.Certificate_Language__c='Local', pq.Certificate_Language__c='Both')}" 
+            value="{!pq.Delegate__r.LastNameLocal}{!pq.Delegate__r.FirstNameLocal}" styleClass="size22"/>
+    </apex:panelGroup>      
+    
+    <!-- Singapore and Malaysia -- shows local fields if both populated or english if both blank -- if no name on cert then check both local fields either empty or populated -->
+    <apex:panelGroup rendered="{!OR(pq.Training_Translations__r.Name='Singapore (English)', pq.Training_Translations__r.Name='Malaysia (English)')}">
+        <apex:outputText rendered="{!AND(NOT(ISBLANK(pq.Delegate__r.FirstNameLocal)), NOT(ISBLANK(pq.Delegate__r.LastNameLocal)))}" 
+            value="{!pq.Delegate__r.LastNameLocal}  {!pq.Delegate__r.FirstNameLocal}" styleClass="size22"/>
+        <apex:outputText rendered="{!AND(ISBLANK(pq.Delegate__r.FirstNameLocal),ISBLANK(pq.Delegate__r.LastNameLocal))}" 
+            value="{!pq.Delegate__r.Name}" styleClass="size22"/>
+    </apex:panelGroup>    
+
+    <!--Hong Kong -->
+    <apex:panelGroup rendered="{!pq.Training_Translations__r.Name='Hong Kong (English)'}">  
+        <apex:outputText value="{!pq.Delegate__r.LastName} {!pq.Delegate__r.FirstName}" styleClass="size22"/>
+    </apex:panelGroup>    
+    </Apex:panelGroup>
+       
+    <Apex:panelGroup rendered="{!source='course'}">
+    <!-- (NOT DE JP TW KR VN CN SG MY HK) -->
+    <apex:outputText rendered="{!NOT(OR(enrollment.Training_Translations__r.Name='Korea (Korean)', enrollment.Training_Translations__r.Name='Vietnam (Vietnamese)', enrollment.Training_Translations__r.Name='China (Chinese)', enrollment.Training_Translations__r.Name='Taiwan (Chinese)', enrollment.Training_Translations__r.Name='Japan (Japanese)', enrollment.Training_Translations__r.Name='Germany (Deutsch)', enrollment.Training_Translations__r.Name='Singapore (English)', enrollment.Training_Translations__r.Name='Malaysia (English)', enrollment.Training_Translations__r.Name='Hong Kong (English)'))}" 
+        value="{!enrollment.Delegate_name__r.Name}" styleClass="size22"/>
+
+    <!-- Germany -- for Herr and Frau Dr, displays the salutation-->
+    <apex:panelGroup rendered="{!enrollment.Training_Translations__r.Name='Germany (Deutsch)'}">
+        <apex:outputText rendered="{!NOT(OR(enrollment.Delegate_name__r.Salutation='Herr Dr.', enrollment.Delegate_name__r.Salutation='Frau Dr.'))}" 
+            value="{!enrollment.Delegate_name__r.Salutation} {!enrollment.Delegate_name__r.Name}" styleClass="size22"/>
+        <apex:outputText rendered="{!OR(enrollment.Delegate_name__r.Salutation='Herr Dr.', enrollment.Delegate_name__r.Salutation='Frau Dr.')}" 
+            value="Dr. {!enrollment.Delegate_name__r.Name}" styleClass="size22"/>
+    </apex:panelGroup>
+
+    <!-- Japan -- for non IRCA shows Local Name 殿 and English name, for IRCA just English -->
+    <apex:panelGroup rendered="{!enrollment.Training_Translations__r.Name='Japan (Japanese)'}">    
+        <apex:outputText escape="false" rendered="{!AND(enrollment.Certificate_Language__c='Local',NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}" 
+            value="{!enrollment.Delegate_name__r.LastNameLocal}  {!enrollment.Delegate_name__r.FirstNameLocal} 殿<br/>" styleClass="size22"/> 
+        <apex:outputText value="{!enrollment.Delegate_name__r.FirstName} {!enrollment.Delegate_name__r.LastName}" styleClass="size22"/>   
+    </apex:panelGroup>
+
+    <!-- Taiwan, Korea & Vietnam -- shows names dependent on IRCA and cert language on ENR -->
+    <apex:panelGroup rendered="{!OR(enrollment.Training_Translations__r.Name='Taiwan (Chinese)', enrollment.Training_Translations__r.Name='Korea (Korean)', enrollment.Training_Translations__r.Name='Vietnam (Vietnamese)')}">  
+    <!-- English/Both/IRCA-->
+        <apex:outputText escape="false" rendered="{!OR(enrollment.Certificate_Language__c='English', enrollment.Certificate_Language__c='Both', enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}"
+            value="{!enrollment.Delegate_name__r.FirstName} {!enrollment.Delegate_name__r.LastName}<br/>" styleClass="size22"/>
+    <!-- Local/Both -->
+        <apex:outputText escape="false" rendered="{!AND(NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'),OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c='Both'))}" 
+            value="{!enrollment.Delegate_name__r.LastNameLocal}{!enrollment.Delegate_name__r.FirstNameLocal}" styleClass="size22"/>
+    </apex:panelGroup>
+    
+    <!--  China -- shows names dependent on IRCA and cert language on ENR -->
+    <apex:panelGroup rendered="{!enrollment.Training_Translations__r.Name='China (Chinese)'}">  
+    <!-- English/Both/IRCA-->
+        <apex:outputText escape="false" rendered="{!OR(enrollment.Certificate_Language__c='English', enrollment.Certificate_Language__c='Both', enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}"
+            value="{!enrollment.Delegate_name__r.LastName} {!enrollment.Delegate_name__r.FirstName}<br/>" styleClass="size22"/>
+    <!-- Local/Both -->
+        <apex:outputText escape="false" rendered="{!AND(NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'),OR(enrollment.Certificate_Language__c='Local', enrollment.Certificate_Language__c='Both'))}" 
+            value="{!enrollment.Delegate_name__r.LastNameLocal}{!enrollment.Delegate_name__r.FirstNameLocal}" styleClass="size22"/>
+    </apex:panelGroup>      
+    
+    <!-- Singapore and Malaysia -- shows local fields if both populated or english if both blank -- if no name on cert then check both local fields either empty or populated -->
+    <apex:panelGroup rendered="{!OR(enrollment.Training_Translations__r.Name='Singapore (English)', enrollment.Training_Translations__r.Name='Malaysia (English)')}">
+        <apex:outputText rendered="{!AND(NOT(ISBLANK(enrollment.Delegate_name__r.FirstNameLocal)), NOT(ISBLANK(enrollment.Delegate_name__r.LastNameLocal)))}" 
+            value="{!enrollment.Delegate_name__r.LastNameLocal}  {!enrollment.Delegate_name__r.FirstNameLocal}" styleClass="size22"/>
+        <apex:outputText rendered="{!AND(ISBLANK(enrollment.Delegate_name__r.FirstNameLocal),ISBLANK(enrollment.Delegate_name__r.LastNameLocal))}" 
+            value="{!enrollment.Delegate_name__r.Name}" styleClass="size22"/>
+    </apex:panelGroup>    
+
+    <!--Hong Kong -- shows name as last name, first name for everything - updated 13/11/19-->
+    <apex:panelGroup rendered="{!enrollment.Training_Translations__r.Name='Hong Kong (English)'}">  
+         <apex:outputText value="{!enrollment.Delegate_name__r.LastName} {!enrollment.Delegate_name__r.FirstName}" styleClass="size22"/>
+    </apex:panelGroup>
+    </Apex:panelGroup>
+</apex:component>

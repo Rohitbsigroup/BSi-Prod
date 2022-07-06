@@ -1,0 +1,52 @@
+<!--<apex:page language="{!$CurrentPage.parameters.L}" standardstylesheets="false" showheader="false" cache="false" applyBodyTag="false" applyHtmlTag="false" docType="html-5.0">
+-->
+
+
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+
+    <apex:composition template="{!$Site.Template}">
+
+
+
+        <!-- *** Details *** -->
+         <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+            <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                </h2>
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                </h2>
+             </apex:outputPanel>
+            <h2 class="subtitle">
+                <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Name.Label}"/>:&nbsp;
+                <apex:outputField value="{!objBooking.Name}"/>
+            </h2>
+        </apex:define>
+                            
+         <!--<apex:define name="introduction">
+            <div class="title">
+                <h2 class="title">{!$Label.TrainingBookingPaymentCancelledTitle}</h2>
+            </div>
+        </apex:define> -->
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <p class="intro">
+                <apex:outputText value="{!$Label.TrainingBookingPaymentCancelledTitle}"/> - <apex:outputText value="{!$Label.TrainingBookingPaymentCancelledText}"/>
+            </p>
+        </apex:define>
+
+    </apex:composition> 
+</apex:page>

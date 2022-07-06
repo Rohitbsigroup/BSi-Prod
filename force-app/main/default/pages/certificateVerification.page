@@ -1,0 +1,36 @@
+<apex:page id="certificateVerification" controller="CertificateVerificationController" lightningStylesheets="false" standardstylesheets="false" applyHtmlTag="false" applyBodyTag="false" sidebar="false" showheader="false" cache="false" >
+ 
+    <html>
+        <head>
+                            
+            <meta name="og:url" content="{!currentURL}"/> <!-- content="https://uat-bsi.cs126.force.com/training/certificateVerification?shareId=2f7a623f38fcc5281bc50e64546f530a06b5d30d">-->
+            <meta name="title" property="og:title" content="BSI Training Certificate"/>
+            <meta name="image" property="og:image" content="{!traceLabsURL}bsi-certificate-metaimage-1200x630.jpeg"/><!--<meta name="image" property="og:image" content="{!traceLabsURL}images/bsi-meta-image.jpg"/>-->
+            <meta name="description" property="og:description" content="BSI Training Certificate"/>
+            <meta name="twitter:card" content="summary_large_image"/>
+            <meta name="twitter:site" content="{!currentURL}"/> <!-- content="https://uat-bsi.cs126.force.com/training/certificateVerification?shareId=2f7a623f38fcc5281bc50e64546f530a06b5d30d">-->
+            <meta name="twitter:title" content="BSI Training Certificate"/>
+            <meta name="twitter:text:title" content="BSI Training Certificate" />
+            <meta name="twitter:description" content="BSI Training Certificate" />
+            <meta name="twitter:image:src" content="{!traceLabsURL}bsi-certificate-metaimage-1200x630.jpeg"/><!--<meta name="twitter:image:src" content="{!traceLabsURL}images/bsi-meta-image.jpg"/>-->
+                        
+        </head>
+        
+        <body>
+            
+            <div id="bsi-tc-application-wrapper"></div>
+        
+            <script>
+                window.TRACELABS = {};
+                window.TRACELABS.USER_ID = "{!portalUserId}";
+                let type = "application/javascript";
+                let src = "{!verifierScript}";
+                let script = document.createElement("script");
+                script.type = type;
+                script.src = src;
+                script.id = 'tracelabs_js';
+                document.getElementById("bsi-tc-application-wrapper").appendChild(script);
+            </script>
+        </body>
+    </html>
+</apex:page>

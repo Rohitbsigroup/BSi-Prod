@@ -1,0 +1,49 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <apex:form >
+                <div class="two-thirds">
+                    
+                    <!-- Existing portal user login -->
+                    <p class="notes">{!$Label.TrainingBookingPortalLoginIntroduction}</p>
+                    <fieldset class="form-fields">
+                        <div class="field-item">
+                            <apex:outputLabel for="username" value="{!$Label.TrainingBookingPortalUsername} *"/>
+                            <apex:inputText id="username" value="{!username}" required="true"/>
+                        </div>
+                        <div class="field-item">
+                            <apex:outputLabel for="password" value="{!$Label.TrainingBookingPortalPassword} *"/>
+                            <apex:inputSecret id="password" value="{!password}"/>
+                        </div>
+                        <apex:outputLink value="{!resetPasswordURL}" style="float: right; margin-right: 40px; margin-top: 10px">{!$Label.TrainingBookingResetPassword}</apex:outputLink>
+                    </fieldset>
+                    <div style="float: left; width: auto; margin-bottom: 20px;">
+                        <apex:commandButton value="{!$Label.TrainingBookingLoginButton}" style="float: right; margin-left: 20px;" action="{!portalUserLogin}"/>
+                        <apex:commandButton value="{!$Label.TrainingBookingContinueAsGuest}" style="float: right; margin-left: 20px;" action="{!forwardToStep2}" immediate="true" html-formnovalidate="formnovalidate"/>
+                        <apex:commandButton value="{!$Label.TrainingBookingPreviousButton}" action="{!backToStep1}" immediate="true" html-formnovalidate="formnovalidate" style="float: right;"/>
+                    </div>
+                    
+                </div>
+            </apex:form>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                <p>{!$Label.TrainingBookingStep2Notes}</p>
+            </apex:outputPanel>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

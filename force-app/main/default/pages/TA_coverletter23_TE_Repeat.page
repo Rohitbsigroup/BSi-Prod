@@ -1,0 +1,329 @@
+<apex:page renderAs="pdf" standardController="Training_Event__c" showHeader="false">
+
+<!-- TA_coverletter23_TE_Repeat check out NAME  DATE  -->
+
+<head>
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: "Arial Unicode MS" "Sans-Serif";
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+<body>
+
+<!--------  Displays the course dates and name and list of delegates for up to 44 delegates. ------>
+
+<apex:panelGroup rendered="{!IF((Training_Event__c.Enrollment_Count__c <= 44),true,false)}">
+
+    <table align="left" width="19.3cm" valign="top" style="position: absolute; left: 1.5cm; top: 6.5cm; line-height: 12pt;">
+    
+     <tr> <td> <apex:outputText escape="false" value=" {!Training_Event__c.Course_Name_for_Certificate__c}"></apex:outputText></td>
+     </tr>       
+     <tr> <td>        
+    <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c, false,true)}">
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=1,true,false)}" value="{0,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                      </apex:outputText>
+                                      <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c>1,true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy}"> 
+                                          <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                          <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                      </apex:outputText>
+                                </apex:outputpanel>
+                                
+                                <apex:outputpanel rendered="{!IF(Training_Event__c.Split_Date_Event__c,true,false)}">
+                                
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy} - {3,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c =0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date_of_Section_1__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(AND((Training_Event__c.Course_Duration_Days__c>2),(Training_Event__c.End_Date3__c - Training_Event__c.Start_Date_of_Section_2__c >0) , (Training_Event__c.End_Date_of_Section_1__c - Training_Event__c.Start_date__c =0)),true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy} - {2,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.Start_Date_of_Section_2__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                
+                                   <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=2,true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                        <apex:param value="{!Training_Event__c.End_Date3__c}"/>
+                                    </Apex:outputText>
+                                    
+                                    <apex:outputtext rendered="{!IF(Training_Event__c.Course_Duration_Days__c=1,true,false)}" value="{0,date,dd/MM/yyyy}">
+                                        <apex:param value="{!Training_Event__c.Start_date__c}"/>
+                                    </Apex:outputText>
+                                
+                                </apex:outputpanel>
+                                </td></tr>
+                                <tr><td><br/></td></tr> 
+    </table>
+ 
+                  
+    <table  align="left" cellpadding="2" cellspacing="0" styleclass="table"  border="0.1"  style="position: absolute; top: 8cm; text-align: center; font-size:6pt;">
+            <THEAD>
+                <tr>
+                    <th width="1.5cm" style="border:0px solid #000000;border-right:0;"> </th>
+                    <th style="border:1px solid #000000;border-right:0;">Enrolment ID</th>
+                    <th style="border:1px solid #000000;border-right:0;">Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Local Name</th>
+                    <th style="border:1px solid #000000;border-right:0;">Booking Status</th>
+                    <th style="border:1px solid #000000;">Exam Results</th>
+                </tr>
+            </THEAD>
+                <apex:repeat value="{!Training_Event__c.Enrollments__r}" var="cx">
+            <TBODY>
+                <tr >
+                    <td width="1.5cm" style="border:0px solid #000000;border-right:0;"> </td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.Name}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!cx.delegate_name__r.LastNameLocal}{!cx.delegate_name__r.FirstNameLocal}</td>
+                    <td style="text-align:center;border:1px solid #000000;border-top:0;border-right:0;">{!cx.Booking_status__c}</td>
+                    <td style="text-align:left;border:1px solid #000000;border-top:0;">{!cx.Exam_results__c}</td>
+                </tr>
+            </TBODY>
+            </apex:repeat>
+    </table>
+
+</apex:panelGroup>
+
+<!--------  For 44+ delegates a message is shown to state a table can't be produced. ------>
+
+<apex:panelGroup rendered="{!IF((Training_Event__c.Enrollment_Count__c <= 44),false, true)}">
+
+     <table valign="middle" style="position: absolute; left: 1.2cm; top: 10cm; line-height: 12pt;">
+         <tr><td><apex:outputText value="A list cannot be displayed for more than 44 delegates, but you can still see all the certificates on the following pages."/></td></tr>
+      </table>
+</apex:panelGroup>
+
+
+
+
+
+<!-- This sets it so that the code is repeated and a cover letter is displayed for each enrolment-->
+<apex:repeat value="{!Training_Event__c.Enrollments__r}" var="enr">
+
+
+<!--Here may restricts for when that the cover letter is shown e.g. if the booking status contains booked so No Shows and Cancelled enrollments are excluded -->
+
+<!--<apex:panelGroup rendered="{!OR((CONTAINS('Booked',enr.Booking_status__c)), (CONTAINS('Booked - BSI Employee',enr.Booking_status__c)), (CONTAINS('Booked - Resit',enr.Booking_status__c))  )}"> -->
+ <apex:panelGroup > 
+ 
+<!--This creates a page break between each certificate -->                    
+<table height="0">
+      <tr><td>
+          <div style="page-break-before:always"></div>
+      </td></tr>
+</table>
+
+
+<apex:outputText escape="false" rendered="{!IF((enr.Translation_Formula__c = 'Germany (Deutsch)'),true,false)}" value="<br/><br/>"/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<!-- Date of letter and Address on left of the page (all countries except France)  -->
+    <apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0"> 
+        <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}"> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!NOW()}"/> </apex:outputText> </apex:outputpanel>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'Italy (Italiano)'),true,false)}"><br/> </apex:outputText>
+        <apex:outputText rendered="{!IF(OR(enr.Translation_Formula__c = 'France (French)', enr.Translation_Formula__c = 'Korea (Korean)'),false,true)}">{!enr.Delegate_name__r.Name}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'Korea (Korean)'),true,false)}">{!enr.Delegate_name__r.LastNameLocal} {!enr.Delegate_name__r.FirstNameLocal}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.Account.Name}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.MailingStreet}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.MailingCity}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.Mailing_District__c}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.MailingPostalCode}</apex:outputText>
+        <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),false,true)}">{!enr.Delegate_name__r.MailingCountry}</apex:outputText>
+    </apex:panelGrid>
+
+<!-- Address and Date of letter and on right of the page (for France)  -->
+    <apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0">
+        <table width="30%" align="right" table-layout="fixed" >
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.Name}</apex:outputText>
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.Account.Name}</apex:outputText>
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.MailingStreet}</apex:outputText>
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.MailingPostalCode}   {!enr.Delegate_name__r.MailingCity}</apex:outputText>
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.Mailing_District__c}</apex:outputText>
+            <!--<apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.MailingPostalCode}</apex:outputText>-->
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!enr.Delegate_name__r.MailingCountry}</apex:outputText>
+            <apex:outputText rendered="{!IF((enr.Translation_Formula__c = 'France (French)'),true,false)}">{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>
+        </table>
+    </apex:panelGrid>
+    
+<!-- Adds breaks for countries except China & Germany. For Italy Only: Adds the Course name and Dates above the Dear with some additional text
+For Japan & Korea Only: Enrolment name then translation for "Dear". For all other countries except Germany, Japan & Korea adds translation for "Dear" then Enrolment Name -->
+    <apex:outputText escape="false" rendered="{!IF(OR(enr.Translation_Formula__c = 'Germany (Deutsch)', enr.Translation_Formula__c = 'China (Chinese)'),false,true)}" value="<br/>"/>
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'Italy (Italiano)')&& IF(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE',false,true),true,false)}"> <apex:outputText escape="false" styleClass="size14" value="Oggetto: Invio attestato del corso {!enr.Training_Event__r.Course__r.Product_Name_Local__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText>  </apex:outputpanel>
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'Italy (Italiano)')&& IF(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE',true,false),true,false)}"> <apex:outputText escape="false" styleClass="size14" value="Oggetto: Invio attestato del corso {!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText>  </apex:outputpanel>
+    <br/><br/>
+    <apex:outputText rendered="{!IF(enr.Translation_Formula__c = 'Japan (Japanese)',true,false)}" value="{!enr.Delegate_name__r.Name} {!enr.Training_Translations__r.Dear__c},"/> 
+    <apex:outputText rendered="{!IF(enr.Translation_Formula__c = 'Korea (Korean)',true,false)}" value="{!enr.Delegate_name__r.LastNameLocal} {!enr.Delegate_name__r.FirstNameLocal} {!enr.Training_Translations__r.Dear__c},"/>
+    <apex:outputText rendered="{!IF(OR(enr.Translation_Formula__c = 'Japan (Japanese)', enr.Translation_Formula__c = 'Germany (Deutsch)', enr.Translation_Formula__c = 'Korea (Korean)'),false,true)}" value="{!enr.Training_Translations__r.Dear__c} {!enr.Delegate_name__r.Name},"/> 
+    <br/><br/>
+
+<!-- Adds Course name and Dates as reference for the letter (Except for Japan, Italy & Thailand).  Adds break for countries except Italy & Thailand
+For Germany Only: Adds translation for "Dear" then Enrolment Salutation and Lastname-->
+    <apex:outputpanel rendered="{!IF(NOT(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE')&&(NOT(IF((OR(enr.Translation_Formula__c = 'Japan (Japanese)', enr.Translation_Formula__c = 'Italy (Italiano)', enr.Translation_Formula__c = 'Thailand (Thai)')),true,false))),true,false)}"> <apex:outputText styleClass="size14" value="Ref: "></apex:outputText><apex:outputText rendered="{!(enr.Translation_Formula__c = 'UK (English)')}">{!enr.Name}/</apex:outputText><apex:outputText styleClass="size14" value="{!enr.Training_Event__r.Course__r.Product_Name_Local__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>  
+    <apex:outputpanel rendered="{!IF((enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE')&&(NOT(IF((OR(enr.Translation_Formula__c = 'Japan (Japanese)', enr.Translation_Formula__c = 'Italy (Italiano)', enr.Translation_Formula__c = 'Thailand (Thai)')),true,false))),true,false)}"> <apex:outputText styleClass="size14" value="Ref: "></apex:outputText><apex:outputText rendered="{!(enr.Translation_Formula__c = 'UK (English)')}">{!enr.Name}/</apex:outputText><apex:outputText styleClass="size14" value="{!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>
+    <apex:outputText rendered="{!IF(OR(enr.Translation_Formula__c = 'Italy (Italiano)', enr.Translation_Formula__c = 'Thailand (Thai)'),false,true)}"> <br/><br/> </apex:outputText>
+    <apex:outputText escape="false" rendered="{!IF((enr.Translation_Formula__c = 'Germany (Deutsch)'),true,false)}" value="{!enr.Training_Translations__r.Dear__c} {!enr.Delegate_name__r.Salutation} {!enr.Delegate_name__r.LastName},<br/><br/>"/>
+    
+<!-- If it is an IRCA Resit Enrolment adds additional text & the Original dates of the IRCA Course --> 
+    <apex:outputpanel rendered="{!IF(((enr.Booking_status__c='Booked - Resit')&&(enr.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),true,false)}">
+        <apex:outputText escape="false" value="{!enr.Training_Translations__r.IRCA_validation_explanation__c}"></apex:outputText>
+        <apex:outputText value="  {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c}"/></apex:outputText>
+    <br/><br/>
+    </apex:outputpanel>
+
+<!-- Adds the Cover Letter Text 1 - "Thank you for choosing..." -->
+    <apex:outputText escape="false" value="{!enr.Training_Translations__r.Cover_letter_text1__c}"></apex:outputText>
+    <br/><br/>
+
+<!---- covering letter text2 or covering letter text3 from training translations depending on exam results pick list value in enrolment (passed / failed).-->
+<!-- 12 Jan 2017 Vim updated condition below to include BSI - NONPASS CA Exam results -->
+<!--
+    <apex:outputText rendered="{!IF((enr.Exam_results__c = 'IRCA - Pass exam & pass CA')||(enr.Exam_results__c = 'NON - Pass exam')||(enr.Exam_results__c = 'IEMA - Pass exam')||(enr.Exam_results__c = 'Six Sigma - Pass')||(enr.Exam_results__c = 'ISEB - Pass')
+                               ||(enr.Exam_results__c = 'RABQSA TPECS - Pass')||(enr.Exam_results__c = 'APMG - Pass')||(enr.Exam_results__c = 'CCAA - Pass')||(enr.Exam_results__c = 'EXIN - Pass')||(enr.Exam_results__c = 'ITSMF - Pass')||(enr.Exam_results__c = 'JATA - Pass')
+                               ||(enr.Exam_results__c = 'JRCA - Pass')||(enr.Exam_results__c = 'Self Study Assessment Pass')||(enr.Exam_results__c = 'IOSH - Pass'),true,false)}" value="{!enr.Training_Translations__r.Cover_letter_text2__c}<br/><br/>" escape="false"/>
+    <apex:outputText rendered="{!IF((enr.Exam_results__c = 'IRCA - Pass exam & fail CA')||(enr.Exam_results__c = 'IRCA - Fail exam & pass CA')|| (enr.Exam_results__c = 'IRCA - Fail exam & fail CA')||(enr.Exam_results__c = 'NON - Fail exam')||(enr.Exam_results__c = 'IEMA - Fail exam')
+                               ||(enr.Exam_results__c = 'Six Sigma - Fail')||(enr.Exam_results__c = 'ISEB - Fail')||(enr.Exam_results__c = 'APMG - Fail')||(enr.Exam_results__c = 'CCAA - Fail')||(enr.Exam_results__c = 'EXIN - Fail')||(enr.Exam_results__c = 'ITSMF - Fail')
+                               ||(enr.Exam_results__c = 'JATA - Fail')||(enr.Exam_results__c = 'JRCA - Fail')||(enr.Exam_results__c = 'IOSH - Fail')||(enr.Exam_results__c = null),true,false)}" value="{!enr.Training_Translations__r.Cover_letter_text3__c}<br/><br/>" escape="false"/>
+-->
+<apex:outputText rendered="{!IF((enr.Exam_results__c = 'IRCA - Pass exam & pass CA')||(enr.Exam_results__c = 'NON - Pass exam')||(enr.Exam_results__c = 'IEMA - Pass exam')||(enr.Exam_results__c = 'Six Sigma - Pass')||(enr.Exam_results__c = 'ISEB - Pass')
+                               ||(enr.Exam_results__c = 'RABQSA TPECS - Pass')||(enr.Exam_results__c = 'APMG - Pass')||(enr.Exam_results__c = 'CCAA - Pass')||(enr.Exam_results__c = 'EXIN - Pass')||(enr.Exam_results__c = 'ITSMF - Pass')||(enr.Exam_results__c = 'JATA - Pass')
+                               ||(enr.Exam_results__c = 'JRCA - Pass')||(enr.Exam_results__c = 'Self Study Assessment Pass')||(enr.Exam_results__c = 'IOSH - Pass') || (enr.Exam_results__c = 'NON - Pass exam & pass CA') ,true,false)}" value="{!enr.Training_Translations__r.Cover_letter_text2__c}<br/><br/>" escape="false"/>
+    <apex:outputText rendered="{!IF((enr.Exam_results__c = 'IRCA - Pass exam & fail CA')||(enr.Exam_results__c = 'IRCA - Fail exam & pass CA')|| (enr.Exam_results__c = 'IRCA - Fail exam & fail CA')||(enr.Exam_results__c = 'NON - Fail exam')||(enr.Exam_results__c = 'IEMA - Fail exam')
+                               ||(enr.Exam_results__c = 'Six Sigma - Fail')||(enr.Exam_results__c = 'ISEB - Fail')||(enr.Exam_results__c = 'APMG - Fail')||(enr.Exam_results__c = 'CCAA - Fail')||(enr.Exam_results__c = 'EXIN - Fail')||(enr.Exam_results__c = 'ITSMF - Fail')
+                               ||(enr.Exam_results__c = 'JATA - Fail')||(enr.Exam_results__c = 'JRCA - Fail')||(enr.Exam_results__c = 'IOSH - Fail')||(enr.Exam_results__c = null) ||(enr.Exam_results__c = 'NON - Pass exam & fail CA') ||(enr.Exam_results__c = 'NON - Fail exam & pass CA') ||(enr.Exam_results__c = 'NON - Fail exam & fail CA')  ,true,false)}" value="{!enr.Training_Translations__r.Cover_letter_text3__c}<br/><br/>" escape="false"/>
+<!-- 12 Jan Vim code ends here -->
+
+<!---- covering letter text4 from training translations (Letter ending).-->
+    <apex:outputText escape="false" value="{!enr.Training_Translations__r.Cover_letter_text4__c}"></apex:outputText>
+    <br/><br/>
+
+<!---- "Yours sincerely" text.-->
+    <apex:outputText value="{!enr.Training_Translations__r.Yours_sincerely__c}"/><br/><br/>
+    
+<!---- "Academy Manager name and contact details" text. Signature included for Australia & France-->
+    <apex:image rendered="{!IF(enr.Training_Translations__r.Name = 'Australia (English)',true,false)}" height="1.5cm" width="2cm" url="{!enr.Training_Translations__r.Cover_Letter_Signature__c}"/>
+    <apex:outputText escape="false" rendered="{!IF(enr.Translation_Formula__c = 'Australia (English)',true,false)}" value="<br/>"/>
+    <apex:image rendered="{!IF(enr.Training_Translations__r.Name = 'France (French)',true,false)}" height="2.0cm" width="4cm" url="{!enr.Training_Translations__r.Cover_Letter_Signature__c}"/>
+    <apex:outputText escape="false" rendered="{!IF(enr.Translation_Formula__c = 'France (French)',true,false)}" value="<br/>"/>
+    <apex:outputField value="{!enr.Training_Translations__r.Academy_Manager__c}"/>
+    <apex:outputText escape="false" rendered="{!IF(OR(enr.Translation_Formula__c = 'Japan (Japanese)', enr.Translation_Formula__c = 'Thailand (Thai)'),true,false)}" value="<br/><br/>"/>
+
+<!-- For Japan & Thailand Only: Adds Course name and Dates as reference for the letter -->
+    <apex:outputPanel rendered="{!IF((enr.Translation_Formula__c = 'Japan (Japanese)')&&(NOT(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE')),true,false)}"> <apex:outputText styleClass="size14" value="{!enr.Training_Event__r.Course__r.Product_Name_Local__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>
+    <apex:outputPanel rendered="{!IF((enr.Translation_Formula__c = 'Japan (Japanese)')&&(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE'),true,false)}"> <apex:outputText styleClass="size14" value="{!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>
+    <apex:outputPanel rendered="{!IF((enr.Translation_Formula__c = 'Thailand (Thai)')&&(NOT(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE')),true,false)}"> <apex:outputText escape="false" styleClass="size14"  value="{!enr.Training_Event__r.Course__r.Product_Name_Local__c} <br/> ในวันที่อบรม "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>
+    <apex:outputPanel rendered="{!IF((enr.Translation_Formula__c = 'Thailand (Thai)')&&(enr.Training_Event__r.RecordType.Id = '012D00000002Ar6IAE'),true,false)}"> <apex:outputText escape="false" styleClass="size14"  value="{!enr.Training_Event__r.Bespoke_Course_Name_for_Certificate__c} <br/> ในวันที่อบรม "></apex:outputText> <apex:outputText value="{0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText styleClass="size14" value=" - {0,date,{!enr.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!enr.Training_Event__r.End_Date3__c}"/></apex:outputText> </apex:outputpanel>
+    <br/>
+
+<!-- For India Only: Adds User Name, Office Phone number and User email address  -->
+    <apex:outputText escape="false" rendered="{!IF(enr.Translation_Formula__c = 'India (English)',true,false)}" value="<br/>{!$User.FirstName} {!$User.LastName} <br/>{!enr.Training_Event__r.Indian_Office_Number__c}<br/>E:- {!$User.Email}"/>
+
+<!-- For China Only: Adds extra signature text depending on the "China Region" selected on the Training Event. -->
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(OR(enr.Training_Event__r.China_Region__c = "EC:SH", enr.Training_Event__r.China_Region__c="EC:Other")),true,false)}">
+        <br/><br/>地区 : 上海 EC:SH
+        <br/>联系人 : Sophia Zhu(朱晓燕)
+        <br/>邮箱 : Sophia.zhu@bsigroup.com
+        <br/>电话 : +86 (0)21 23160217
+        <br/>地址 : 上海市南京西路388号仙乐斯广场10楼1006-1011室
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(enr.Training_Event__r.China_Region__c = "EC:SU"),true,false)}">
+        <br/><br/>地区 : 苏州 EC:SU
+        <br/>联系人 : Eleanor Cai(蔡佳乐)
+        <br/>邮箱 : Eleanor.cai@bsigroup.com
+        <br/>电话 : +86 (0)512 6875 9220
+        <br/>地址 : 苏州市 高新区 狮山路28号 高新广场1802室
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(OR(enr.Training_Event__r.China_Region__c = "NC:BJ", enr.Training_Event__r.China_Region__c="NC:Other")),true,false)}">
+        <br/><br/>地区 : 北京 NC:BJ
+        <br/>联系人 : Evelyn Zhang(张静)
+        <br/>邮箱 : Evelyn.zhang@bsigroup.com
+        <br/>电话 : +86 (0)10 8507 2912
+        <br/>地址 : 北京市朝阳区建国门外大街甲24号东海中心2008室
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(enr.Training_Event__r.China_Region__c = "NC:QD"),true,false)}">
+        <br/><br/>地区 : 青岛 NC:QD
+        <br/>联系人 : Anne Wu(吴宁宁）
+        <br/>邮箱 : Anne.wu@bsigroup.com
+        <br/>电话 : +86 (0)532 8090 6918
+        <br/>地址 : 青岛市市南区东海西路15号英德隆大厦22层B户
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(enr.Training_Event__r.China_Region__c = "NC:TJ"),true,false)}">
+        <br/><br/>地区 : 天津 NC:TJ
+        <br/>联系人 : Echo Zhi （只通）
+        <br/>邮箱 : Echo.zhi@bsigroup.com
+        <br/>电话 : +86 (0)22 5852 1901
+        <br/>地址 : 天津市和平区南京路75号天津国际大厦2308室
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(OR(enr.Training_Event__r.China_Region__c = "SC:GZ", enr.Training_Event__r.China_Region__c="SC:Other")),true,false)}">
+        <br/><br/>地区 : 广州 SC:GZ
+        <br/>联系人 : Ivy Ru(茹晓兰)
+        <br/>邮箱 : Ivy.ru@bsigroup.com
+        <br/>电话 : +86 (0)20 8516 8192
+        <br/>地址 : 广州市天河路208号粤海天河城大厦12楼1209室
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(enr.Training_Event__r.China_Region__c = "SC:SZ"),true,false)}">
+        <br/><br/>地区 : 深圳 SC:SZ
+        <br/>联系人 : Wheaty CAI(蔡穗芬)
+        <br/>邮箱 : Wheaty.cai@bsigroup.com
+        <br/>电话 : +86 (0)755 32900126
+        <br/>地址 : 深圳市深南大道6008号特区报业大厦29楼AB区
+    </apex:outputpanel>
+
+    <apex:outputpanel rendered="{!IF((enr.Translation_Formula__c = 'China (Chinese)')&&(CONTAINS(enr.Training_Event__r.China_Region__c, 'SW')),true,false)}">
+        <br/><br/>地区 : 重庆 SW
+        <br/>联系人 : Blair Chen(陈鹏博)
+        <br/>邮箱 : Blair.chen@bsigroup.com
+        <br/>电话 : +86 (0)23 6768 6708
+        <br/>地址 : 重庆市北部新区金开大道68号金开协信中心4栋4-8
+    </apex:outputpanel>
+
+
+
+</apex:panelGroup>
+</apex:repeat>
+
+</body>
+
+</apex:page>

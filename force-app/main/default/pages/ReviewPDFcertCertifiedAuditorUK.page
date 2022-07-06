@@ -1,0 +1,175 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false" pageStyle="all">
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 portrait;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:1.5cm;
+          
+}
+
+div.footer {
+   display: block;
+   padding: 10px;                       
+   position: running(footer);
+   line-height: 10px;
+   z-index: -3; 
+   color: #A9A9A9;                
+}
+
+
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+}
+
+.logo {
+   position: fixed;
+   left: 15mm;
+   bottom: 0mm;
+   z-index:+2;
+
+   }
+.size12 {
+    font-weight: bold;
+    font-size: 12pt;
+    text-align: left;
+    line-height: 20px;
+    }
+.size15 {
+    font-weight: bold;
+    font-size: 15pt;
+    text-align: left;
+    line-height: 34px;
+    }
+
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 44px;
+    }
+.small8 {
+    font-size: 8pt;
+    text-align: left;
+    line-height: 4px;
+   }
+
+.tmname10 {
+    font-size: 10pt;
+    line-height: 14pt;
+    text-align: left;
+     }
+
+</style>
+</head>
+
+
+
+<!-- this sets the background template image for the certificate-->
+
+<!--<img src="{!URLFOR($Resource.TrainingCertificatesV2watermark, 'BSI_training_certificate_newv2_watermark.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="21cm" height="29.7"/>-->
+
+<body>
+
+<!--
+Only if enrolment field ‘Personal Qualification’ is not blank DONE
+Only if enrolment record type = ‘UK Certified Auditor Audit Reports’ DONE
+Only for Qualification ‘UK - XXX43901ENUK - Certified Auditor DONE
+Only for Products 
+‘UK - XXX43901ENUK - Certified Auditor Report Review Y1’, 01tc0000002IjGh
+ ‘UK - XXX43901ENUK - Certified Auditor Report Review Y2’,  01tc0000002Io81
+  ‘UK - XXX43901ENUK - Certified Auditor Report Review - Pre TR’ 01tc0000002IjI4
+
+
+(Using Product IDs where possible instead of Product Names is preferable. Everything is only in Sandbox at the moment so if we could use IDs we would just need to change the refs in live)
+
+-->
+<apex:outputPanel rendered="{!IF((Enrollment__c.RecordType.Name='UK Certified Auditor Audit Report Submission') && Not(IsBlank(Enrollment__c.Personal_Qualification__c)) && (Enrollment__c.Personal_Qualification__r.Qualification__r.Name ='UK - XXX43901ENUK - Certified Auditor'),true, false)}">
+
+
+<!--
+<apex:outputPanel rendered="{!IF((Enrollment__c.RecordType.Name='UK Certified Auditor Audit Reports') && Not(IsBlank(Enrollment__c.Personal_Qualification__c)) && (Enrollment__c.RecordType.Name='UK Certified Auditor Audit Reports') ,true, false)}">
+-->
+
+<!---- this creates a table to insert the text in the correct places---->
+<table width="95%" align="center" table-layout="fixed">
+
+<!---- this inserts a space at the top---->
+<tr>
+    <td width ="0.25cm" ></td>
+    <td height="9.5cm"></td>
+</tr> 
+    <!--This is to certify that in text as not necessarily enrollment goes up to training translation-->
+<!--<tr>
+    <td width ="0.3cm" ></td>
+    <td><apex:outputText styleClass="size12" value="This is to certify that:" /></td>
+</tr>-->
+            
+            
+        
+<tr>
+    <td width="0.25cm" height="3.2cm"></td>
+    <td align="left" valign="middle">
+
+
+        <!-- (Insert Delegate first and last name) -->
+
+        <apex:outputText styleclass="size22" value="{!Enrollment__c.Delegate_name__r.Name}" style="font-style:italic"/></td>
+</tr>
+<!---- this inserts a space---->
+<tr>
+    <td width ="0.25cm"></td>
+    <td height="1cm"></td>
+</tr>
+
+<!--Certified_Auditor_Standards__c
+Has successfully met the qualification criteria to become a BSI Certified Lead (Certified Auditor Type field – if ‘Lead’ insert Lead if ‘Internal’ no insertion required)  Auditor for the following Management Systems Standards: ISO/IEC 27001 (Insert Certified Auditor Standards field – could be multiple, separated by ‘,’ and if possible the last one is preceeded by ‘and’.)
+  -->
+<tr>
+    <td width ="0.25cm" ></td>
+    <td><apex:outputText styleClass="size12" value="Has successfully met the qualification criteria to become a BSI Certified" /><apex:outputText rendered="{!IF(Enrollment__c.Certified_Auditor_Type__c = 'Lead',true,false)}" escape="false" styleClass="size12" value=" Lead"/><apex:outputText styleClass="size12" value=" Auditor for the " /></td>
+</tr> 
+<tr>
+    <td width ="0.25cm" ></td>
+    <td><apex:outputText styleClass="size12" value="following Management Systems Standards: " /><apex:outputText styleClass="size12" value="{!Enrollment__c.Certified_Auditor_Standards__c}" /></td>
+</tr> 
+
+<!---- this inserts a space---->
+<tr>
+    <td width ="0.25cm" ></td>
+    <td height="1.5cm"></td>
+</tr> 
+
+<!--Expiry Date: 21/07/2015 (Insert Qualification Stage Expiry Date field)-->
+    <tr>
+        <td width="0.25cm" ></td>
+        <td align="left">
+          <apex:outputText styleClass="size12" value="Expiry Date: "/>
+          <apex:outputPanel > <apex:outputtext styleClass="size12" value="{0,date,dd/MM/yyyy}"> 
+         <apex:param value="{!Enrollment__c.Qualification_Stage_Expiry_Date__c}"/>
+         </apex:outputText>
+         </apex:outputpanel>
+
+
+        </td> 
+ </tr>
+
+<!--Membership number: BSI1925 (Insert Personal Qualification - Membership Number field)-->
+    <tr>
+        <td width="0.25cm" ></td>
+        <td align="left">
+          <apex:outputText styleClass="size12" value="Membership Number: "/><apex:outputText styleClass="size12" value="{!Enrollment__c.Personal_Qualification__r.Membership_Number__c }"/>
+        </td> 
+    </tr>  
+        
+</table>
+</apex:outputPanel>  
+</body>
+</apex:page>

@@ -1,0 +1,78 @@
+<apex:component controller="ActivityHistoryController">
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.description {
+			font-family: "Courier",Times,serif;
+			font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.text {
+			font-family: "Courier",Times,serif;
+			font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.header {
+			font-family: "Futura",Helvetica,sans-serif;
+			font-size: 11px;
+			text-align: left;
+			color: black;
+		}
+		.notes {
+			background-image:url('{!URLFOR($Resource.note_texture)}');
+			background-repeat:repeat;
+		} 
+		.clip {
+			margin-top:-19px;
+			margin-left:20px;
+		}
+	</style>
+
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    
+    <script type="text/javascript">
+    	function showItem(el){
+			$(el).fadeIn(1100, function() {
+				if($(this).nextAll("li").size() > 0) {
+					showItem($(this).next("li"));
+					
+				}
+			});
+		  }
+		    
+		$(function(){
+		   //recursion
+		    //$("#hd li").hide();
+		    showItem("li:first");
+		});
+    </script>	
+	
+	<!-- Attributes Required For Component -->
+  	<apex:attribute name="objectID" assignTo="{!objectID}" description="Related object ID" type="String" required="true"/>
+  	<apex:attribute name="currentTask" assignTo="{!taskID}" description="To be used in the Task detail page" type="String"/>
+  	<apex:attribute name="imageURL" description="Line Separator Image" type="String" required="false"/>
+  	<apex:attribute name="imageHeight" description="Line Separator Image Height" type="String" required="false"/>
+  	
+  	<apex:outputPanel >
+  	<br/>
+  	<br/>
+  	<ul id="hd" style="list-style-type: none;padding: 0;margin-left: 0;">
+  	<apex:repeat value="{!history}" var="t">
+  		<li style="list-style:none;margin-left:0;">
+  		<div class="notes">
+  		<center><apex:image value="{!imageURL}" height="{!imageHeight}" styleclass="clip"/></center>
+  		<center><apex:outputText styleclass="description"><b class="header" style="color:black">{!DAY(t.ActivityDate)} - {!MONTH(t.ActivityDate)} - {!YEAR(t.ActivityDate)}</b></apex:outputText></center>
+  		<p class="header" style="padding-left:25px;"><b>Assigned To: </b><apex:outputField value=" {!t.Owner.Name}" styleclass="text"/></p>
+  		<p class="header" style="padding-left:25px;"><b>Summary: </b><apex:outputText value=" {!t.Subject}" styleclass="text"/></p>
+  		<p class="header" style="padding-left:25px;"><b>Type: </b><apex:outputText value=" {!t.Type}" styleclass="text"/></p>
+  		<p class="description" style="padding-left:25px;"><apex:outputField value="{!t.Description}"/></p>
+  		<br/>
+  		</div>
+  		<br/>
+  		<br/>
+  		</li>		
+  	</apex:repeat>
+  	</ul>
+  	</apex:outputPanel>
+</apex:component>

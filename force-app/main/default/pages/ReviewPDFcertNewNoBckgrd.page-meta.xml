@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>25.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Review the PDF certificate which will be emailed to the customer. This code must also be incorporated in the code for the Email PDF cert template. NEW BRAND FOR USE WITH ALL COUNTRIES.</description>
+    <label>ReviewPDFcertNewNoBckgrd</label>
+</ApexPage>

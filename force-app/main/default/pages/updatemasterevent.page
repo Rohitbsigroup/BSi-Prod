@@ -1,0 +1,9 @@
+<apex:page standardController="Training_Event__c" >
+
+  
+    <flow:interview name="AU_TPECS_Combined_module_costs">
+      <apex:param name="MEID" value="{!Training_Event__c.Name}"/>
+    </flow:interview>
+
+
+</apex:page>

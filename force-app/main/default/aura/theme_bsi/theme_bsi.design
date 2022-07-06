@@ -1,0 +1,9 @@
+<design:component label="Theme - BSI">
+    <design:attribute name="logoName"    label="Logo name (Static Resource)" default="" description="To specify the logo of the theme"/>
+    <design:attribute name="mediaChannels" label="mediaChannels" default="" description="To specify the media"/>
+    <design:attribute name="headerLinks"   label="headerLinks"   default="" description="To specify the header links"/>
+    <design:attribute name="footerLinks"   label="footerLinks"   default="" description="To specify the footer links"/>
+    <design:attribute name="isFooter"      label="isFooter"      default="" description="To specify if the page only contains the footer"/>
+    <design:attribute name="recordIdTest"  label="recordIdTest" default=""/>
+    <design:attribute name="redirectNoAccess" label="redirectNoAccess" default=""/>
+</design:component>

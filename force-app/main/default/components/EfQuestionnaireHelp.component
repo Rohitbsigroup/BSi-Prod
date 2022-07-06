@@ -1,0 +1,8 @@
+<apex:component selfClosing="true">
+  <apex:attribute name="helpId" description="Unique identifier." type="String" required="true"/>
+  <apex:attribute name="helpText" description="Help text." type="String" required="true"/>
+  <span id="{!helpId}-_help" class="helpButton">
+    <img src="/s.gif" class="helpOrb" alt="" title="" />
+    <script>sfdcPage.setHelp('{!helpId}', '{!SUBSTITUTE(SUBSTITUTE(JSINHTMLENCODE(helpText), "\n", "<br />"), "\r", "")}');</script>
+  </span>
+</apex:component>

@@ -1,0 +1,151 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+        </apex:define>
+
+        <!-- *** Introduction *** -->
+        <apex:define name="introduction">
+            <p class="intro">
+                <apex:outputText value="{!SUBSTITUTE($Label.TrainingBookingStep1Intro,'{0}',TEXT(selectedCountry.maxNumberOfDelegates))}" />
+            </p>
+
+            <!-- 27/06/2019 PC hide this section for 'IncludeExam' flag or if no exam -->
+            <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Start -->
+            <p class="intro">
+                <apex:outputText value="{!$Label.TrainingBookingStep1ExamInformation}" rendered="{!AND(NOT(isIncludeExam), courseOnlineExam)}"/>
+            </p>
+            <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Finish -->
+        </apex:define>
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+
+            <apex:form id="listing">
+                <!-- PK(NEB) 10 Sep 2018 - Replaced standard html table with div and style support, to help with mobile layouts -->
+                <div class="listingTable">
+                    <div class="listingTableHeading">
+                        <div class="listingTableRow">
+                            <div class="listingTableCellHeader" style="width: 20%">{!$Label.TrainingBookingDatesHeader}</div>
+                            <div class="listingTableCellHeader locationBox" style="width: 27%">
+                                <apex:outputPanel layout="block">
+                                    <apex:selectList id="SelectLocation1" value="{!selectedLocation}" size="1" multiselect="false">
+                                        <apex:selectOptions value="{!LocationOptions}" />
+                                        <apex:actionSupport event="onchange" action="{!changeFilter}" reRender="listing" />
+                                    </apex:selectList>
+                                </apex:outputPanel>
+                            </div>
+                            <div class="listingTableCellHeader" style="width: 13%">{!$Label.TrainingBookingLanguageHeader}</div>
+                            <div class="listingTableCellHeader" style="width: 20%">{!$Label.TrainingBookingPriceHeader}</div>
+                            <div class="listingTableCellHeader center" style="width: 12%">{!$Label.TrainingBookingAvailabilityHeader}</div>
+                            <div class="listingTableCellHeader center" style="width: 8%">{!$Label.TrainingBookingBookingHeader}</div>
+                        </div>
+                    </div>
+
+                    <div class="listingTableBody">
+                        <apex:repeat value="{!events}" var="e" rendered="{!events.size > 0}">
+                            <!-- PK(NEB) 10 Sep 2018 - Also removed the even-row / odd-row class application with better css only version -->
+                            <div class="listingTableRow">
+                                <div class="listingTableCell fixLines tc-dates">
+                                    <c:TrainingBookingDates event="{!e.event}" format="table" />
+                                </div>
+                                <div class="listingTableCell tc-venue">
+                                    <apex:outputLink value="{!e.event.Training_Venue__r.Venue_Website__c}" target="_blank" rendered="{!NOT(e.event.Training_Venue__r.Venue_Website__c='')}" styleClass="underline">{!e.event.Training_Venue__r.Name}</apex:outputLink>
+                                    <apex:outputField value="{!e.event.Training_Venue__r.Name}" rendered="{!e.event.Training_Venue__r.Venue_Website__c=''}"/>
+                                </div>
+                                <div class="listingTableCell tc-language">
+                                    <apex:outputField value="{!e.event.Delivery_Language__c}"/>
+                                </div>
+                                <div class="listingTableCell tc-price">
+                                    <apex:outputText value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                        <apex:param value="{!e.totalPriceCourse}"/>
+                                    </apex:outputText>
+                                    <apex:outputPanel rendered="{!e.accommodationAvailable}">
+                                        &nbsp;<apex:outputText value="{!$Label.TrainingBookingPriceExclusive}"/>
+                                        <br />
+                                        <apex:outputText value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!e.totalPriceWithAccom}"/>
+                                        </apex:outputText>
+                                        &nbsp;<apex:outputText value="{!$Label.TrainingBookingPriceInclusive}"/>
+                                    </apex:outputPanel>
+                                </div>
+                                <div class="listingTableCell center tc-available">
+                                    <apex:outputText value="{!$Label.TrainingBookingAvailabilityGood}" rendered="{!e.freeSeats >= 3}"/>
+                                    <apex:outputText value="{!$Label.TrainingBookingAvailabilityLimited}" rendered="{!AND(e.freeSeats > 0, e.freeSeats < 3)}"/>
+                                    <apex:outputText value="{!$Label.TrainingBookingAvailabilityFull}" rendered="{!e.freeSeats <= 0}"/>
+                                </div>
+                                <div class="listingTableCell center tc-book">
+                                    <apex:commandLink value="{!$Label.TrainingBookingSelect}" action="{!forwardToLogin}" rendered="{!AND(e.freeSeats>0,e.shortNotice=false,NOT(isAuthenticated),selectedCountry.portalLogin)}" styleClass="key-link underline">
+                                        <apex:param name="event" value="{!e.event.Id}" assignTo="{!selectedEventId}" />
+                                    </apex:commandLink>
+                                    <apex:commandLink value="{!$Label.TrainingBookingSelect}" action="{!forwardToStep2}" rendered="{!AND(e.freeSeats>0,e.shortNotice=false,isAuthenticated) || AND(e.freeSeats>0,e.shortNotice=false,NOT(selectedCountry.portalLogin))}" styleClass="key-link underline">
+                                        <apex:param name="event" value="{!e.event.Id}" assignTo="{!selectedEventId}" />
+                                    </apex:commandLink>
+                                    <apex:outputText value="{!$Label.TrainingBookingShortNotice}" rendered="{!e.shortNotice=true}"/>
+                                </div>
+                            </div>
+                        </apex:repeat>
+                        <apex:outputPanel rendered="{!events.size = 0}">
+                            <div class="listingTableRow">
+                                <div class="listingTableCell">
+                                    <apex:outputText value="{!$Label.TrainingBookingNoEvents}"/>
+                                </div>
+                            </div>
+                        </apex:outputPanel>
+                    </div>
+                </div>
+                <apex:commandLink value="{!$Label.TrainingBookingShowAll}" action="{!moreEvents}" rendered="{!pageAllowMore}" reRender="listing" styleClass="show-more underline"/>
+            </apex:form>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <div class="notes">
+                <apex:outputPanel layout="none" rendered="{!NOT($Label.TrainingBookingStep1Notes='')}">
+                    <p>
+                        {!SUBSTITUTE($Label.TrainingBookingStep1Notes,'{0}',TEXT(selectedCountry.maxNumberOfDelegates))}
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.enquiryUrl=''),NOT($Label.TrainingBookingEnquiryFormLink=''))}">
+                            &nbsp;<apex:outputLink target="blank" value="{!selectedCountry.enquiryUrl}" styleClass="underline">{!$Label.TrainingBookingEnquiryFormLink}</apex:outputLink>.
+                        </apex:outputPanel>
+                    </p>
+                </apex:outputPanel>
+
+                <apex:variable var="showCard" value="{!AND(NOT(selectedCountry=''),selectedCountry.isCardAllowed,NOT(coursePmtOpts='Invoice'))}" />
+                <apex:variable var="showInvoice" value="{!AND(NOT(selectedCountry=''),selectedCountry.isInvoiceAllowed,NOT(coursePmtOpts='Card'))}" />
+                <apex:variable var="sfdcTax" value="{!selectedCountry.calculateTaxMethod='SFDC'}" />
+                <apex:outputPanel layout="none" rendered="{!AND(NOT(sfdcTax),showCard,NOT(showInvoice),NOT($Label.TrainingBookingPaymentCard=''))}">
+                    <p>{!$Label.TrainingBookingPaymentCard}</p>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(NOT(sfdcTax),showInvoice,NOT(showCard),NOT($Label.TrainingBookingPaymentInvoice=''))}">
+                    <p>{!$Label.TrainingBookingPaymentInvoice}</p>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(NOT(sfdcTax),showCard,showInvoice,NOT($Label.TrainingBookingPaymentBoth=''))}">
+                    <p>{!$Label.TrainingBookingPaymentBoth}</p>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(sfdcTax,showInvoice,NOT(showCard),NOT($Label.TrainingBookingPaymentSFDCTax=''))}">
+                    <p>{!$Label.TrainingBookingPaymentSFDCTax}</p>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(sfdcTax,showInvoice,showCard,NOT($Label.TrainingBookingPaymentBoth=''))}">
+                    <p>{!$Label.TrainingBookingPaymentBoth}</p>
+                </apex:outputPanel>
+
+
+                <apex:outputPanel layout="none" rendered="{!courseAccommodation}">
+                    <p>{!$Label.TrainingBookingAccommodationOffered}</p>
+                </apex:outputPanel>
+            </div>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

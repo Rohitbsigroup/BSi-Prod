@@ -1,0 +1,288 @@
+<apex:page renderAs="pdf" standardController="Personal_Qualification__c"  applyBodyTag="false" applyHtmlTag="false"  showHeader="false">
+
+<!-- 
+
+
+ -->
+ 
+<html>
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 portrait;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:1.9cm;
+          
+}
+div.footer {
+   display: block;
+   padding: 10px;                       
+   position: running(footer);
+   line-height: 10px;
+   z-index: -3; 
+   color: #A9A9A9;                
+}
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+}
+
+.logo {
+   position: fixed;
+   left: 15mm;
+   bottom: -3mm;
+   z-index:+2;
+
+   }
+.logo2 {
+   position: relative;
+   left: 0mm;
+   bottom: - 0mm;
+   z-index:+2;
+   }
+.size15 {
+    font-weight: bold;
+    font-size: 15pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size20 {
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size25 {
+    font-weight: bold;
+    font-size: 25pt;
+    text-align: left;
+    line-height: 36px;
+    }
+.size33 {
+    font-weight: bold;  
+    font-size: 33pt;
+    text-align: left;
+    line-height: 34px;
+    } 
+.small8 {
+    font-size: 8pt;
+    text-align: left;
+    line-height: 4px;
+   }
+
+  </style>
+</head>
+<!---- this sets out the office address in the footer at the bottom of the page---->
+
+<div class="footer" >
+  <table width="95%" align="left" valign="middle" table-layout="fixed">
+   <tr>
+     <td width ="1cm" >
+     </td>  
+     
+<td>
+    <apex:outputText escape="false" styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Certificate_Property__c}"/><br/><br/>
+    <apex:outputText styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Royal_Charter__c}"/><br/>
+    <apex:outputText styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Office_Address__c}"/> 
+</td>
+</tr>
+</table>
+</div> 
+
+<!---- this sets the background template image for the certificate---->
+
+<img src="{!URLFOR($Resource.TrainingCertificatesv3, 'BSI_training_certificate_newv3.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="21cm" height="29.7"/>
+
+<!--<img src="{!URLFOR($Resource.TrainingCertificatesv4, 'BSI_training_certificate_newv4-2014.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="29.7cm" height="21cm"/> -->
+
+
+<body>
+
+  <!---- this creates a table to insert the text in the correct places---->
+
+<table width="95%" align="center" table-layout="fixed">
+
+<!---- this inserts a space at the top----> 
+    <tr> 
+        <td width ="0.5cm" >
+        </td><td height="120"></td>
+    </tr>     
+    <tr>      
+        <td width ="0.5cm" ></td>
+        <td align="left" valign="bottom" height="40">
+        <!---- this brings in the text "Bsi Training Academy" for all countries---->
+        <apex:outputText styleClass="size33"  value="{!Personal_Qualification__c.Training_Translations__r.BSI_Training_Academy__c}"/>
+        </td>
+    </tr>  
+    
+<!---- this brings in the text Statement of Attainment ---->
+    <tr> 
+        <td width ="0.5cm" ></td>
+        <td align="left" valign="bottom" height="50">  <apex:outputText value="Statement of Attainment" styleClass="size25" /></td>
+    </tr>
+</table> 
+
+
+   
+<table width="95%" align="center" table-layout="fixed"> 
+   
+<!---- this inserts a space ---->
+    <tr>
+        <td width ="0.5cm" ></td>
+        <td height="12" ></td>
+    </tr>
+    
+  <!-- this inserts This is a statement that -->  
+    <tr>
+        <td width ="0.5cm" ></td>
+        <td align="left" valign="middle">This is a statement that</td>
+    </tr>  
+    
+       
+    
+<!---- this brings in the delegates name in English ---->
+    <tr>
+        <td width="0.5cm" height="30" ></td><!-- was height="64"-->
+        <td align="left" valign="middle"><apex:outputText value="{!Personal_Qualification__c.Delegate__r.Name}" styleClass="size15"/></td>
+    </tr> 
+    
+<!---- this inserts a space ---->
+    <tr>
+    <td width ="0.5cm" height="4"></td>
+    </tr>
+
+<!---- This displays the text "has attained" ---->
+    <tr>
+        <td width="0.5cm" ></td>
+        <td align="left" valign="middle"><apex:outputText value="has attained" styleClass="size10"/></td>
+    </tr>
+    <tr>
+        <td width ="0.5cm" ></td>
+        <td height="18" ></td>
+    </tr>
+</table>
+
+<!--This displays the list of compentencies attained showing completion date, unit number and unit name -->
+
+    <table  align="centre" table-layout="fixed">
+            <THEAD>
+                <tr>
+                    <th width="1cm"> </th>
+                    <th width="3cm">Completion Date</th>
+                    <th width="3cm">Unit Number</th>
+                    <th width="9.5cm">Unit Name</th>
+                    <th align="center" width="2cm">Result</th>
+                </tr>
+            </THEAD>
+            <apex:repeat value="{!Personal_Qualification__c.Competency__r}"  var="units">
+            <TBODY>
+                <Apex:outputPanel rendered="{!(units.Rating__c ='C')}"> 
+                <tr >
+                    <td width="1cm"></td>
+                    <td width="3cm" ><apex:outputField value="{!units.Completion_Date__c}"/></td>
+                    <td width="3cm" ><apex:outputField value="{!units.Unit_Code__c}"/></td>
+                    <td width="9.5cm" ><apex:outputField value="{!units.Unit__r.Name}"/></td>
+                    <td align="center" width="2cm"><apex:outputField value="{!units.Rating__c}"/></td>
+                </tr>
+                </Apex:outputPanel>
+            </TBODY>
+            </apex:repeat>
+    </table>
+
+<table width="95%" align="center" table-layout="fixed">
+    <tr> 
+        <td width ="0.5cm" height="12" ></td>
+    </tr>
+<!----This brings in the Qualification code and name ---->
+    <tr> 
+        <td width ="0.5cm" ></td>
+        <td valign="middle" >These competencies form part of</td>
+    </tr>
+    <tr>
+        <td width ="0.5cm" ></td>
+        <td align="left" valign="middle" height="1.8cm" >
+        <apex:outputText value="{!Personal_Qualification__c.Qualification_Code__c} - {!Personal_Qualification__c.Qualification_Name__c}" styleClass="size15"/>
+        </td>    
+    </tr>
+    <tr>
+    <td width="0.5cm"></td>
+    <td align="left" valign="middle">
+<!---- This displays the text "A Statement of Attainment is issued by a Registered Training Organisation when an individual..etc" ----> 
+    <apex:outputText value="A Statement of Attainment is issued by a Registered Training Organisation when an individual has completed one or more accredited units." styleClass="size10"/>
+    </td>
+    </tr>
+        <tr> 
+        <td width ="0.5cm" height="12" ></td>
+    </tr>
+    
+</table>
+<!---- This displays the text "For and on behalf of:" and the signature  ----> 
+<table width="95%" align="center" table-layout="fixed">
+    <tr>
+    <td width ="0.5cm" ></td>
+    <td width ="5cm" align="left" valign="bottom"> <apex:outputText styleClass="size10" >On behalf of BSI:   </apex:outputText></td>
+    <td frame="below" align="left" valign="bottom" height="70"> 
+    <!--<apex:image url="{!Personal_Qualification__c.Training_Translations__r.Signature__c}" height="1.2cm"/>-->
+    <apex:image style="align:left" height="2cm"         url="{!URLFOR($Resource.TrainingCertificateSignatures, Personal_Qualification__c.Training_Translations__r.Signature_Image__c)}"/>
+    </td>
+    </tr>
+</table>
+<!---- This creates the line under the managers signature  ---->   
+<table width="95%" align="center" table-layout="fixed" >
+    <tr>
+    <td height="10" width ="0.5cm" ></td>
+    <td width ="5cm"></td>
+    <td ><hr valign="top" size="1" align="left" style="COLOR: #000000;"/></td>
+    <td width ="3.4cm"></td>
+    </tr>
+</table>
+<!---- This adds the managers name under the line ---->    
+<table width="95%" align="center" table-layout="fixed" >
+    <tr>
+    <td height="20"  width="5.7cm" ></td>
+    <td valign="top">
+    <apex:outputText styleClass="size10" value="{!Personal_Qualification__c.Training_Translations__r.Training_Manager__c}"/>  
+     
+    </td>
+    </tr>
+    <tr><td width="0.5cm" height="15" ></td></tr>
+</table>
+<!---- This pulls in the Dates,certificate number,student number for the course ---->
+<table width="95%" align="centre" table-layout="fixed" >
+     <tr>
+    <td width="1cm" ></td>
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="Date :"/> </td> 
+    <td align="left" width="5cm"><apex:outputText styleClass="size10" value="{0,date,dd'/'MM'/'yyyy}">
+                                 <apex:param value="{!TODAY()}"/> </apex:outputText></td>
+    <td align="left" width="1.3cm"></td>
+    <td width="3.5cm" align="left"><apex:outputText value="Certificate Number :"  styleClass="size10"/></td>
+    <td width="5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Name}"/></td>
+    </tr>
+    <tr>
+    <td width="1cm" ></td>
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="Student Number :"/> </td> 
+    <td align="left" width="5cm"><apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.Delegate_Number__c}"/></td>
+    <td align="left" width="1.3cm"></td>
+    <td width="3.5cm" align="left"><apex:outputText value="Provider Number :" styleClass="size10"/></td>
+    <td width="5cm" align="left"><apex:outputText value="40532"/></td>
+    </tr>
+    </table> 
+<!----This brings in the NTR Logo ---->    
+<table width="95%" align="centre" table-layout="fixed"> 
+    <tr>
+    <td width="0.5cm"></td>
+    <td align="left">    
+    <apex:image styleClass="logo" height="2.3cm" width="2.3cm" url="{!Personal_Qualification__c.Training_Translations__r.NRT_Logo__c}"/>     
+    </td>   
+    </tr>      
+</table>
+</body>
+</html>
+
+</apex:page>

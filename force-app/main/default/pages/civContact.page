@@ -1,0 +1,7 @@
+<apex:page standardController="Contact" sidebar="false" showHeader="false">
+
+    <c:civMain theRecord="{!Contact}" theName="{!Contact.Name}" theEmail="{!Contact.Email}"
+                thePostcode="{!Contact.MailingPostalCode}" thePhone="{!Contact.Phone}" 
+                theAccountId="{!Contact.AccountId}" />
+
+</apex:page>

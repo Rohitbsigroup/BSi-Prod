@@ -1,0 +1,33 @@
+<aura:component implements="force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" extends="c:lightningUtility" description="BSI Custom Tiles Component" controller="PersonalQualificationTilesController">
+
+    <aura:attribute name="recordId" type="String" default="{!v.recordId}"/>
+
+    <!--TILE TO BE DISPLAYED-->
+    <aura:attribute name="tilesToDisplay" type="Object[]"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div class="container">
+        <div class="body">
+            <aura:iteration items="{!v.tilesToDisplay}" var="tile" indexVar="index">
+                    <span class="spanClass">
+                        <aura:if isTrue="{!tile.title == $Label.c.CLP_PersonalQualification_DownloadLogo}">
+                            <a href="{!tile.url}" download="{!tile.logoUrl}">
+                                <button class="buttonTile">
+                                    <span class="title">{!tile.title} &gt;</span>
+                                    <span class="description">{!tile.description}</span>
+                                </button>
+                            </a> <br></br>
+                            <aura:set attribute="else">
+                                <a href="{!tile.url}" target="_blank">
+                                    <button class="buttonTile">
+                                        <span class="title">{!tile.title} &gt;</span>
+                                        <span class="description">{!tile.description}</span>
+                                    </button>
+                                </a> <br></br>
+                            </aura:set>
+                        </aura:if>
+                    </span>          
+            </aura:iteration>
+        </div>
+    </div>
+</aura:component>

@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<categories>
+  <category description="Customer type" field="Live_Customer_Type__c" unspecifiedDefault="true" multipick="false">
+    <value description="New" colour="lemon" default="true" />
+    <value description="Retained" colour="tangerine" default="true" />
+    <value description="Lost" colour="mint" default="true" />
+    <value description="Past Customer" colour="raspberry" default="false" />
+  </category>
+  <category description="Product count" field="Product_Count__c" unspecifiedDefault="true" multipick="false">
+    <value description="Single Product" colour="lemon" default="true" />
+    <value description="Multi Product" colour="pea" default="true" />
+  </category>
+  <category description="Industry" field="Sector__c" unspecifiedDefault="true" multipick="false">
+	<value description="Aerospace and Defence" colour="puce" default="true"/>
+	<value description="Auto" colour="violet" default="true"/>
+	<value description="Built Environment" colour="lemon" default="true"/>
+	<value description="Finance and Banking" colour="aubergine" default="true"/>
+	<value description="Food and Agri" colour="dragonfruit" default="true"/>
+	<value description="Healthcare" colour="lime" default="true"/>
+	<value description="ICT" colour="snowberry" default="true"/>
+	<value description="Manufacturing" colour="pea" default="true"/>
+	<value description="Mining" colour="grey" default="true"/>
+	<value description="Oil / Gas / Energy" colour="raspberry" default="true"/>
+	<value description="Other Services" colour="avocado" default="true"/>
+	<value description="Professional Services" colour="coffee" default="true"/>
+	<value description="Public Administration" colour="blueberry" default="true"/>
+	<value description="Transport and Logistics" colour="tangerine" default="true"/>
+	<value description="Wholesale / Retail" colour="mint" default="true"/>
+  </category>
+  <category description="Site role" field="Site_Role__c" unspecifiedDefault="true" multipick="false">
+    <value description="Key Account Head Office" colour="lemon" default="true" />
+    <value description="Key Account Site" colour="tangerine" default="true" />
+    <value description="Head Office" colour="mint" default="true" />
+    <value description="Site" colour="puce" default="true" />
+  </category>
+  <category description="Size (employees)" field="Size_Employees__c" unspecifiedDefault="true" multipick="false">
+    <value description="a. 1 to 25" colour="lemon" default="true" />
+    <value description="b. 26 to 50" colour="tangerine" default="true" />
+    <value description="c. 51 to 75" colour="mint" default="true" />
+    <value description="d. 76 to 100" colour="violet" default="true" />
+    <value description="e. 101 to 150" colour="raspberry" default="true" />
+    <value description="f. 151 to 250" colour="blueberry" default="true" />
+    <value description="g. 251 to 500" colour="lime" default="true" />
+    <value description="h. 501 to 1000" colour="puce" default="true" />
+    <value description="i. 1001 to 2500" colour="avocado" default="true" />
+    <value description="j. >2500" colour="dragonfruit" default="true" />
+  </category>
+  <category description="Spend band" field="Spend_Band__c" unspecifiedDefault="true" multipick="false">
+    <value description="Less than £300" colour="lemon" default="true" />
+    <value description="£300-£3,000" colour="tangerine" default="true" />
+    <value description="£3,000-£10,000" colour="mint" default="true" />
+    <value description="£10,000+" colour="violet" default="true" />
+  </category>
+  <category description="Portfolios" field="Portfolios__c" unspecifiedDefault="true" multipick="true">
+    <value description="Performance" colour="red" default="true" />
+    <value description="Risk" colour="red" default="true" />
+    <value description="Sustainability" colour="red" default="true" />
+    <value description="Healthcare" colour="red" default="true" />
+    <value description="GRC" colour="red" default="true" />
+    <value description="Personal Safety" colour="red" default="true" />
+    <value description="Transport" colour="red" default="true" />
+    <value description="Construction" colour="red" default="true" />
+    <value description="Electrical &amp; Appliances" colour="red" default="true" />
+    <value description="Other" colour="red" default="true" />
+    <value description="Medical Devices" colour="red" default="true" />
+  </category>
+  <category description="Substreams" field="Substreams__c" unspecifiedDefault="true" multipick="true">
+    <value description="System Certification" colour="red" default="true" />
+    <value description="Entropy" colour="red" default="true" />
+    <value description="Healthcare" colour="red" default="true" />
+    <value description="Product Certification" colour="red" default="true" />
+    <value description="In-House Training" colour="red" default="true" />
+    <value description="Public Training" colour="red" default="true" />
+    <value description="Unclassified Training" colour="red" default="true" />
+  </category>
+</categories>
+<!-- Available colours
+  - aubergine
+  - avocado
+  - blueberry
+  - red (reserved for unspecified)
+  - coffee
+  - dragonfruit
+  - lemon
+  - lime
+  - mint
+  - pea
+  - puce
+  - raspberry
+  - snowberry
+  - tangerine
+  - violet
+-->

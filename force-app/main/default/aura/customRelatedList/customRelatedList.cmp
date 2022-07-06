@@ -1,0 +1,132 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,force:hasRecordId" extends="c:lightningUtility" access="global"
+    controller="CustomRelatedListController" description="Component to dynamically populate the Delegate Related List">
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="recordId"             type="String"	access="global" default=""/>
+    <aura:attribute name="type"                 type="String"   access="global" default=""/>
+    <aura:attribute name="fieldList"            type="String"   access="global" default="Id, Course_Name_Formula__c, Course_Start_Date__c"/>
+    <aura:attribute name="object"               type="String"   access="global" default="Enrollment__c"/>
+    <aura:attribute name="parentObject"         type="String"   access="global" default="Training_Event__c"/>
+    <aura:attribute name="whereFilter"          type="String"   access="global" default=""/>
+    <aura:attribute name="orderBy"              type="String"   access="global" default="CreatedDate DESC"/>
+    <aura:attribute name="editableFields"       type="String"   access="global" default="Id, Course_Name_Formula__c, Course_Start_Date__c"/>
+    <aura:attribute name="urlExtension"         type="String"   access="global" default=""/>
+    <aura:attribute name="hideListOnNoResults"  type="Boolean"  access="global" default="false"/>
+
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute name="draftValues" type="Object" default="[]"/> 
+
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="relatedListResponse"  type="CustomRelatedListController.RelatedListResponse" access="private" default="" />
+    <aura:attribute name="initDone"             type="Boolean"  access="private" default="false" />
+    <aura:attribute name="isErrorShown"         type="Boolean"  access="private" default="false" />
+    <aura:attribute name="errorMessage"         type="String"   access="private" default="" />
+
+    <aura:attribute name="isMobile"             type="Boolean"  access="private" default="false"/>
+    <aura:attribute name="isDimensionsCorrect"  type="Boolean"  access="private" default="true"/>
+
+    <!-- HANDLER -->
+    <aura:handler name="init" value="{!this}"   action="{!c.doInit}"/>
+
+    <!-- BODY -->
+    <div class="slds-p-top_medium" style="max-height: 600px;"> 
+
+        <aura:if isTrue="{!v.isDimensionsCorrect}">
+            <aura:if isTrue="{!v.isMobile}">
+                <aura:if isTrue="{!v.initDone}">
+                    <aura:if isTrue="{!v.type == 'Related List'}">
+                        <aura:if isTrue="{!empty(v.relatedListResponse.data)}">
+                            <aura:if isTrue="{!!v.hideListOnNoResults}">
+                                <div class="slds-align_absolute-center">
+                                    <p> No items to display </p>
+                                </div>
+                            </aura:if>
+                            <aura:set attribute="else">
+                                <!--MOBILE-->
+                                <lightning:datatable
+                                class="slds-max-medium-table_stacked"
+                                aura:id="user-datatable"
+                                data="{!v.relatedListResponse.data}"
+                                columns="{!v.relatedListResponse.columns}"
+                                keyField="id"
+                                draftValues="{! v.draftValues }"
+                                onsave="{! c.handleSaveEdition }"
+                                hideCheckboxColumn="false"
+                                />     
+                            </aura:set>
+                        </aura:if>
+                    </aura:if>
+                </aura:if>
+
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.initDone}">
+                        <aura:if isTrue="{!empty(v.relatedListResponse.data)}">
+                            <aura:if isTrue="{!!v.hideListOnNoResults}">
+                                <div class="slds-align_absolute-center">
+                                    <p> {!$Label.c.CLP_Related_List_no_item}</p>
+                                </div>
+                            </aura:if>
+                            <aura:set attribute="else">
+                                <!-- Show Datatable -->
+                                <aura:if isTrue="{!v.type == 'List View'}">
+                                    <!-- LIST VIEW -->
+                                    <lightning:datatable
+                                    aura:id="user-datatable"
+                                    class="tableClass"
+                                    data="{!v.relatedListResponse.data}"
+                                    columns="{!v.relatedListResponse.columns}"
+                                    keyField="id"
+                                    draftValues="{! v.draftValues }"
+                                    onsave="{! c.handleSaveEdition }"
+                                    hideCheckboxColumn="true"
+                                    showRowNumberColumn="true"
+                                    />
+                                    <aura:if isTrue="{!v.isErrorShown}">
+                                        <div class="slds-align_absolute-center">
+                                            <c:errorWarning message="{!v.errorMessage}"/>
+                                        </div>
+                                    </aura:if>
+            
+                                    <aura:set attribute="else">
+                                        <!-- LIST VIEW OTHER -->
+                                        <lightning:datatable
+                                        aura:id="user-datatable"
+                                        data="{!v.relatedListResponse.data}"
+                                        columns="{!v.relatedListResponse.columns}"
+                                        keyField="id"
+                                        draftValues="{! v.draftValues }"
+                                        onsave="{! c.handleSaveEdition }"
+                                        hideCheckboxColumn="false"
+                                        />
+                                    </aura:set>
+                                    <aura:if isTrue="{!v.isErrorShown}">
+                                        <div class="slds-align_absolute-center">
+                                            <c:errorWarning message="{!v.errorMessage}"/>
+                                        </div>
+                                    </aura:if>
+                                </aura:if>
+                            </aura:set>
+                            <aura:if isTrue="{!v.isErrorShown}">
+                                <div class="slds-align_absolute-center">
+                                    <c:errorWarning message="{!v.errorMessage}"/>
+                                </div>
+                            </aura:if>
+                        </aura:if>
+            
+                        <aura:set attribute="else">
+                            <div class="slds-text-color_default slds-align_absolute-center">
+                                {!$Label.c.CLP_LoadingMessage}
+                            </div>
+                        </aura:set>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </aura:if>
+
+        <c:errorWarning isErrorShown="{!v.isErrorShown}" message="{!v.errorMessage}"/>
+
+    </div>
+	
+</aura:component>

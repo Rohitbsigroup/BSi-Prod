@@ -1,0 +1,63 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" description="Component to display Images fields">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="imageName"        type="String"	access="global" default=""/>
+    <aura:attribute name="hasSubDir"	    type="Boolean"	access="global" default="false"/>
+    <aura:attribute name="isResponsive"	    type="Boolean"	access="global" default="false"/>
+    <aura:attribute name="url"	            type="String"	access="global" default=""/>
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="baseUrl"          type="String" access="private" default=""/>
+    <aura:attribute name="imgSrcSmall"	    type="String" access="private" default=""/>
+    <aura:attribute name="imgSrcMedium"	    type="String" access="private" default=""/>
+    <aura:attribute name="imgSrcLarge"	    type="String" access="private" default=""/>
+    <aura:attribute name="width"            type="Integer" access="private" default="0"/>
+    <aura:attribute name="initDone"         type="Boolean" access="private" default="false"/>
+
+    <!-- HANDLER -->
+    <aura:handler name="init"   value="{!this}"         action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.imageName}"  action="{!c.doReInit}"/>
+
+    <!-- BODY -->
+    <a href="{!v.url}"> 
+        <div style="width: 100% !important; height: auto;">
+            <aura:if isTrue="{! and(v.imageName ne '', v.initDone)}">
+
+                <aura:if isTrue="{!v.isResponsive}">
+
+                    <!-- OPTION A: Less efficient solution, but resets image dynamically based on width resize -->
+                    <aura:if isTrue="{!v.width le 768}">
+                        <img src="{!v.imgSrcSmall}" />
+
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!v.width le 1024}">
+                                <img src="{!v.imgSrcMedium}"/>
+                                <aura:set attribute="else">
+                                    <img src="{!v.imgSrcLarge}" />
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+
+                    <!-- OPTION B: More efficient solution, but doesn't reset image due to use of cache -->
+                    <!--<img style="width: 100% !important;"-->
+                         <!--srcset="{! v.imgSrcSmall + ' 768w , ' + v.imgSrcMedium + ' 1024w , ' + v.imgSrcLarge + ' 1366w '}"-->
+                         <!--sizes="100vw"-->
+                         <!--src="{!v.imgSrcSmall}"-->
+                         <!--alt="Responsive Image"/>-->
+
+                    <aura:set attribute="else">
+                        <!-- else if not Responsive -->
+                        <img src="{! v.baseUrl + v.imageName}" />
+                    </aura:set>
+                </aura:if>
+
+                <aura:set attribute="else">
+                    <p>{!$Label.c.CLP_ImageNotFoundMessage}</p>
+                </aura:set>
+            </aura:if>
+        </div>
+    </a>
+</aura:component>

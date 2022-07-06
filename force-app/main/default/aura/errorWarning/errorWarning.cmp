@@ -1,0 +1,18 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes">
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="message"          type="String"  default=""/>
+    <aura:attribute name="messageAreaWidth" type="String"  default="400px"/>
+    <aura:attribute name="isErrorShown"     type="Boolean" default="true"/>
+
+    <aura:if isTrue="{!v.isErrorShown}">
+        <div class="pageError" style="{!'margin-left:auto; margin-right:auto; width:' + v.messageAreaWidth}" data-aura-rendered-by="21:794;a">
+            <div class="pageErrorIcon" data-aura-rendered-by="22:794;a" data-proxy-id="aura-pos-lib-1" id="22:794;a">
+                <lightning:icon class="icon" iconName="utility:warning" alternativeText="Error" variant="warning" size="small"/>
+                <div class="slds-popover slds-popover_tooltip slds-nubbin_left-top popover-section" style="{!'min-height:50px; min-width:'+ v.messageAreaWidth}" role="tooltip" id="help">
+                    <div class="slds-popover__body">{!v.message}</div>
+                    <lightning:icon class="icon icon-close" iconName="utility:close" dalternativeText="Close" size="x-small" onclick="{!c.closeTooltip}"/>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

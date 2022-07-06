@@ -1,0 +1,8 @@
+<apex:page Controller="ActivateBatchesController" >
+    <apex:pageMessages id="messages" />
+    <apex:form >  
+        <apex:pageBlock title="Activate Lead & Contact Reflag Pardot Synch Batches">            
+            <apex:commandButton action="{!activateBatches}" value="Activate" />            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

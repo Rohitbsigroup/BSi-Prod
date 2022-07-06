@@ -1,0 +1,181 @@
+<apex:page controller="TrainingDelegateImportController" tabStyle="TrainingBooking__c">
+    <style type="text/css">
+        .classHeader { 
+            padding-top: 2px;
+            padding-right: 2px;
+            padding-bottom: 2px;
+            padding-left: 2px;
+            background-color: #F9EAD5;
+            font-weight: bolder;
+            width: 100%;
+        }
+        .width45 { width: 45%; }
+        .width1 { width: 1% }
+        .moreInfo {
+            background-color:#FFFFFF;
+            border:1px solid #999999;
+            cursor:default;
+            display:none;
+            margin-top: 15px;
+            margin-left: -500px;
+            position:absolute;
+            text-align:left;
+            z-index:50;
+            padding: 5px 5px 5px;
+        }
+        .leftCol { float: left; width: 50%; }
+        .rightCol { float: right; padding: 5px; }
+        .container { width: 100%; }
+        
+    </style>
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    <script type="text/javascript">
+        var element = '';
+        $(document).ready(
+            function(){
+                $(".theLink").click(function(event){
+                    $("#moreInfo"+$(this).attr("title")).show();
+                    return false;
+                });
+
+                $(".theLink").bind('mouseleave', function(event){
+                    $("#moreInfo"+$(this).attr("title")).hide();
+                    return false;
+                });
+        });
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="{!$Label.DI_Title}"/>
+
+        <apex:pageMessages />
+
+        <!-- IMPORT SECTION -->
+        <apex:pageBlock title="{!$Label.DI_Sub_Title}">
+            <apex:pageBlockButtons location="both" rendered="{!ISNULL(Delegates)}">
+                <apex:commandButton action="{!back}" value="{!$Label.Cancel}" style="float:right;"/>
+            </apex:pageBlockButtons>
+            <br/>
+            <apex:panelGrid columns="3" cellpadding="5" cellspacing="2" width="100%" columnClasses="width45, width1">
+                <apex:outputPanel >
+                    <apex:panelGrid columns="1" styleClass="classHeader" rendered="{!!isConverted}">
+                        <apex:outputLabel value="{!$Label.DI_File_Upload}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                        <br/>
+                        <br/>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2" rendered="{!!isConverted}">
+                        
+                        <apex:inputFile value="{!docFile.body}" filename="{!docFile.name}" fileSize="{!docFile.BodyLength}" contentType="{!docFile.ContentType}" size="40" />
+                        <apex:commandButton action="{!readFile}" value="{!$Label.DI_Validate_File}" id="theButton2"/>
+                        <br/>
+                        <br/>
+                    </apex:panelGrid>
+
+                    <apex:panelGrid columns="1" styleClass="classHeader">
+                        <apex:outputLabel value="{!$Label.DI_File_Downloads}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                    <!-- PC 20181005 removed CSV template -->
+                    <br/>
+                    <br/>
+                    <apex:panelGrid columns="1" cellpadding="5" cellspacing="2">
+                        <apex:outputLink value="{!$Resource.Delegate_Import_Template_XLS}" target="_blank">{!$Label.DI_Download_xls}</apex:outputLink><br/>
+                        Please ensure you follow the instructions so that the file ends up in a csv format for upload.  There are different steps for countries who have characters in the delegate names.                      
+                    </apex:panelGrid>  
+                </apex:outputPanel>
+                <apex:outputPanel >&nbsp;</apex:outputPanel>
+                <apex:outputPanel >
+                    <apex:panelGrid columns="1" styleClass="classHeader">
+                        <apex:outputLabel value="{!$Label.DI_Instructions}" styleClass="classHeader" />
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/info16.png" width="16"/>
+                        <apex:outputText value="{!$Label.DI_Template_Info}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/warning16.png" width="16"/>
+                        <apex:outputText value="{!$Label.DI_File_Format}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/info16.png" width="16"/>
+                        <apex:outputText value="{!$Label.DI_Upload_Instructions}" escape="false"/>
+                    </apex:panelGrid>
+                    <apex:panelGrid columns="2" cellpadding="5" cellspacing="2">
+                        <apex:image value="/img/msg_icons/info16.png" width="16"/>
+                        <apex:outputText value="{!$Label.DI_Upload_Instructions_2}" escape="false"/>
+                    </apex:panelGrid>
+                </apex:outputPanel>
+            </apex:panelGrid>
+        </apex:pageBlock>
+        <apex:pageBlock title="{!$Label.DI_Account_Information}" rendered="{!NOT(ISNULL(trainingBookingAccount))}">
+            <apex:panelGrid columns="2" style="width:50%">
+                <apex:outputPanel rendered="{!NOT(ISNULL(trainingBookingAccount.id))}">
+                    <a href="/{!trainingBookingAccount.id}" id="{!trainingBookingAccount.id}" onblur="LookupHoverDetail.getHover('{!trainingBookingAccount.id}').hide();" onfocus="LookupHoverDetail.getHover('{!trainingBookingAccount.id}', '/{!trainingBookingAccount.id}/m?retURL=%2F{!trainingBookingAccount.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!trainingBookingAccount.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!trainingBookingAccount.id}', '/{!trainingBookingAccount.id}/m?retURL=%2F{!trainingBookingAccount.id}&isAjaxRequest=1').show();" target="_blank">{!trainingBookingAccount.Name}</a>
+                </apex:outputPanel>
+                <apex:outputPanel >
+                    <apex:outputLabel value="{!$Label.DI_Contacts_will_be_created_and_assigned_against_this_Account}" />
+                </apex:outputPanel>
+            </apex:panelGrid>
+        </apex:pageBlock>
+        <apex:pageBlock title="{!$Label.DI_Results_Title}" rendered="{!NOT(ISNULL(Delegates))}">
+            <apex:pageBlockButtons location="both">
+                <apex:commandButton action="{!updateDelegates}" value="{!$Label.DI_Import_Delegates}" style="float:right;"/>
+                <apex:commandButton action="{!back}" value="{!$Label.Cancel}" style="float:right;"/>
+            </apex:pageBlockButtons>
+                <apex:variable var="rowIndex" value="{!0}" />
+                <apex:pageblocktable value="{!Delegates}" var="d">
+                    <apex:column headerValue="{!$Label.DI_Actions_Title}">
+                        <apex:variable var="rowIndex" value="{!rowIndex + 1}"/>
+                        <apex:selectList value="{!d.action}" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!d.actions}" />
+                        </apex:selectList>
+                    </apex:column>
+                    <apex:column headerValue="{!$Label.DI_Reason}" value="{!d.reason}" />
+                    <apex:column headerValue="{!$Label.DI_Duplicate}">
+                        <apex:outputPanel rendered="{!NOT(ISNULL(d.existingDelegate.id))}">
+                            <a href="/{!d.existingDelegate.id}" id="{!d.existingDelegate.id}" onblur="LookupHoverDetail.getHover('{!d.existingDelegate.id}').hide();" onfocus="LookupHoverDetail.getHover('{!d.existingDelegate.id}', '/{!d.existingDelegate.id}/m?retURL=%2F{!d.existingDelegate.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!d.existingDelegate.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!d.existingDelegate.id}', '/{!d.existingDelegate.id}/m?retURL=%2F{!d.existingDelegate.id}&isAjaxRequest=1').show();" target="_blank">{!d.existingDelegate.First_Name__c} {!d.existingDelegate.Last_Name__c}</a>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(ISNULL(d.existingContact.id))}">
+                            <br />
+                            <a href="/{!d.existingContact.id}" id="{!d.existingContact.id}" onblur="LookupHoverDetail.getHover('{!d.existingContact.id}').hide();" onfocus="LookupHoverDetail.getHover('{!d.existingContact.id}', '/{!d.existingContact.id}/m?retURL=%2F{!d.existingContact.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!d.existingContact.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!d.existingContact.id}', '/{!d.existingContact.id}/m?retURL=%2F{!d.existingContact.id}&isAjaxRequest=1').show();" target="_blank">{!d.existingContact.FirstName} {!d.existingContact.LastName}</a>
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column headerValue="{!$Label.DI_Contact_Actions_Title}" rendered="{!NOT(ISNULL(trainingBooking.Conversion_Account__c))}">
+                        <apex:selectList value="{!d.contactAction}" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!d.contacts}" />
+                        </apex:selectList>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Salutation__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Salutation__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['First_Name__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.First_Name__c}" />
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Last_Name__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Last_Name__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Email_Address__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Email_Address__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Mobile_Number__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Mobile_Number__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Accommodation_Required__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Accommodation_Required__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$ObjectType.TrainingDelegate__c.fields['Accommodation_night_before__c'].label}"> 
+                        <apex:outputField value="{!d.delegate.Accommodation_night_before__c}"/>
+                    </apex:column>
+                    <apex:column headerValue="{!$Label.DI_More_Info}">
+                        <a href="#" id="theLink" class="theLink" title="{!rowIndex}">{!$Label.DI_more}</a>
+                        <div class="moreInfo" id="moreInfo{!rowIndex}">
+                            <apex:panelGrid columns="4">
+                                <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields['First_Name_English__c'].label}:"/><apex:outputText value="{!d.delegate['First_Name_English__c']}"/>
+                                <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields['Last_Name_English__c'].label}:"/><apex:outputText value="{!d.delegate['Last_Name_English__c']}"/>
+                                <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields['Job_Title__c'].label}:"/><apex:outputText value="{!d.delegate['Job_Title__c']}"/>
+                                <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields['Social_Security_Number__c'].label}:"/><apex:outputText value="{!d.delegate['Social_Security_Number__c']}"/>
+                            </apex:panelGrid>
+                        </div>
+                    </apex:column>
+                </apex:pageblocktable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,55 @@
+<apex:page standardController="CI_Account__c" extensions="CiWizardController">
+    <script type="text/javascript">
+        function checkAll(cb, cbid)
+        {
+            var inputElem = document.getElementsByTagName("input");                     
+            for(var i = 0; i < inputElem.length; i++)
+            {             
+                if(inputElem[i].id.indexOf(cbid) != -1 && !inputElem[i].disabled) inputElem[i].checked = cb.checked;
+            }
+            redraw();
+        }
+    </script>
+    <apex:form >
+        <apex:actionFunction name="redraw" reRender="list"/>
+        <apex:sectionHeader title="CI Account" subtitle="Create Sales Copy" />
+        <apex:pageMessages />
+        <apex:pageBlock Title="Step 3 of 3 - Contact options">
+            <apex:PageBlockButtons style="text-align: right;">
+                <apex:commandButton action="{!backToStep2}" value="Previous" immediate="true"/>&nbsp;
+                <apex:commandButton action="{!doIt2}" value="Confirm" disabled="{!hasWarnings}"/>&nbsp;
+                <apex:commandLink action="{!cancel}" value="Cancel" immediate="true"/>
+            </apex:PageBlockButtons>
+            <p style="font-weight: bold;">Select the SVC Contacts that you want to include:</p>
+            <apex:outputPanel id="list">
+                <apex:pageBlockTable value="{!sourceContacts}" var="contact" rendered="{!AND(NOT(ISNULL(sourceContacts)),sourceContacts.size>0)}" style="margin-top: 20px;">
+                    <apex:column headerValue="Action" headerClass="actionColumn">
+                        <apex:facet name="header">
+                            <apex:inputCheckbox onclick="checkAll(this,'checkedone')" />
+                        </apex:facet>
+                        <apex:inputCheckbox selected="true" disabled="true" rendered="{!NOT(contact.matchingContact=null)}" />
+                        <apex:inputCheckbox id="checkedone" value="{!contact.isPicked}" rendered="{!contact.matchingContact=null}">
+                            <apex:actionSupport event="onclick" action="{!ok}" reRender="options"/>
+                        </apex:inputCheckbox>
+                    </apex:column>
+                    <apex:column headerValue="Name"><apex:OutputField value="{!contact.ciContact.Name}" /></apex:column>
+                    <apex:column headerValue="City"><apex:OutputField value="{!contact.ciContact.City__c}" /></apex:column>
+                    <apex:column headerValue="Region"><apex:OutputField value="{!contact.ciContact.Region__c}" /></apex:column>
+                    <apex:column headerValue="Postcode"><apex:OutputField value="{!contact.ciContact.Postcode__c}" /></apex:column>
+                    <apex:column headerValue="Country"><apex:OutputField value="{!contact.ciContact.Country__c}" /></apex:column>
+                    <apex:column headerValue="Options">
+                        <apex:outputPanel id="options">
+                            <apex:outputText value="Contact already exists" rendered="{!NOT(contact.matchingContact=null)}" />
+                            <apex:outputText value="Create new contact" rendered="{!contact.matchingContact=null}" />
+                            <!--<apex:outputText value="Create new contact" rendered="{!AND(contact.matchingContact=null,unlinkedContacts.size=0)}" />
+                            <apex:selectList rendered="{!AND(contact.matchingContact=null,unlinkedContacts.size>0)}" size="1" disabled="{!NOT(contact.IsPicked)}">
+                                <apex:selectOption itemValue="new" itemLabel="Create new contact" />
+                                <apex:selectOptions value="{!unlinkedContacts}" />
+                            </apex:selectList>-->
+                        </apex:outputPanel>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

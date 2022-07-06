@@ -1,0 +1,30 @@
+<aura:component >
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:attribute name="numKeyCols" type="Integer" />
+    <aura:attribute name="groupingKey" type="String" description="key so we know which data to access from factMap"/>
+    <aura:attribute name="groupingsAcross" type="String[]" description="Groupings across in the case of a Stacked Matrix report"/>
+    <aura:attribute name="stackedDataLabels" type="String[]" description=""/>
+    <aura:attribute name="factMap" type="Map" description="all data keyed to groupings so we can pull the correct data"/>
+    <aura:attribute name="colourKeyMap" type="Map" description="Holds colour rows, colourKey entries and colourKey title"/>
+
+	<!-- Data rows calculated by controller -->
+    <aura:handler name="change" value="{!v.factMap}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.groupingAcross}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.colourKeyMap}" action="{!c.doInit}"/> 
+    
+    <aura:attribute name="dataRows" type="Object[]" description="rows of data from report"/>
+
+    <!-- gives us access to edit modal -->
+    <aura:dependency resource="markup://force:editRecord" type="EVENT" />
+    <aura:iteration items="{!v.dataRows}" var="aRow" indexVar="i">
+        <tr>
+            <td colspan="{!v.numKeyCols}"></td>
+            <aura:iteration items="{!aRow}" var="aCell">
+                <td style="{! 'text-align: left'+(aCell.colour?';background-color:#'+aCell.colour:'')}" colspan="{!aCell.colspan}" >
+                      {! aCell.label}
+                </td>
+            </aura:iteration>
+        </tr>
+    </aura:iteration>
+</aura:component>

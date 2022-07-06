@@ -1,0 +1,9 @@
+<design:component >
+	<design:attribute name="reportIdAttribute" label="Report ID" description="Use the ID of the summary report that you want to display. Make sure the user has access to it"/>
+	<design:attribute name="reportParameterOption" label="Report Parameter Option" description="Whether and which parameter to pass to the last filter of the report." datasource="None, Record Id, Ultimate Parent Id" default="None"/>	
+    <design:attribute name="reportEditUrl" label="Report Edit URL" description="Use the URL or an appropriate Object home page corresponding to the object records being displayed" />
+    <design:attribute name="verticalColumnHeaders" label="Vertical column headers?" description="Whether to display column headers vertically" datasource="Yes,No" default="No"/>
+    <design:attribute name="colourRows" label="Colour rows" description="Stacked data rows of a Matrix report to which conditional formatting is to be applied according to the 'Key values' below. For example, 0 corresponds to the top row. 0,1 to the first two rows."/>
+    <design:attribute name="colourKeyTitle" label="Colour key title" description="Label, lowest value, RGB colour, Label, next lowest value, RGB colour..."/>
+    <design:attribute name="colourKey" label="Colour key" description="Label, lowest value, RGB colour, Label, next lowest value, RGB colour..."/>
+</design:component>

@@ -1,0 +1,12 @@
+<apex:page standardController="Lead" extensions="LeadProductInterestExt">
+
+	<apex:outputField value="{!Lead.Product_Stream__c}" rendered="false" />
+	<apex:outputField value="{!Lead.Product_SubStream__c}" rendered="false" />
+	<apex:outputField value="{!Lead.Portfolio_Interests__c}" rendered="false" />
+	<apex:outputField value="{!Lead.Product_Area_Interests__c}" rendered="false" />
+	<apex:outputField value="{!Lead.Product_Interests__c}" rendered="false" />
+
+	<apex:form >
+		<c:ProductInterest2 objectRecord="{!leadExt}" editModeParm="{!editMode}"/>
+    </apex:form>
+</apex:page>

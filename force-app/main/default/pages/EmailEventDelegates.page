@@ -1,0 +1,59 @@
+<apex:page standardController="Enrollment__c" recordSetVar="Enrollments" sidebar="false">
+    <apex:sectionHeader title="Email Delegates Changes to Course"/>
+        <apex:form >
+          <apex:pageBlock >
+             <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Send Email" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton action="{!quicksave}" value="Update"/>
+                </apex:pageBlockButtons>
+                                                   
+               <apex:pageBlockSection title="Selected Enrollments" columns="1" collapsible="False">
+                    <apex:pageBlockTable value="{!selected}" var="Enrollment">
+                       <apex:column value="{!Enrollment.Training_Event__r.Event_Confirmed__c}"/>
+                       <apex:column value="{!Enrollment.Training_Event__r.Change_of_Venue__c}"/>
+                       <apex:column value="{!Enrollment.Training_Event__r.Change_of_Date__c}"/>
+                       <apex:column value="{!Enrollment.name}"/>
+                       <apex:column value="{!Enrollment.Delegate_name__c}"/>
+                       <apex:column value="{!Enrollment.Booking_status__c}"/>
+                       <apex:column value="{!Enrollment.Invoice_status__c}"/>
+                       <apex:column value="{!Enrollment.Email_Confirmation_Sent__c}"/>
+                       <!--<apex:column headerValue="Email Changes"><apex:inputField value="{!Enrollment.Email_Changes__c}"/></apex:column>-->
+                       <!-- code added to allow all to be ticked in one go plus java script below-->
+                       <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <apex:outputLabel value="Email Changes"></apex:outputLabel>
+                                    <apex:inputCheckbox onclick="checkAll(this)" id="Select_All_Markedemail"/>
+                                </apex:outputPanel>
+                            </apex:facet>
+                            <apex:inputField id="emailchanges" value="{!Enrollment.Email_Changes__c}"/> 
+                        </apex:column>
+                       
+                       <apex:column value="{!Enrollment.Changes_Emailed__c}"/>
+                       <apex:column headerValue="Course Confirmed Email Sent">                          
+                          <apex:inputField value="{!Enrollment.Course_Confirmed_Email_Sent__c}"/>
+                       </apex:column> 
+                    </apex:pageBlockTable>
+              </apex:pageBlockSection> 
+                                      
+        </apex:pageBlock>
+    </apex:form>
+    
+    <!--java to allow all boxes to be ticked in one go-->
+    <script type="text/javascript">
+                function checkAll(cb)
+                {
+                var inputElem = document.getElementsByTagName("input");           
+                for(var i=0; i<inputElem.length; i++)
+                    {    
+                 if(inputElem[i].id.indexOf("emailchanges")!=-1)                          
+                 inputElem[i].checked = cb.checked;
+                    }
+                }
+     </script>
+    
+    
+         
+</apex:page>

@@ -1,0 +1,4 @@
+<apex:page standardController="Training_Promo_Code__c" sidebar="false">
+  
+<flow:interview name="Training_Promotion_Code_2015" finishLocation="{!URLFOR('/apex/trainingpromocode')}"   />
+</apex:page>

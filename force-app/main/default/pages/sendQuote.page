@@ -1,0 +1,153 @@
+<apex:page controller="SendQuoteController">
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.bubble {
+			position:relative;
+			padding:15px;
+			margin:20px 0 0.5em;
+			color:#333;
+			background:#eee;
+			/* css3 */
+			-webkit-border-radius:10px;
+			-moz-border-radius:10px;
+			border-radius:10px;
+			width: 80%;
+		}
+		.bubble p{
+			font-size: 15px;
+			font-family: Cambria,Georgia,sans-serif;
+			line-height: 1.25em;
+		}
+		/* display of quote author */
+		.bubblep {
+			padding-left:15px; 
+			font:11px Arial, sans-serif;
+			color: #A23233;
+		}
+		.note {
+			font-size: 15px;
+			font-family: Cambria,Georgia,sans-serif;
+			line-height: 1.25em;
+			padding-left:15px;
+			padding-top:5px;
+			border: none;
+			background:#eee;
+			-webkit-border-radius:10px;
+			-moz-border-radius:10px;
+			border-radius:10px;
+		}
+	</style>
+
+
+<apex:sectionHeader subtitle="Customer Quote Facts Validation" title="Summary Info"/>
+	<apex:form id="theForm">
+	<apex:pageMessages />
+	<apex:pageBlock mode="edit">	
+		<apex:pageBlockButtons >
+			<apex:commandButton id="btnSave" value="Send to Customer" action="{!startValidation}" disabled="{!IF(noPDF || ISBLANK(customer.Email) || ISBLANK(accOwner.UserRoleId) || historyView,true,false)}"/>
+        	<apex:commandButton id="btnBack" value="{!$Label.Cancel}" action="{!back}"/>
+		</apex:pageBlockButtons>
+		
+		<table width="100%" style="background-color:#E1E6EE;"><tr>
+			<td style="vertical-align:middle;" width="45px" rowspan="2"><apex:image value="{!$Resource.icon_contact}" width="40"/></td>
+			<td style="vertical-align:middle;align:left;">
+				<apex:outputText value="{!customer.FirstName} {!customer.LastName}" style="font-weight:bold;font-size:14px"/>
+			</td> 
+			</tr>
+			<tr>
+			<td align="left">
+				<apex:outputText value="{!customer.Email}" style="font-weight:bold;font-size:12px;color:grey;" rendered="{!!ISBLANK(customer.Email)}"/>
+				<apex:outputText value="No Email" style="font-weight:bold;font-size:12px;color:#A23233;" rendered="{!ISBLANK(customer.Email)}"/>
+			</td>
+ 		</tr></table>
+ 		<br/>
+ 		<div style="{!IF(historyView, 'display: none','')}">
+ 		<apex:outputpanel rendered="{!ISBLANK(accOwner.UserRoleId)}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="The Owner of the Account related to this quote must have a Role. Please contact your Administrator." style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+ 		<apex:outputpanel rendered="{!ISBLANK(customer.Email)}">
+			<table width="100%" style="background-color:#C25454;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="A Contact Email is required to create a Customer Portal User" style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+ 		<apex:outputpanel rendered="{!IF(ISBLANK(customer.Id) && !ISBLANK(customer.Email) && !ISBLANK(accOwner.UserRoleId),true,false)}">
+			<table width="100%" style="background-color:#E1E6EE;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="After selecting 'Send To Customer' a new username and password will be sent to the customer." style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+		<apex:outputpanel rendered="{!!ISBLANK(customer.Id)}">
+			<table width="100%" style="background-color:#DCFBDC;"><tr>
+				<td style="vertical-align:middle;" width="35"><apex:image value="{!$Resource.icon_selected}" width="30"/></td>
+				<td style="vertical-align:middle;">
+				<apex:outputText value="Customer's access is enabled." style="font-weight:bold;" />
+				</td> 
+			</tr></table>
+		</apex:outputpanel>
+		</div>
+ 		<br/>
+ 		<table width="100%" style="background-color:#E1E6EE;"><tr>
+			<td style="vertical-align:middle;" width="45px"><apex:image value="{!$Resource.icon_notebook}" height="40"/></td>
+			<td style="vertical-align:middle;align:left;">
+				<apex:outputText value="Comments" style="font-weight:bold;font-size:14px"/>
+			</td> 
+ 		</tr></table>
+ 		<br/>
+ 		<apex:pageBlockSection columns="1">
+ 		<apex:repeat value="{!comments}" var="c">
+ 			<blockquote class="bubble" style="{!IF(c.OwnerId == customer.Id,'background:#ABDDF3;float:right;','')}">
+				<p style="{!IF(c.OwnerId == customer.Id,'float:right;','')}">{!c.Body}</p>
+			</blockquote>			
+			<!--<p class="bubblep" style="{!IF(c.OwnerId == customer.Id,'padding-right:15px;float:right;color:#40A74A','')}">{!c.Owner.Name} {!IF(c.OwnerId == customer.Id,c.Title&' this quote','')} on 
+			{!c.CreatedDate}-->
+			<p>
+			<apex:outputText value="{!c.Owner.Name} {!IF(c.OwnerId == customer.Id,c.Title&' this quote','')} on {0,date,EEE dd MMM yyyy 'at' HH:mm}" styleclass="bubblep" style="{!IF(c.OwnerId == customer.Id,'padding-right:15px;float:right;color:#40A74A','')}">
+				<apex:param value="{!c.CreatedDate}"/>
+			</apex:outputText>
+			</p>
+ 		</apex:repeat>
+ 		<br/>
+ 		<apex:pageBLockSectionItem rendered="{!!historyView}">
+ 			<apex:outputLabel value="Your comment here"/>
+ 			<apex:inputTextArea value="{!bsiComment.Body}" style="width:80%;height:110px" styleclass="note"/>
+ 		</apex:pageBLockSectionItem>	
+ 		</apex:pageBlockSection>
+		<br/>
+		
+		<table width="100%" style="background-color:#E1E6EE;"><tr>
+			<td style="vertical-align:middle;" width="45px"><apex:image value="{!$Resource.icon_pdf}" height="40"/></td>
+			<td style="vertical-align:middle;align:left;">
+				<apex:outputText value="Quote Facts Preview" style="font-weight:bold;font-size:14px"/>
+			</td> 
+			<!--</tr>
+			<tr>
+			<td>
+			<apex:outputText value="Press here to download the PDF: " style="font-weight:bold;font-size:12px;color:grey"/>
+ 			<apex:outputLink style="font-weight:bold;font-size:12px;color:grey" target="_blank" value="{!URLFOR($Action.Attachment.Download,pdf.id)}">
+      			Download
+    		</apex:outputLink>
+    		</td>-->
+ 		</tr></table>
+ 		<br/>
+ 		
+		<apex:outputpanel rendered="{!ISBLANK(pdf)}">
+			<table width="100%" style="background-color:#F9EAD5;"><tr>
+				<td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+				<td style="vertical-align:middle;"><apex:outputText value="No Attachment has been found on this quote. Please generate the quote document before sending to customer." style="font-weight:bold;"/></td> 
+			</tr></table>
+		</apex:outputpanel>
+			
+		<apex:outputPanel rendered="{!!ISBLANK(pdf)}">
+			<object data="/servlet/servlet.FileDownload?file={!pdf.id}" type="application/pdf" width="100%" height="500px">
+ 				<embed src="/servlet/servlet.FileDownload?file={!pdf.id}" width="100%" height="500px"/>
+			</object>				
+		</apex:outputPanel>
+		
+	</apex:pageBlock>
+ 	</apex:form>
+	
+</apex:page>

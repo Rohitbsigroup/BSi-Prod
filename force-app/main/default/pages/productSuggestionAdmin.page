@@ -1,0 +1,128 @@
+<apex:page controller="ProductSuggestionAdminController" sidebar="false">
+
+    <apex:form >    
+        <apex:pageMessages id="pageMessages" />
+
+        <apex:actionStatus id="busyStatus">
+            <apex:facet name="start">
+                <apex:image url="/img/loading32.gif" width="20px" height="20px" />
+            </apex:facet>
+            <apex:facet name="stop"><div style="height:20px;" /></apex:facet>
+        </apex:actionStatus>
+
+        <apex:pageBlock mode="maindetail">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton action="{!save}" id="saveButton" value="{!$Label.Save}" rerender="pageMessages,suggestedProducts" status="busyStatus" />
+                <apex:commandButton action="{!cancel}" id="cancelButton" value="{!$Label.Cancel}" rerender="pageMessages,suggestedProducts,selections" status="busyStatus" />
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection columns="1">        
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Products" for="productSelectList" />
+                    <apex:outputPanel >
+	                    <apex:selectList id="productSelectList" value="{!selectedProductId}" multiselect="false" size="1">
+	                        <apex:selectOptions value="{!selectProductItems}" />
+	                        <apex:actionSupport event="onchange" action="{!RefreshSuggestedProducts}" rerender="suggestedProducts,pageMessages" status="busyStatus" />
+	                    </apex:selectList>
+						&nbsp;&nbsp;
+		                <apex:inputCheckbox id="withSuggestionsOnly" value="{!withSuggestionsOnly}">
+		                	<apex:actionSupport event="onchange" action="{!PopulateProductList}" rerender="productSelectList,pageMessages" status="busyStatus" />
+		                </apex:inputCheckbox>
+		                <apex:outputLabel value="with suggestions only" for="withSuggestionsOnly" />
+        	        </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Region" for="regionSelectList" />
+                    <apex:selectList id="regionSelectList" value="{!selectedRegion}" multiselect="false" size="1">
+                        <apex:selectOptions value="{!selectRegionItems}" />
+                        <apex:actionSupport event="onchange" action="{!RefreshSuggestedProducts}" rerender="suggestedProducts,pageMessages" status="busyStatus" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Order By" for="orderBySelectList" />
+                    <apex:selectList id="orderBySelectList" value="{!selectedOrderBy}" multiselect="false" size="1">
+                        <apex:selectOptions value="{!selectOrderByItems}" />
+                        <apex:actionSupport event="onchange" action="{!RefreshSuggestedProducts}" rerender="suggestedProducts,pageMessages" status="busyStatus" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection>                                        
+	
+			<br />
+			
+			<apex:outputPanel id="suggestedProducts">
+	            <apex:pageBlockTable value="{!suggestedProductWrappers}" var="spw" >
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.SuggestedProductClassification__c.label}</apex:facet>
+	                    <apex:selectList rendered="{!spw.CanEdit}" id="suggestedProductSelectList" value="{!spw.obj.SuggestedProductClassification__c}" multiselect="false" size="1">
+	                        <apex:selectOptions value="{!productItems}" />
+	                    </apex:selectList>
+						<apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.SuggestedProductClassificationName__c}" />	                    
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.Ranking__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.Ranking__c}" />
+						<apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.Ranking__c}" />	                    
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.CompanySizeMin__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.CompanySizeMin__c}" style="width:50px;" />                    
+						<apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.CompanySizeMin__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.CompanySizeMax__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.CompanySizeMax__c}" style="width:50px;" />                    
+						<apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.CompanySizeMax__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.Sector__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.Sector__c}" />
+						<apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.Sector__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.BSIReadiness__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.BSIReadiness__c}" />                    
+	                    <apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.BSIReadiness__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.CustomerBuyingStage__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.CustomerBuyingStage__c}" />                    
+	                    <apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.CustomerBuyingStage__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.Region__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.Region__c}" Required="true" />                    
+	                    <apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.Region__c}" />
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.Country__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.Country__c}" />                    
+	                    <apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.Country__c}" />	                    
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header">{!$ObjectType.Product_Classification_Relationship__c.fields.ReasonsForSuggestion__c.label}</apex:facet>
+	                    <apex:inputField rendered="{!spw.CanEdit}" value="{!spw.obj.ReasonsForSuggestion__c}" style="width:200px;height:50px;" />
+	                    <apex:outputField rendered="{!!spw.CanEdit}" value="{!spw.obj.ReasonsForSuggestion__c}" />                    
+	                </apex:column>
+
+	                <apex:column >
+	                    <apex:facet name="header"></apex:facet>
+	                    <apex:commandButton rendered="{!spw.CanEdit}" value="Delete" action="{!DeleteSuggestedProduct}" rerender="suggestedProducts,pageMessages" status="busyStatus">
+	                    	<apex:param name="deleteSuggestedProductId" value="{!spw.obj.Id}" assignTo="{!deleteSuggestedProductId}" /> 
+	                    </apex:commandButton>
+	                </apex:column>		                	                
+	            </apex:pageBlockTable>
+	            
+	            <apex:commandButton rendered="{!!ISNULL(selectedProductId)}" action="{!AddSuggestedProduct}" id="addButton" value="Add Suggested Product" rerender="suggestedProducts,pageMessages" status="busyStatus" />
+			</apex:outputPanel>                               
+         </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,28 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,force:hasRecordId" access="global">
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="recordTypeName" type="String"/>
+    <aura:attribute name="record" type="Object"/>
+	<aura:attribute name="simpleRecord" type="Object"/>
+	<force:recordData aura:id="record"
+    	fields="Learning_Type__c, RecordType.Name"
+    	recordId="{!v.recordId}"
+    	targetRecord="{!v.record}"
+    	targetFields ="{!v.simpleRecord}"
+    mode="VIEW"/>
+    <aura:if isTrue="{!v.simpleRecord.RecordType.Name == 'E-Learning'}">
+        <aura:if isTrue="{!v.simpleRecord.Learning_Type__c == 'Online Training'}">
+            <lightning:layout>
+                <lightning:layoutItem padding="horizontal-large">
+                            <div>{!$Label.c.CLP_ENR_ELearningMessage}</div>
+                </lightning:layoutItem>
+            </lightning:layout>
+        </aura:if>
+        <aura:if isTrue="{!v.simpleRecord.Learning_Type__c == 'Online Exam'}">
+            <lightning:layout>
+                <lightning:layoutItem padding="horizontal-large">
+                            <div>{!$Label.c.CLP_ENR_ExamMessage}</div>
+                </lightning:layoutItem>
+            </lightning:layout>
+        </aura:if>
+    </aura:if>
+</aura:component>

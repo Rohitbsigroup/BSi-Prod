@@ -1,0 +1,11 @@
+<apex:component controller="DateFormatTimezoneController" access="global">
+	<apex:attribute assignTo="{!dateTimeFormat}" 
+		description="The DateTime value to be rendered based upon the user's Timezone" 
+		name="dateTimeValue" 
+		type="DateTime"/>
+	<apex:attribute assignTo="{!receiverId}" 
+		description="The Id of the user that will see the date" 
+		name="receiverID" 
+		type="String"/>	
+	{!TimeZoneDateTime}
+</apex:component>

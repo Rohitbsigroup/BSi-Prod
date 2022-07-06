@@ -1,0 +1,320 @@
+<apex:page controller="AddSiteToQuoteController" sidebar="false">
+    <apex:sectionHeader subtitle="{!$Label.OpportunitySitesPageSubtitle}" title="{!$Label.OpportunitySitesPageTitle}"/>
+    
+    <!-- SCRIPT FOR POSTCODE ANYWHERE -->
+    <apex:includeScript value="{!$Resource.pca__LookupComponent}"/>
+    <apex:includeScript value="{!$Resource.pca__EditPageLauncher}"/>
+    <apex:includeScript value="{!$Page.pca__EditPageSettings}"/>
+    
+    <!-- CSS STYLE -->
+    <style type="text/css">
+        .banner {
+            position: absolute; 
+            margin-top: 11px;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }
+        .header {
+            position: absolute; 
+            margin-top: 8px;
+            margin-left: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }
+        .tabdisabled {
+            opacity:0.3;
+            filter:alpha(opacity=30);
+            font-size:13px;
+            font-weight:bold;
+        }
+        .tabenabled {
+            font-size:13px;
+            font-weight:bold;
+        }
+        .noteRow {
+            background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-middle.png')}');
+            background-repeat: repeat;
+            background-color:#f6f6f6;
+            color: black;
+            font-size: 12px;
+            padding-left: 5px;
+        }
+        .noteBottom {
+            background-image: url('{!URLFOR($Resource.coolhover,'coolhover/paper-bottom-trsp.png')}');
+            background-repeat: repeat-x;
+            height: 20px;
+        }
+        
+        .content-top-align tr td{
+        	vertical-align: top!important;
+        }
+        
+        .selectlist-width{
+        	width: 250px;
+        }
+        
+        .selectlist-width-txt{
+        	width: 246px;
+        }
+        
+        .selectlist-div select{
+        	width: 250px!important;
+        }
+    </style>
+    <apex:actionStatus id="status">
+    <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="200px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+    </apex:actionStatus>
+    
+    <apex:form id="theForm">
+        <apex:pageMessages id="pageMessages"/>
+        <apex:pageMessage summary="T-Codes should be entered if they are planning to quote for a management systems product" severity="info" strength="3"/>
+        <apex:pageBlock id="accSites" mode="edit" title="{!$Label.OpportunitySites}">
+            <apex:pageBlockButtons >    
+                <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}"/>
+                <apex:commandButton action="{!save}" value="{!$Label.Save}" />
+                <apex:commandButton action="{!saveAndQuote}" value="{!$Label.SaveAndQuote}"/>
+            </apex:pageBlockButtons>
+            <table width="100%">
+                <tr>
+                    <td width="60%" valign="top">
+                        <!-- NEW SECTION HERE-->
+                        <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+                            <apex:outputPanel >
+                                <apex:image value="{!$Resource.icon_markeradd}" height="30"/>
+                                <apex:outputText value="{!$Label.NewSite}" styleclass="header"/>
+                            </apex:outputPanel>
+                            <apex:outputPanel style="float:right;">
+                                <apex:commandButton action="{!cancelNewSite}" value="{!$Label.Cancel}"  reRender="theForm" status="status" rendered="{!showNewSection}"/>
+                                <apex:commandButton action="{!addNewSite}" value="{!$Label.AddNewSite}"  oncomplete="pca_Controls[0].bind()" reRender="theForm" status="status"/>
+                            </apex:outputPanel>
+                        </apex:panelGrid>
+                        <apex:outputPanel id="newSection" rendered="{!showNewSection}">
+                            <table width="100%">
+                                <tr>
+                                    <td>
+                                        <apex:pageBlockSection columns="1">
+                                            <apex:inputText value="{!newSiteWrapper.Site.Name}" style="font-weight:bold;height:20px;font-size:13px;width:300px;"/>      
+                                            <apex:inputField value="{!newSiteWrapper.Site.Industry__c}"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.TCodeDescr__c}" style="width:250px;"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.Type__c}"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.S_Code__c}"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.Risk_Level__c}"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.EMS_Risk_Level__c}"/>
+                                            <apex:inputField value="{!newSiteWrapper.Site.H_S_Risk_Level__c}"/>
+                                            <apex:pageBlockSectionItem >
+                                                <apex:outputLabel value="{!$ObjectType.Site__c.fields.PrimaryContact__c.label}"/>
+                                                <apex:selectList value="{!newSiteWrapper.Site.PrimaryContact__c}" size="1" multiselect="false">
+                                                    <apex:selectOptions value="{!newSiteWrapper.Contacts}"/>
+                                                </apex:selectList>
+                                            </apex:pageBlockSectionItem>
+                                            <apex:inputField value="{!newSiteWrapper.Site.SkipDupeChecker__c}"/>
+                                        </apex:pageBlockSection>
+                                    </td>
+                                    <td>
+                                        <apex:pageBlockSection columns="2">
+                                            <pca:Address id="postcodeAny" License="WD73-WW63-JC22-AP27"
+                                                Country="{!newSiteWrapper.Site.Country__c}"
+                                                Street="{!newSiteWrapper.Site.Street__c}"
+                                                City="{!newSiteWrapper.Site.City__c}" 
+                                                State="{!newSiteWrapper.Site.State__c}" 
+                                                Zip="{!newSiteWrapper.Site.Postcode__c}">
+                                            </pca:Address>  
+											<!--
+                                            <pca:AddressFinder label="Mailing"
+                                                               address="Site"
+                                                               record="{!newSiteWrapper.Site}"
+                                                               country="{!newSiteWrapper.Site.Country__c}"
+                                                               value="{!newSiteWrapper.Site.Street__c}</br>
+                                                                      {!newSiteWrapper.Site.City__c}</br>
+                                                                      {!newSiteWrapper.Site.State__c}</br>
+                                                                      {!newSiteWrapper.Site.Postcode__c}</br>
+                                                                      {!newSiteWrapper.Site.Country__c}</br>
+                                                                      {!newSiteWrapper.Site.Country_Code__c}"/>
+											-->
+                                            <script type="text/javascript">pca_Load();</script>
+                                            <!--<apex:inputField value="{!newSiteWrapper.Site.Country_Code__c}"/>-->
+                                        </apex:pageBlockSection>
+                                    </td>
+                                </tr>
+                            </table>
+                        </apex:outputPanel>
+                        <!-- ACCOUNT SECTION HERE-->
+                        <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+                            <apex:outputPanel >
+                                <table width="100%">
+                                    <tr>
+                                        <td rowspan="2" width="35px">
+                                            <apex:image value="{!$Resource.icon_account}" height="30"/>
+                                        </td>   
+                                        <td align="left">
+                                            <apex:outputText value="{!$Label.AccountSites}" style="font-size:14px;font-weight:bold;"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left">
+                                            <apex:outputText value="{!opp.Account.Name}" style="color:grey;font-weight:bold;"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </apex:outputPanel>
+                            <apex:commandButton action="{!addSiteToQuote}" value="{!$Label.LinkSite}" style="float:right;" reRender="linkedaccount,newlinkedopty,croles,customError" status="status" rendered="{!accSiteWrappers.size > 0}"/>
+                            <apex:outputText value="{!$Label.NoAccountSite}" style="color:grey;font-weight:bold;float:right;" rendered="{!accSiteWrappers.size == 0}"/>
+                        </apex:panelGrid>
+                        <apex:outputPanel id="linkedaccount">
+                            <apex:pageBlockTable value="{!accSiteWrappers}" var="siteWrapper" rendered="{!accSiteWrappers.size > 0}" styleClass="content-top-align">
+                                <apex:column width="25">
+                                    <apex:facet name="header">
+                                        <apex:outputPanel >
+                                            <apex:commandLink action="{!selectAll}" reRender="linkedaccount" status="status" rendered="{!!allCheck}">
+                                                <apex:image value="{!$Resource.icon_selected}" width="20" title="{!$Label.SelectAll}"/>
+                                            </apex:commandLink>
+                                            <apex:commandLink action="{!deselectAll}" reRender="linkedaccount" status="status" rendered="{!allCheck}">
+                                                <apex:image value="{!$Resource.icon_deselected}" width="20" title="{!$Label.Deselectall}"/>
+                                            </apex:commandLink>
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                    <apex:inputCheckbox value="{!siteWrapper.IsSelected}"/>
+                                </apex:column>
+                                <apex:column value="{!siteWrapper.site.Name}"/>
+                                <apex:column headerValue="{!$Label.Address}">
+                                    <apex:outputText value="{!siteWrapper.site.Street__c}" style="font: 11px 'American Typewriter';"/><br/>
+                                    <apex:outputText value="{!siteWrapper.site.City__c} {!siteWrapper.site.Postcode__c}" style="font: 11px 'American Typewriter';"/><br/>
+                                    <apex:outputText value="{!siteWrapper.site.State__c} {!siteWrapper.site.Country__c}" style="font: 11px 'American Typewriter';"/>
+                                </apex:column>
+                                <apex:column headerValue="{!$ObjectType.Site__c.fields.PrimaryContact__c.label}">
+                                    <apex:selectList value="{!siteWrapper.site.PrimaryContact__c}" size="1" multiselect="false">
+                                        <apex:selectOptions value="{!siteWrapper.contacts}"/>
+                                    </apex:selectList>
+                                </apex:column>                                    
+                                <apex:column headerValue="{!$Label.TypeandTCode}">
+                                    <table columns="2" width="100%" cellpadding="0" cellspacing="0" style="border:none;">
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Type: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!siteWrapper.site.Type__c}" styleClass="selectlist-width" />
+                                                <apex:image value="{!$Resource.icon_warning}" id="warningIcon" width="20" rendered="{!ISBLANK(siteWrapper.site.Type__c)}" title="Type is blank"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Industry: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!siteWrapper.site.Industry__c}" styleClass="selectlist-width" style="color:black" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                               <apex:outputLabel value="T-Code: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <div style="width:400px;" class="selectlist-div">
+                                                    <apex:inputField value="{!siteWrapper.site.TCodeDescr__c}" styleClass="selectlist-width"  id="tcode" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Number of Employees: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!siteWrapper.site.NumberEmployees__c}" styleClass="selectlist-width-txt" style="color:black" id="numemp" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </td>
+                    <td width="40%" valign="top">
+                        <!-- LINKED SECTION -->
+                        <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#F6EDC9">
+                            <apex:outputPanel >
+                                <table width="100%">
+                                    <tr>
+                                        <td rowspan="2" width="35px">
+                                            <apex:image value="{!$Resource.icon_basket}" height="30"/>
+                                        </td>    
+                                        <td align="left">
+                                            <apex:outputText value="{!$Label.OpportunitySites}" style="font-size:14px;font-weight:bold;"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left">
+                                            <apex:outputText value="{!opp.Name}" style="color:grey;font-weight:bold;"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </apex:outputPanel>
+                        </apex:panelGrid>
+                        <!-- NEW LINKED SITE -->
+                        <apex:outputPanel id="newlinkedopty">
+                            <apex:pageBlockTable id="toLink" value="{!oppSiteWrappers}" var="oppSiteWrapper" styleClass="content-top-align">
+                                <apex:column width="30" />
+                                <apex:column width="150" headerValue="Site Name" value="{!oppSiteWrapper.Site.Name}"/>
+                                <apex:column headerValue="{!$Label.Address}">
+                                    <apex:outputText value="{!oppSiteWrapper.Site.Street__c}" style="font: 11px 'American Typewriter'"/><br/>
+                                    <apex:outputText value="{!oppSiteWrapper.Site.City__c} {!oppSiteWrapper.Site.Postcode__c}" style="font: 11px 'American Typewriter'"/><br/>
+                                    <apex:outputText value="{!oppSiteWrapper.Site.State__c} {!oppSiteWrapper.Site.Country__c}" style="font: 11px 'American Typewriter'"/>
+                                </apex:column>                                    
+                                <apex:column headerValue="{!$Label.TypeandTCode}">
+                                    <table columns="2" width="100%" cellpadding="0" cellspacing="0" style="border:none;">
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Type: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!oppSiteWrapper.Site.Type__c}" styleClass="selectlist-width" style="color:'black'" />
+                                                <apex:image value="{!$Resource.icon_warning}" id="warningIcon" width="20" rendered="{!ISBLANK(oppSiteWrapper.Site.Type__c)}" title="Type is blank"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Industry: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!oppSiteWrapper.Site.Industry__c}" styleClass="selectlist-width" style="color:'black'" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="T-Code: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <div class="selectlist-div">
+                                                    <apex:inputField value="{!oppSiteWrapper.Site.TCodeDescr__c}" styleClass="selectlist-width" id="tcode" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        	<td style="padding:4px;border-spacing:0;border-style:none">
+                                                <apex:outputLabel value="Number of Employees: " />
+                                        	</td>
+                                            <td style="padding:0;border-spacing:0;border-style:none">
+                                                <apex:inputField value="{!oppSiteWrapper.Site.NumberEmployees__c}" styleClass="selectlist-width-txt" style="color:'black'" id="numemp" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </apex:column>
+                                <apex:column width="50">
+                                    <apex:commandButton action="{!removeOpportuntySiteFromQuote}" value="{!$Label.Remove}" reRender="linkedaccount,newlinkedopty" status="status" immediate="true">
+                                        <apex:param value="{!oppSiteWrapper.Site.Id}" assignTo="{!opportunitySiteIdToRemove}" name="del"/>
+                                    </apex:commandButton>
+                                </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </td>
+                </tr>   
+            </table>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

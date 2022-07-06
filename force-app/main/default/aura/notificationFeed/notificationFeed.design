@@ -1,0 +1,6 @@
+<design:component>
+	<design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!userId}"
+                      description="Record Id of current User"/>
+</design:component>

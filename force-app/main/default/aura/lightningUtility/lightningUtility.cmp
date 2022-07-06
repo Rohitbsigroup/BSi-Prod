@@ -1,0 +1,24 @@
+<aura:component description="Abstract utility component that provides resuable functionality."
+                abstract="true"
+                controller="LightningUtilityController">
+
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="renderFlag"    type="Boolean" default="true" access="public" />
+    <aura:attribute name="renderMessage" type="String"  default="" />
+
+    <!-- Body -->
+    <aura:if isTrue="{!v.renderFlag}">
+        {!v.body}
+
+        <aura:set attribute="else">
+            <aura:if isTrue="{!empty(v.renderMessage)}">
+                <lightning:spinner alternativeText="Loading" />
+                <aura:set attribute="else">
+                    <div class="slds-align_absolute-center slds-text-color_weak">
+                        {!v.renderMessage}
+                    </div>
+                </aura:set>
+            </aura:if>
+        </aura:set>
+    </aura:if>
+</aura:component>

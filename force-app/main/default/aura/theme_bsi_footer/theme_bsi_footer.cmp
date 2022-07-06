@@ -1,0 +1,61 @@
+<aura:component implements="forceCommunity:themeLayout,forceCommunity:availableForAllPageTypes,force:hasRecordId" extends="c:lightningUtility" access="global" description="BSI Custom Theme Layout" controller="ThemeBSIAura">
+
+    <!-- GLOBAL DESIGN ATTRIBUTES -->
+    <aura:attribute name="logoName"      type="String" access="global" default=""/>
+    <aura:attribute name="mediaChannels" type="String" access="global" required="false"  default=""/>
+    <aura:attribute name="footerLinks"   type="String" access="global" required="false"  default=""/>
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="footerLogo"    type="Aura.Component[]" required="false"/>
+    <aura:attribute name="footer"		 type="Aura.Component[]" required="false"/>
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="lstMediaChannel" type="Object[]" default=""/>
+    <aura:attribute name="lstFooterLink"   type="Object[]" default=""/>
+
+    <!-- HANDLERS -->  
+	<aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+
+    <div class="themeLayout">
+        <div class="mainBody">
+            <div class="bodyContainer" aura:id="body-container">
+                {!v.body}
+            </div>
+            <div class="themefooter">
+                <div class="container">
+                    <div class="left-footer">
+                        <div class="logo-image-footer">
+                            {!v.footerLogo}
+                        </div>
+                    </div>
+                    <div class="inner">
+                        <div class="copyright">
+                            <p>&copy; {!$Label.c.CLP_CopyrightLabel}&nbsp;{!v.currentYear}</p>
+                        </div>
+                        
+                        <div class="social-media slds-col--padded">
+                            <ul>
+                                <aura:iteration items="{!v.lstMediaChannel}" var="item">
+                                    <li>
+                                        <a href="{!item.ref}"><img src="{!item.picW}"/></a>
+                                    </li>
+                                </aura:iteration>
+                            </ul>     
+                        </div>
+                        
+                        <div class="nav">
+                            <ul>
+                                <aura:iteration items="{!v.lstFooterLink}" var="item">
+                                    <li>
+                                        <a href="{!item.lnk}">{!item.txt}</a>
+                                    </li>
+                                </aura:iteration>
+                            </ul>
+                        </div>
+                    </div>
+                </div>    
+            </div>
+        </div>
+    </div>
+	
+</aura:component>

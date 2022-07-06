@@ -1,0 +1,232 @@
+<apex:page standardcontroller="Opportunity" extensions="ConsultantRandomController" tabstyle="Contact" sidebar="false" showHeader="false">
+	
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.slotTable {
+			position: relative;
+			top: 112px;
+			left: 30px;
+			width: 346px;
+			height: 155px;
+			font-size: 15px;
+			text-align: center;
+		}
+		.slotDiv {
+			background-image: url('{!URLFOR($Resource.slotmachine)}');
+			width: 500px;
+			height: 375px
+		}
+		.slotButton {
+			position: absolute;
+			top: 102px;
+			left: 390px;
+			width: 80px;
+			height: 200px;
+			text-decoration: none;
+			color: white;
+			font-size: 15px;
+		}
+		.hoverDiv {		
+			display: none;
+			width: 350px;
+			position: absolute;
+			top: 281px;
+			left: 30px;
+			color: white;
+			font-size: 15px;
+			font-family: 'American Typewriter',Times,serif;
+			z-index:999;
+		}
+		.emailDiv {
+			position: absolute;
+			top: 20px;
+			left: 30px;
+		}
+		.toAddress {
+			font-size: 15px;
+			font-family: 'American Typewriter',Times,serif;
+			font-weight: bold;
+			position:absolute;
+			margin-top:10px;
+			margin-left:-182px;
+			width:180px;
+			border:none;
+			background-color:transparent;
+			outline:none;
+		}
+		.viewCon1 {		
+			font-family: 'American Typewriter',Times,serif;
+			width: 117px;
+		}
+		.viewCon2 {	
+			font-family: 'American Typewriter',Times,serif;
+			width: 112px;	
+		}
+		.viewCon3 {	
+			font-family: 'American Typewriter',Times,serif;
+			width: 117px;	
+		}
+	</style>
+	
+	<apex:includeScript value="{!$Resource.jquery}"/>
+	
+	<apex:actionStatus id="status">
+    	<apex:facet name="start">
+	        <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+		</apex:facet>
+  	</apex:actionStatus>
+  	<apex:outputpanel id="theSlot">
+  	<!-- SCRIPT FOR HIDING-SHOWING HOVERS -->
+	<script type="text/javascript">
+		$(document).ready(function(){          	
+			$('.hoverDiv').hide();
+			$(".viewCon1").hover(
+		      function(){
+		      	$("#con1").fadeIn("200");
+		      },
+		      function(){
+		      	$("#con1").fadeOut("300");
+		      }
+			);
+			$(".viewCon2").hover(
+		      function(){
+		      	$("#con2").fadeIn("200");
+		      },
+		      function(){
+		      	$("#con2").fadeOut("300");
+		      }
+			);
+			$(".viewCon3").hover(
+		      function(){
+		      	$("#con3").fadeIn("200");
+		      },
+		      function(){
+		      	$("#con3").fadeOut("300");
+		      }
+			);
+			// Send Email Section hide/show
+			//$('.toAddress').hide(); 
+			//$('#mailsend').hide();
+			//$("#mail").click(
+		      //function(){
+		      	//$(".toAddress").fadeIn("200");
+		      	//$("#mail").fadeOut("200");
+		      	//$("#mailsend").fadeIn("200");	      	
+		      //}
+			//);
+		});
+	</script>
+	<div class="slotDiv">
+		<div class="emailDiv" style="{!IF(!warning,'display:none','')}">
+			<table width="340px" style="padding:5px;cellspacing:5px;"><tr>	
+				<td>
+				<apex:outputText value="{!errorMessage}" style="font-family:'American Typewriter',Times,serif;font-size:11px;" 
+					rendered="{!warning}"/>			
+				</td>
+			</tr></table>
+		</div>
+		<div class="emailDiv" style="{!IF(noConsultant,'display:none','')}">
+		<apex:form >
+		<apex:actionFunction action="{!sendEmail}" name="send"/> 
+		<apex:actionFunction action="{!reset}" name="reset"/>
+			<table width="340px" style="padding:5px;cellspacing:5px;"><tr>			
+			<td style="vertical-align:middle;">
+			<!--<apex:image value="{!$Resource.icon_input}" height="34" rendered="{!!showError}"/>
+			<apex:inputText value="{!customerEmail}" styleClass="toAddress" rendered="{!!showError}"/>-->
+			<apex:selectList value="{!customerId}" size="1" id="contacts" style="font-family:'American Typewriter',Times,serif;font-size:12px;" rendered="{!IF(!showError && !emailSent, true, false)}">
+		        <apex:selectOptions value="{!Customers}"/>       
+		    </apex:selectList>
+		    <apex:outputText value="Your Email has been sent." style="font-family:'American Typewriter',Times,serif;font-size:14px;font-weight:bold;" rendered="{!emailSent}"/>
+			<apex:image value="{!$Resource.icon_warning}" height="34" onclick="reset();" style="cursor:pointer;" rendered="{!showError}"/>
+			</td>
+			<td style="vertical-align:middle;">
+			<apex:outputLink onclick="reset();" style="text-decoration:none;">
+			<apex:outputText value="{!errorMessage}" style="font-family:'American Typewriter',Times,serif;font-size:11px;cursor:pointer;" rendered="{!showError}"/>		
+			</apex:outputLink>
+			<apex:image value="{!$Resource.icon_emailsend}" onclick="send();" style="height:45px;cursor:pointer;posisiton:relative;left:30px" rendered="{!IF(!showError && !emailSent, true, false)}"/>
+			<apex:image value="{!$Resource.icon_selected}" height="45" rendered="{!emailSent}"/>
+			</td>
+			<td></td>
+			</tr></table>
+		</apex:form>
+		</div>
+		<table class="slotTable" cellpadding="8px">
+			<tr>
+			<td class="viewCon1" >
+				<apex:outputLink value="/{!con1.Id}" target="_blank" rendered="{!!ISBLANK(con1.Id)}">
+				<apex:image value="{!$Resource.icon_contact}" width="35" />
+				</apex:outputLink>
+				<apex:image value="{!$Resource.icon_deselected}" width="35" rendered="{!ISBLANK(con1.Id)}"/>
+				<br/>
+				{!con1.FirstName}
+				<br/>
+				{!con1.LastName}
+			</td>
+			<td class="viewCon2">
+				<apex:outputLink value="/{!con2.Id}" target="_blank" rendered="{!!ISBLANK(con2.Id)}">
+				<apex:image value="{!$Resource.icon_contact}" width="35"/>
+				</apex:outputLink>
+				<apex:image value="{!$Resource.icon_deselected}" width="35" rendered="{!ISBLANK(con2.Id)}"/>
+				<br/>
+				{!con2.FirstName}
+				<br/>
+				{!con2.LastName}
+			</td>
+			<td class="viewCon3">
+				<apex:outputLink value="/{!con3.Id}" target="_blank" rendered="{!!ISBLANK(con3.Id)}">
+				<apex:image value="{!$Resource.icon_contact}" width="35"/>
+				</apex:outputLink>
+				<apex:image value="{!$Resource.icon_deselected}" width="35" rendered="{!ISBLANK(con3.Id)}"/>
+				<br/>
+				{!con3.FirstName}
+				<br/>
+				{!con3.LastName}
+			</td>
+			</tr>
+		</table>
+		<apex:form id="theForm">
+			<apex:commandLink styleclass="slotButton" action="{!SlotMachine}" status="status" reRender="theSlot,theForm" rendered="{!!noConsultant}">
+			</apex:commandLink>
+			<div class="hoverDiv" id="con1">
+				{!con1.Email}
+				<br/>
+				{!con1.Phone}
+				<br/>
+				{!con1.MailingPostalCode}
+			</div>
+			<div class="hoverDiv" id="con2">
+				{!con2.Email}
+				<br/>
+				{!con2.Phone}
+				<br/>
+				{!con2.MailingPostalCode}
+			</div>
+			<div class="hoverDiv" id="con3">
+				{!con3.Email}
+				<br/>
+				{!con3.Phone}
+				<br/>
+				{!con3.MailingPostalCode}
+			</div>
+		</apex:form>
+	</div>
+	</apex:outputpanel>
+	
+	
+	<!--<apex:pageBlock title="Work in progress" id="theBlock">
+	<apex:pageBlockButtons >
+		<apex:commandButton action="{!slotMachine}" value="Play Again!" reRender="theBlock" status="status"/>
+	</apex:pageBlockButtons>
+		<apex:pageBlockSection columns="1" title="UI and filtering to be redefined">
+			<apex:outputText value="Value 1: {!random1}"/>
+			<apex:outputText value="Value 2: {!random2}"/>
+			<apex:outputText value="Value 3: {!random3}"/>
+			<apex:outputText value="Query size: {!maxCount}"/>
+		</apex:pageBlockSection>
+		<apex:pageBlockSection columns="3">
+			<apex:outputText value="{!con1.Name}"/>
+			<apex:outputText value="{!con2.Name}"/>
+			<apex:outputText value="{!con3.Name}"/>		
+		</apex:pageBlockSection>
+	</apex:pageBlock>-->
+</apex:page>

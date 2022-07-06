@@ -1,0 +1,11 @@
+<configuration>
+<campaignId>701D0000000pyOH</campaignId>
+<targetIcons default="target-white.png">
+<targetIcon modelId="9">target-red.png</targetIcon>
+<targetIcon modelId="6">target-blue.png</targetIcon>
+<targetIcon modelId="7">target-blue.png</targetIcon>
+<targetIcon modelId="5">target-yellow.png</targetIcon>
+<targetIcon modelId="10">target-yellow.png</targetIcon>
+<targetIcon modelId="11">target-yellow.png</targetIcon>
+</targetIcons>
+</configuration>

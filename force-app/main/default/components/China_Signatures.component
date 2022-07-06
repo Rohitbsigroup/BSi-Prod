@@ -1,0 +1,46 @@
+<apex:component access="global">
+    <apex:attribute name="translation" type="String" description="translation" required="true" access="global"/>
+    <apex:attribute name="chinaRegion" type="String" description="region" required="true" access="global"/>
+    <apex:attribute name="ver" type="String" description="version" required="true" access="global"/>
+  
+    <apex:panelgroup rendered="{!AND((translation = 'China (Chinese)'),(OR(chinaRegion = "EC:SH", chinaRegion="EC:Other")))}">
+        地区 : 上海 EC:SH <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        联系人 : Sophia Zhu(朱晓燕) <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        邮箱 : Sophia.zhu@bsigroup.com <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        电话 : +86 (0)21 23160217 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        地址 : 上海市南京西路388号仙乐斯广场10楼1006-1011室 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+    </apex:panelgroup>
+
+    <apex:panelgroup rendered="{!AND((translation = 'China (Chinese)'),(chinaRegion = "EC:SU"))}">
+        地区 : 苏州 EC:SU <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        联系人 : Jingjing Chen(陈晶晶) <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        邮箱 : Jingjing.chen@bsigroup.com <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        电话 : +86 (0)512 6875 9226 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        地址 : 苏州市高新区狮山路28号高新广场1802室 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+    </apex:panelgroup>
+
+    <apex:panelgroup rendered="{!AND((translation = 'China (Chinese)'),(OR(chinaRegion = "NC:BJ", chinaRegion="NC:Other")))}">
+        地区 : 北京 NC:BJ <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        联系人 : Ruki Liu(刘琳) <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        邮箱 : Ruki.Liu@bsigroup.com <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        电话 : +86 (0)10 8507 2915 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        地址 : 北京市朝阳区建国门外大街甲24号东海中心2008室 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+    </apex:panelgroup>
+
+    <apex:panelgroup rendered="{!AND((translation = 'China (Chinese)'),(OR(chinaRegion = "NC:QD", chinaRegion="NC:TJ")))}">
+        地区 : 青岛 NC:QD  天津NC:TJ <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        联系人 : Man Yan(闫漫) <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        邮箱 : man.yan@bsigroup.com <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        电话 : +86 (0)10 8507 2911 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        地址 : 北京市朝阳区建国门外大街甲24号东海中心2008室 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+    </apex:panelgroup>
+
+    <apex:panelgroup rendered="{!AND((translation = 'China (Chinese)'),(OR(chinaRegion = "SC:GZ", chinaRegion="SW", chinaRegion="SW", chinaRegion="SW")))}">
+        地区 : 广州 SC:GZ 深圳 SC:SZ 重庆 SW   <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        联系人 : Gemma Liang(梁嘉敏) <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        邮箱 : Gemma.liang@bsigroup.com <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        电话 : +86 (0)755 2184 6330 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+        地址 : 深圳市深南大道6008号特区报业大厦29楼AB区 <apex:outputText value="<br/>" escape="false" rendered="{!ver='HTML'}"/>
+    </apex:panelgroup>
+
+</apex:component>

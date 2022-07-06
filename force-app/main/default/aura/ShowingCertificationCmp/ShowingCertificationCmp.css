@@ -1,0 +1,21 @@
+.certValue.cShowingCertificationCmp{
+    margin-top: 1em;
+    word-break: keep-all;
+    margin-left: 2em;
+}
+
+.showCertButton.cShowingCertificationCmp {
+    cursor: pointer;
+    font-size: 16px;
+    width: fit-content;
+}
+
+.uiInput.uiInputCheckbox.uiInput--default.uiInput--checkbox.cShowingCertificationCmp {
+    display: flex;
+    margin-top: 0.5em;
+    margin-left: 2em;
+}
+
+.uiInput.uiInputCheckbox.uiInput--default.uiInput--checkbox.cShowingCertificationCmp input {
+    margin-left: 1em;
+}

@@ -1,0 +1,168 @@
+<apex:page controller="TrainingBookingController" action="{!initCheck}" language="{!pageLanguage}" standardstylesheets="false" cache="false" renderAs="pdf" applyHtmlTag="false" showHeader="false">
+ <head>
+        <style type="text/css" media="print">
+            html, body
+            {
+                margin: 0;
+                padding: 0;
+                font-family: Arial Unicode MS;
+                font-size: 12px;
+            }
+            @page
+            {
+                size: A4 portrait;
+                margin: 3.25cm 1.5cm 2.25cm 1.5cm;
+                @top-left {content: element(header); width: 100%;}
+                @bottom-left {content: element(footer); width: 100%;}
+            }
+            div.header
+            {
+                position: running(header);
+                height: 3.0cm;
+                background-image: url('{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}'); background-position: left 0.5cm; background-repeat: no-repeat;
+            }
+            <!-- 28 March 2017 Vim commented the div created to display Espion Logo - No longer needed -->
+            <!-- Added Div style by Vimlesh on 24 Aug 2016 to include Espion Header details -->
+            <!-- div.espionheader 
+            {
+                position: running(header);
+                display: block;
+                height: 3.0cm;
+            }-->
+            <!-- vim code finish -->
+            p.questions
+            {
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 1.1cm;
+                margin: 0;
+                font-weight: 500;
+                font-size: 18px;
+                font-size: 1.8rem;
+            }
+            p.phone-no
+            {
+                display: block;
+                position: absolute;
+                right: 0;
+                bottom: 0.6cm;
+                margin: 0;
+                color: #D73000;
+                font-weight: 500;
+                font-size: 24px;
+                font-size: 2.4rem;
+            }
+            div.footer
+            {
+                position: running(footer);
+                height: 2.0cm;
+                background-image: url('{!URLFOR($Resource.TrainingBookingResources, 'site_strap_334.png')}'); background-position: right 0.6cm; background-repeat: no-repeat;
+            }
+            h1 {font-size:18px;margin:10px 0}
+            h2 {font-weight:normal; font-size:15px; margin: 1px 0}
+            h2.section-heading {margin:12px 0 3px 0}
+            h3 {font-weight:normal; font-size:13px; margin:1px 0}
+            h4 {font-weight:normal; font-size:20px; color:#D73000}
+            h4.section-heading {margin:12px 0 3px 0; font-weight:normal; font-size:18px; color: #D73000}
+            table.full-width {width:100%; border:1px solid gray; padding:2px}
+            table.full-width td:first-child {width:35%}
+            table.full-width-2column {width:100%; border-top:solid #D73000}
+            table.full-width-2column td {width:50%; margin:0; padding:0; text-align:left; vertical-align:top}
+            table.multi-column {width:100%; border-top:solid #D73000}
+            table.multi-column th td {font-weight:normal; text-align:left; vertical-align:top}
+            table.layout {width:100%; border-top:solid #D73000}
+            table.layout td {width:50%}
+            table.internal {border:none; width:100%; padding:0}
+            table.internal td {width:50%; margin:0; padding:0}          
+            table.column4 td {width:25%;vertical-align:top}
+        </style> 
+    </head>
+    <body>
+
+
+  
+        <c:BookingConfirmationPDF bookingId="{!objBooking.Id}" country="{!selectedCountry.Id}" source="form" />
+
+        <!-- Delegate details - delete after testing
+        <h4 class="section-heading">{!$Label.TrainingBookingConfirmationPrintDelegates}</h4>
+        <table class="multi-column">
+            <tr>
+                <apex:outputPanel layout="none" rendered="{!FIND('HideSalutation', selectedCountry.Flags)=0}">
+                    <th>
+                        <h3><apex:outputLabel for="BookerSalutation" value="{!$ObjectType.TrainingDelegate__c.fields.Salutation__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                    <th>
+                        <h3><apex:outputLabel for="BookerFirstNameWest" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                <th>
+                    <h3><apex:outputLabel for="BookerLastName" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name__c.label}"/></h3>
+                </th>
+                <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                    <th>
+                        <h3><apex:outputLabel for="BookerFirstNameEast" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                <th>
+                    <h3><apex:outputLabel for="BookerEmailAddress" value="{!$ObjectType.TrainingDelegate__c.fields.Email_Address__c.label}"/></h3>
+                </th>
+                <apex:outputPanel layout="none" rendered="{!selectedEvent.accommodationAvailable}">
+                    <th>
+                        <h3><apex:outputLabel for="BookerAccommodationReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_Required__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!selectedEvent.accommodationAvailable}">
+                    <th>
+                        <h3><apex:outputLabel for="DelegateIncExtraNight" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_night_before__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                <apex:outputPanel layout="none" rendered="{!AND(selectedEvent.onlineExamAvailable, NOT(isIncludeExam))}">
+                    <th>
+                        <h3><apex:outputLabel for="DelegateIncludeOnlineExam" value="{!$ObjectType.TrainingDelegate__c.fields.Online_Exam__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>
+                
+                <apex:outputPanel layout="none" rendered="{!selectedEvent.onlineStandardAvailable}">
+                    <th>
+                        <h3><apex:outputLabel for="DelegateIncludeOnlineStandard" value="{!$ObjectType.TrainingDelegate__c.fields.Standard__c.label}"/></h3>
+                    </th>
+                </apex:outputPanel>                   
+            </tr>
+            <apex:repeat value="{!objDelegates}" var="d">
+                <tr>
+                    <apex:outputPanel layout="none" rendered="{!FIND('HideSalutation', selectedCountry.Flags)=0}">
+                        <td><apex:outputField id="Salutation" value="{!d.Salutation__c}"/></td>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                        <td><apex:outputField id="BookerFirstNameWest" value="{!d.First_Name__c}"/></td>
+                    </apex:outputPanel>
+                    <td><apex:outputField id="BookerLastName" value="{!d.Last_Name__c}"/></td>
+                    <apex:outputPanel layout="none" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                        <td><apex:outputField id="BookerFirstNameEast" value="{!d.First_Name__c}"/></td>
+                    </apex:outputPanel>
+                    <td><apex:outputField id="BookerEmailAddress" value="{!d.Email_Address__c}"/></td>
+                    <apex:outputPanel layout="none" rendered="{!selectedEvent.accommodationAvailable}">
+                        <td><apex:outputField id="BookerAccommodationReqd" value="{!d.Accommodation_Required__c}"/></td>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!selectedEvent.accommodationAvailable}">
+                        <td><apex:outputField id="DelegateIncExtraNight" value="{!d.Accommodation_night_before__c}"/></td>
+                    </apex:outputPanel>
+
+                    <apex:outputPanel layout="none" rendered="{!AND(selectedEvent.onlineExamAvailable, NOT(isIncludeExam))}">
+                        <td><apex:outputField id="DelegateIncludeOnlineExam" value="{!d.Online_Exam__c}"/></td>
+                    </apex:outputPanel>
+
+                    <apex:outputPanel layout="none" rendered="{!selectedEvent.onlineStandardAvailable}">
+                        <td><apex:outputField id="DelegateIncludeOnlineStandard" value="{!d.Standard__c}"/></td>
+                    </apex:outputPanel>  
+ 
+                    
+                </tr>
+            </apex:repeat>
+        </table> -->
+
+    </body>  
+</apex:page>

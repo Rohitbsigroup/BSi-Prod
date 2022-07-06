@@ -1,0 +1,381 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    <script type="text/javascript">
+        /* CB 02/07/2015
+        *   Disable extra night checkbox if its related accommodation checkbox is present in the dom and not checked
+        */
+        var $j = jQuery.noConflict();
+        $j( document ).ready(function() {
+            // for each element with the class name that ends in AccommodationReqd
+            $j("[class$='AccommodationReqd']").each(function(i,obj)
+            {
+                // if this element is rendered - its possible if the element is not rendered that it still resides in the dom
+                if($j(this).length > 0)
+                {
+                    // Test if the checkbox is checked
+
+                    // For some browsers, `attr` is undefined; for others,
+                    // `attr` is false.  Check for both.
+                    var attr = $j(this).attr('checked');
+                    if (typeof attr === typeof undefined || attr === false)
+                    {
+                        // Traverse the dom to the parent element - parent()
+                        // for each subsequent element at this tree level - nextAll()
+                        // traverse child elements for each subsequent element looking for input checkbox - children().nextAll("input[type='checkbox']")
+                        // disable the first one we find - first().attr('disabled','true')
+                        $j(this).parent().nextAll().children().nextAll("input[type='checkbox']").first().attr('disabled','true');
+                    }
+                }
+            });
+        });
+
+        function enableExtraNightStay(accommReqElement){
+            var nextCheckbox = $j(accommReqElement).parent().next().children().nextAll("input[type='checkbox']").first();
+            if(accommReqElement.checked)
+            {
+                // re-enable extra night checkbox
+                $j(nextCheckbox).removeAttr('disabled');
+            }
+            else{
+                // if accomm has been unchecked clear extra night and disable checkbox
+                $j(nextCheckbox).removeAttr('checked');
+                $j(nextCheckbox).attr('disabled','true');
+            }
+        }
+    </script>
+    <apex:composition template="{!$Site.Template}">
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+            <apex:outputPanel rendered="{!pageShowSelection}">
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                </h2>
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                </h2>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!selectedCountry.portalLogin}"> <!--JS added additional render condition 04/03-->
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingCurrentUser}"/>:&nbsp;
+                    <apex:outputText value="{!portalUser.Username}" rendered="{!isAuthenticated}"/>
+                    <apex:outputText value="{!$Label.TrainingBookingGuestUser}" rendered="{!NOT(isAuthenticated)}"/>
+                </h2>
+            </apex:outputPanel>
+        </apex:define>
+
+        <!-- *** Introduction *** -->
+        <apex:define name="introduction">
+            <p class="intro">
+                <apex:outputText value="{!IF(selectedEvent.event.Course__r.Delivery_Method__c == 'eLearning', $Label.TrainingBookingStep3Online, $Label.TrainingBookingStep3Intro)}" />
+            </p>
+            <p class="intro">
+                <apex:outputText value="{!$Label.TrainingBookingStep3GDPR}" />
+            </p>
+        </apex:define>
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+            <apex:form >
+                <div class="two-thirds">
+                    <apex:repeat value="{!objDelegates}" var="d">
+
+                        <!-- Delegate details -->
+                        <fieldset class="form-fields">
+
+                            <!-- Booker -->
+                            <apex:outputPanel layout="none" rendered="{!d.Is_Booker__c}">
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('HideSalutation', selectedCountry.Flags)=0}">
+                                    <apex:outputLabel for="BookerSalutation" value="{!$ObjectType.TrainingDelegate__c.fields.Salutation__c.label}"/>
+                                    <div class="output-only"><apex:outputField id="BookerSalutation" value="{!d.Salutation__c}"/></div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                                    <apex:outputLabel for="BookerFirstNameWest" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}"/>
+                                    <div class="output-only"><apex:outputField id="BookerFirstNameWest" value="{!d.First_Name__c}"/></div>
+                                </apex:outputPanel>
+                                <div class="field-item">
+                                    <apex:outputLabel for="BookerLastName" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name__c.label}"/>
+                                    <div class="output-only"><apex:outputField id="BookerLastName" value="{!d.Last_Name__c}"/></div>
+                                </div>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="BookerFirstNameEast" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label}"/>
+                                    <div class="output-only"><apex:outputField id="BookerFirstNameEast" value="{!d.First_Name__c}"/></div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="BookerLastNameEnglish" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name_English__c.label} *"/>
+                                    <apex:inputField id="BookerLastNameEnglish" value="{!d.Last_Name_English__c}" required="true"/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="BookerFirstNameEnglish" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name_English__c.label} *"/>
+                                    <apex:inputField id="BookerFirstNameEnglish" value="{!d.First_Name_English__c}" required="true"/>
+                                </apex:outputPanel>
+                                <div class="field-item">
+                                    <apex:outputLabel for="BookerEmailAddress" value="{!$ObjectType.TrainingDelegate__c.fields.Email_Address__c.label}"/>
+                                    <div class="output-only"><apex:outputField id="BookerEmailAddress" value="{!d.Email_Address__c}"/></div>
+                                </div>
+                                <!-- 15 Jan 2018 MD Added New flag allowing Job Title to be made mandatory  -->
+                                <apex:outputPanel layout="none" rendered="{!FIND('DelegateJobTitleReqd', selectedCountry.Flags)=0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BookerJobTitleOpt" value="{!$ObjectType.TrainingDelegate__c.fields.Job_Title__c.label}"/>
+                                        <div class="output-only"><apex:outputField id="BookerJobTitleOpt" value="{!d.Job_Title__c}"/></div>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!FIND('DelegateJobTitleReqd', selectedCountry.Flags)>0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BookerJobTitleReq" value="{!$ObjectType.TrainingDelegate__c.fields.Job_Title__c.label} *"/>
+                                        <apex:inputField id="BookerJobTitleReq" value="{!d.Job_Title__c}" required="true"/>
+                                    </div>
+                                </apex:outputPanel>                              
+                                <apex:outputPanel layout="none" rendered="{!FIND('BookerMobReqd', selectedCountry.Flags)>0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="BookerMobile" value="{!$ObjectType.TrainingDelegate__c.fields.Mobile_Number__c.label}"/>
+                                        <div class="output-only"><apex:outputText id="BookerMobile" value="{!d.Mobile_Country_Code__c + ' ' + d.Mobile_Number__c}"/></div>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!FIND('PersonalID', selectedCountry.Flags)>0}">                                
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalID" value="{!$ObjectType.TrainingDelegate__c.fields.Social_Security_Number__c.label}"/>
+                                        <apex:inputField id="PersonalID" value="{!d.Social_Security_Number__c}"/>
+                                    </div>
+                                </apex:outputPanel>                                    
+                                <apex:outputPanel layout="none" rendered="{!FIND('koreaFormat', selectedCountry.Flags)>0}">                                
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR11">
+                                            <apex:outputLink target="blank" value="{!selectedCountry.bookingDataPolicyUrl}" rendered="{!NOT(selectedCountry.bookingDataPolicyUrl=null)}" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Agree_Personal_Data_Statement__c.label}</apex:outputLink>
+                                            <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields.Agree_Personal_Data_Statement__c.label}" rendered="{!selectedCountry.bookingDataPolicyUrl=null}"/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR11" value="{!d.Agree_Personal_Data_Statement__c}"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR12">
+                                            <apex:outputLink target="blank" value="http://www.onbsi.com/contents/member/offline_policy2.htm" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Use_of_Personal_ID__c.label}</apex:outputLink>
+                                            &nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR12" value="{!d.Use_of_Personal_ID__c}"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR13">
+                                            <apex:outputLink target="blank" value="http://www.onbsi.com/contents/member/offline_policy3.htm" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Sharing_Of_Personal_Data__c.label}</apex:outputLink>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR13" value="{!d.Sharing_Of_Personal_Data__c}"/>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedEvent.accommodationAvailable}">
+                                    <apex:outputLabel for="BookerAccommodationReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_Required__c.label}"/>
+                                    <apex:inputField onchange="enableExtraNightStay(this)" styleclass="AccommodationReqd" value="{!d.Accommodation_Required__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.accommodationCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{! selectedEvent.extraNightAvailable}">
+                                    <apex:outputLabel for="BookerExtraNightReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_night_before__c.label}"/>
+                                    <apex:inputField id="BookerExtraNightReqd" value="{!d.Accommodation_night_before__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.extraNightCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Start -->
+                                <!-- 07/05/2019 PC section hidden for 'IncludeExam' config flag -->
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!AND(selectedEvent.onlineExamAvailable, NOT(isIncludeExam))}">
+                                    <apex:outputLabel for="BookerOnlineExamRequired" value="{!$ObjectType.TrainingDelegate__c.fields.Online_Exam__c.label}"/>
+                                    <apex:inputField styleclass="OnlineExamRequired" value="{!d.Online_Exam__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.onlineExamCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedEvent.onlineStandardAvailable}">
+                                    <apex:outputLabel for="BookerStandardRequired" value="{!$ObjectType.TrainingDelegate__c.fields.Standard__c.label}"/>
+                                    <apex:inputField styleclass="StandardRequired" value="{!d.Standard__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.onlineStandardCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                                <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Finish -->
+
+                            </apex:outputPanel>
+
+                            <!-- Not booker -->
+                            <apex:outputPanel layout="none" rendered="{!NOT(d.Is_Booker__c)}">
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('HideSalutation', selectedCountry.Flags)=0}">
+                                    <apex:outputLabel for="DelegateSalutation" value="{!$ObjectType.TrainingDelegate__c.fields.Salutation__c.label}"/>
+                                    <apex:inputField id="DelegateSalutation" value="{!d.Salutation__c}"/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)=0}">
+                                    <apex:outputLabel for="DelegateFirstNameWest" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label} *"/>
+                                    <apex:inputField id="DelegateFirstNameWest" value="{!d.First_Name__c}" required="true"/>
+                                </apex:outputPanel>
+                                <div class="field-item">
+                                    <apex:outputLabel for="DelegateLastName" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name__c.label} *"/>
+                                    <apex:inputField id="DelegateLastName" value="{!d.Last_Name__c}" required="true"/>
+                                </div>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="DelegateFirstNameEast" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name__c.label} *"/>
+                                    <apex:inputField id="DelegateFirstNameEast" value="{!d.First_Name__c}" required="true"/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="DelegateLastNameEnglish" value="{!$ObjectType.TrainingDelegate__c.fields.Last_Name_English__c.label} *"/>
+                                    <apex:inputField id="DelegateLastNameEnglish" value="{!d.Last_Name_English__c}" required="true"/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!FIND('asiaFormat', selectedCountry.Flags)>0}">
+                                    <apex:outputLabel for="DelegateFirstNameEnglish" value="{!$ObjectType.TrainingDelegate__c.fields.First_Name_English__c.label} *"/>
+                                    <apex:inputField id="DelegateFirstNameEnglish" value="{!d.First_Name_English__c}" required="true"/>
+                                </apex:outputPanel>
+                                <div class="field-item">
+                                    <apex:outputLabel for="DelegateEmailAddress" value="{!$ObjectType.TrainingDelegate__c.fields.Email_Address__c.label} *"/>
+                                    <apex:inputField id="DelegateEmailAddress" value="{!d.Email_Address__c}" required="true"/>
+                                </div>
+                                <div class="field-item">
+                                    <apex:outputLabel for="DelegateEmailConfirmation" value="{!$ObjectType.TrainingDelegate__c.fields.Email_Confirmation__c.label} *"/>
+                                    <apex:inputField id="DelegateEmailConfirmation" value="{!d.Email_Confirmation__c}" required="true"/>
+                                </div>
+                                <!-- 15 Jan 2018 MD Modified: New flag to control whether Job Title is mandatory or not  -->
+                                <apex:outputPanel layout="none" rendered="{!FIND('DelegateJobTitleReqd', selectedCountry.Flags)=0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="DelegateJobTitleOpt" value="{!$ObjectType.TrainingDelegate__c.fields.Job_Title__c.label}"/>
+                                        <apex:inputField id="DelegateJobTitleOpt" value="{!d.Job_Title__c}"/>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!FIND('DelegateJobTitleReqd', selectedCountry.Flags)>0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="DelegateJobTitleReq" value="{!$ObjectType.TrainingDelegate__c.fields.Job_Title__c.label} *"/>
+                                        <apex:inputField id="DelegateJobTitleReq" value="{!d.Job_Title__c}" required="true"/>
+                                    </div>
+                                </apex:outputPanel>
+                                
+                                <apex:outputPanel layout="none" rendered="{!FIND('DelegateMobReqd', selectedCountry.Flags)>0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="DelegateMobile" value="{!$ObjectType.TrainingDelegate__c.fields.Mobile_Number__c.label} *"/>
+                                        <!--JS Updated to include prefix 2 new lines below
+                                        <apex:inputField id="DelegateMobile" value="{!d.Mobile_Number__c}" required="true"/>
+                                        <apex:inputText styleClass="js-phone" id="DelegateMobilePrefix" value="{!selectedCountry.countryCodeMobilePrefix}" style="width:80px;margin-right:5px" required="true"/>
+                                        -->
+                                        <!-- JE 25/01/2021 - included mobile country code field -->
+                                        <apex:selectList id="mobileCountryCodeDrop" value="{!d.Mobile_Country_Code__c}" multiselect="false" size="1" style="width:80px;margin-right:5px"  required="true">
+                                            <apex:selectOptions value="{!phoneCountryCodeOptions}" />
+                                        </apex:selectList>
+                                        <apex:inputField styleClass="js-phone" id="DelegateMobile" value="{!d.Mobile_Number__c}" style="width:215px" required="true"/>                                    
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!FIND('PersonalID', selectedCountry.Flags)>0}">                                
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalIDdel" value="{!$ObjectType.TrainingDelegate__c.fields.Social_Security_Number__c.label}"/>
+                                        <apex:inputField id="PersonalIDdel" value="{!d.Social_Security_Number__c}"/>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!FIND('koreaFormat', selectedCountry.Flags)>0}">
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR21">
+                                            <apex:outputLink target="blank" value="{!selectedCountry.bookingDataPolicyUrl}" rendered="{!NOT(selectedCountry.bookingDataPolicyUrl=null)}" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Agree_Personal_Data_Statement__c.label}</apex:outputLink>
+                                            <apex:outputText value="{!$ObjectType.TrainingDelegate__c.fields.Agree_Personal_Data_Statement__c.label}" rendered="{!selectedCountry.bookingDataPolicyUrl=null}"/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR21" value="{!d.Agree_Personal_Data_Statement__c}"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR22">
+                                            <apex:outputLink target="blank" value="http://www.onbsi.com/contents/member/offline_policy2.htm" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Use_of_Personal_ID__c.label}</apex:outputLink>
+                                            &nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR22" value="{!d.Use_of_Personal_ID__c}"/>
+                                    </div>
+                                    <div class="field-item">
+                                        <apex:outputLabel for="PersonalDataKR23">
+                                            <apex:outputLink target="blank" value="http://www.onbsi.com/contents/member/offline_policy3.htm" styleClass="underline">{!$ObjectType.TrainingDelegate__c.fields.Sharing_Of_Personal_Data__c.label}</apex:outputLink>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="{!$Label.TrainingBookingAgreementPrefix}"/>
+                                        </apex:outputLabel>
+                                        <apex:inputField id="PersonalDataKR23" value="{!d.Sharing_Of_Personal_Data__c}"/>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedEvent.accommodationAvailable}">
+                                    <apex:outputLabel for="DelegateAccommodationReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_Required__c.label}"/>
+                                    <apex:inputField onchange="enableExtraNightStay(this)" id="DelegateAccommodationReqd" styleclass="AccommodationReqd" value="{!d.Accommodation_Required__c}"/>
+                                    <apex:outputPanel layout="block" style="padding:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.accommodationCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{! selectedEvent.extraNightAvailable}">
+                                    <apex:outputLabel for="ExtraNightReqd" value="{!$ObjectType.TrainingDelegate__c.fields.Accommodation_night_before__c.label}"/>
+                                    <apex:inputField id="ExtraNightReqd" value="{!d.Accommodation_night_before__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.extraNightCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Start -->
+                                <!-- 07/05/2019 PC section hidden for 'IncludeExam' config flag -->
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!AND(selectedEvent.onlineExamAvailable, NOT(isIncludeExam))}">
+                                    <apex:outputLabel for="BookerOnlineExamRequired" value="{!$ObjectType.TrainingDelegate__c.fields.Online_Exam__c.label}"/>
+                                    <apex:inputField styleclass="OnlineExamRequired" value="{!d.Online_Exam__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.onlineExamCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <apex:outputPanel layout="block" styleClass="field-item" rendered="{!selectedEvent.onlineStandardAvailable}">
+                                    <apex:outputLabel for="BookerStandardRequired" value="{!$ObjectType.TrainingDelegate__c.fields.Standard__c.label}"/>
+                                    <apex:inputField styleclass="StandardRequired" value="{!d.Standard__c}"/>
+                                    <apex:outputPanel layout="block" style="padding-top:7px;">
+                                        <apex:outputText style="padding-left:7px;" value="{0,number,{!selectedCountry.CurrencyFormat}}">
+                                            <apex:param value="{!selectedEvent.onlineStandardCost}"/>
+                                        </apex:outputText>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                                <!-- 28/07/2017 ADS - SoW034 - Online Exam Enhancements - Finish -->
+
+                            </apex:outputPanel>
+
+                        </fieldset>
+
+                    </apex:repeat>
+
+                    <div style="float: left; width: auto;">
+                        <apex:commandButton value="{!$Label.TrainingBookingContinueButton}" action="{!forwardToStep4}" style="float: right; margin-left: 20px;"/>
+                        <!-- PK(NEB) 10 Sep 2018 - Added special attribute to bypass native html5 form field validation -->
+                        <apex:commandButton value="{!$Label.TrainingBookingPreviousButton}" html-formnovalidate="formnovalidate" action="{!backToStep2}" immediate="true" style="float: right;"/>
+                    </div>
+                    <div style="clear:both;"></div>
+
+                </div>
+
+            </apex:form>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep3Notes='')}">
+                <p>{!$Label.TrainingBookingStep3Notes}</p>
+            </apex:outputPanel>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

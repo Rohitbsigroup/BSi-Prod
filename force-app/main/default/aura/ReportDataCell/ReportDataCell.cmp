@@ -1,0 +1,9 @@
+<aura:component >
+    <aura:attribute name="cell" type="Object"/>
+    <aura:if isTrue="{! and((v.cell.value != v.grouping.label), (v.cell.value.length == 15 || v.cell.value.length == 18))}">
+        <a href="{!'/'+v.cell.value}" target="_blank">{!v.cell.label}</a>
+        <aura:set attribute="else">
+            {!v.cell.label}
+        </aura:set>
+    </aura:if> 
+</aura:component>

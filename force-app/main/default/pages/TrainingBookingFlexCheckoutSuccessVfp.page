@@ -1,0 +1,15 @@
+<apex:page showHeader="false" sidebar="false" controller="TrainingBookingFlexCheckoutSuccessCtr" standardstylesheets="false" cache="false" action="{!processPayment}">
+    <head>
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}" />
+        <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+    </head>
+    <apex:messages id="messages" styleClass="messages" />
+    
+    <apex:outputText id="txt3dResponse" value="{!response}" escape="false"/> <!-- 3-D secure response HTML -->
+        
+    <apex:form id="status">
+        <apex:actionPoller action="{!getPaymentProcess}" reRender="status" interval="10" enabled="{!PaymentProcess}"/>
+        <apex:outputLabel id="lblPmtStatus" style="font-size:1.6rem;font-weight:bold; " rendered="{!paymentSucceeded}" value="{!$Label.TrainingBookingPaymentInProcess}"/>
+    </apex:form>  
+
+</apex:page>

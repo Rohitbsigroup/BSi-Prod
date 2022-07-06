@@ -1,0 +1,21 @@
+<apex:page standardController="Enrollment__c" extensions="IRCAEnrolmentExtractExt" recordSetVar="e">
+    <apex:form >
+        <apex:sectionHeader title="IRCA Enrolments" subtitle="Generate an IRCA Enrolment Report" />
+        <apex:pageMessages />
+        <apex:pageBlock Title="File Name & Confirmation" mode="Edit">
+            <apex:PageBlockButtons style="text-align: right;">
+                <apex:commandButton action="{!create}" value="Confirm"/>&nbsp;
+                <apex:commandLink action="{!cancel}" value="Cancel" immediate="true"/>
+            </apex:PageBlockButtons>
+            <apex:pageBlockSection title="Enrolments selected: {!selectedEnrolments.size}" columns="1">
+                <apex:PageBlockSectionItem >
+                    <apex:outputLabel value="File Name" />
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:inputText label="File Name" value="{!fileName}" maxlength="50" size="50"/>
+                    </apex:outputPanel>
+                </apex:PageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

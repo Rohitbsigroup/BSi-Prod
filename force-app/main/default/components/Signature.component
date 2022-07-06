@@ -1,0 +1,82 @@
+<apex:component access="global">
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+
+    <!--Others-->   
+    <apex:image rendered="{!NOT(enrollment.Translation_Formula__c='South Africa (English)' || enrollment.Translation_Formula__c='China (Chinese)' || enrollment.Translation_Formula__c='Australia (English)' || enrollment.Translation_Formula__c='New Zealand (English)' || enrollment.Translation_Formula__c='India (English)' || enrollment.Translation_Formula__c='France (French)' || enrollment.Translation_Formula__c ='Germany (Deutsch)' || enrollment.Translation_Formula__c='Germany (English)' || enrollment.Translation_Formula__c='Turkey (Türkçe)' || enrollment.Translation_Formula__c='Italy (Italiano)' || enrollment.Translation_Formula__c='Spain (Spanish)' || enrollment.Translation_Formula__c='Netherlands (Dutch)' || enrollment.Translation_Formula__c='Netherlands (English)' || enrollment.Translation_Formula__c='Singapore (English)' || enrollment.Translation_Formula__c='Malaysia (English)' || enrollment.Translation_Formula__c='Thailand (Thai)' || enrollment.Translation_Formula__c='Korea (Korean)' || enrollment.Translation_Formula__c='Indonesia (English)' || enrollment.Translation_Formula__c='Germany (Deutsch)' || enrollment.Translation_Formula__c='MEA (English)' || enrollment.Translation_Formula__c='Russia (Русский)' || enrollment.Translation_Formula__c='Japan (Japanese)' || enrollment.Translation_Formula__c='UK (English)' || enrollment.Translation_Formula__c='Hong Kong (English)' || enrollment.Translation_Formula__c='Vietnam (Vietnamese)'|| enrollment.Translation_Formula__c='Espion (English)' || enrollment.Translation_Formula__c='Espion (English GBP)' ||enrollment.Translation_Formula__c='Philippines (English)')}" height="1.3cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+
+    <!--FR,NL,ES,IT-->
+    <apex:image rendered="{!IF((enrollment.Translation_Formula__c='France (French)' || enrollment.Translation_Formula__c='Italy (Italiano)' || enrollment.Translation_Formula__c='Spain (Spanish)' || enrollment.Translation_Formula__c='Netherlands (Dutch)' || enrollment.Translation_Formula__c='Netherlands (English)'), true,false)}" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+
+    <!--VN- dont want to display signature for now <apex:image rendered="{!IF(translation ='Vietnam (Vietnamese)', true,false)}" height="1.3cm"  url="{!enrollment.Training_Translations__r.Signature__c}"/> -->
+
+    <!--MY-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Malaysia (English)'}" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--CN-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='China (Chinese)'}" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--HK-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Hong Kong (English)'}" height="2cm" width="3.5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--DE-->
+    <apex:image rendered="{!OR(enrollment.Translation_Formula__c='Germany (Deutsch)', enrollment.Translation_Formula__c='Germany (English)')}" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--TR ALL JS 20180927-->
+    <apex:outputtext rendered="{!enrollment.Translation_Formula__c ='Turkey (Türkçe)'}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</apex:outputtext>
+    <apex:image rendered="{!enrollment.Translation_Formula__c ='Turkey (Türkçe)'}" height="3cm" Style="valign:bottom"
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    
+    <!--TR NON IRCA
+             <apex:outputtext rendered="{!AND(enrollment.Translation_Formula__c ='Turkey (Türkçe)',NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</apex:outputtext>
+             <apex:image rendered="{!AND(enrollment.Translation_Formula__c ='Turkey (Türkçe)',NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'))}" Style="valign:bottom"  height="3cm" url="{!enrollment.Training_Translations__r.Signature__c}"/>
+    <!--TR IRCA
+             <apex:image rendered="{!AND(enrollment.Translation_Formula__c ='Turkey (Türkçe)',enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}" height="2cm" width="6.5cm"  url="{!enrollment.Training_Translations__r.Signature__c}"/>
+    -->
+    <!--TH-->
+    <apex:outputtext rendered="{!enrollment.Translation_Formula__c='Thailand (Thai)'}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</apex:outputtext>
+    <!--<apex:image rendered="{!enrollment.Translation_Formula__c='Thailand (Thai)'}" height="2.3cm" width="6.7cm"  url="{!enrollment.Training_Translations__r.Signature__c}"/>-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Thailand (Thai)'}" height="2.3cm" width="6.7cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--PH-->
+    <apex:outputtext rendered="{!enrollment.Translation_Formula__c='Philippines (English)'}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</apex:outputtext>
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Philippines (English)'}" height="2.3cm" width="6.7cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    
+    <!--SG-->
+    <apex:image rendered="{!OR(enrollment.Translation_Formula__c='Singapore (English)', enrollment.Translation_Formula__c='Indonesia (English)')}" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--UK-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='UK (English)'}" height="2.5cm" width="9cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--KR-->
+    <apex:outputtext rendered="{!enrollment.Translation_Formula__c='Korea (Korean)'}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</apex:outputtext>
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Korea (Korean)'}" height="1.5cm" width="3.7" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--RU-->
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <!--<apex:image rendered="{!enrollment.Translation_Formula__c='Russia (Русский)'}" style="align:center" height="2.6cm" width="3.2cm"  url="{!enrollment.Training_Translations__r.Signature__c}"/>-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Russia (Русский)'}" style="align:center" height="2.6cm" width="3.2cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--JP-->
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <apex:image rendered="{!enrollment.Translation_Formula__c='Japan (Japanese)'}" style="align:center" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--IN-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='India (English)'}" style="align:left" height="2.5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--ME-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='MEA (English)'}" width="7cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--ZA-->
+    <apex:image rendered="{!enrollment.Translation_Formula__c='South Africa (English)'}" width="7cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--AU and NZ-->
+    <apex:image rendered="{!OR(enrollment.Translation_Formula__c='Australia (English)', enrollment.Translation_Formula__c='New Zealand (English)')}" style="align:left" height="2cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    <!--CSIR Ireland-->
+    <apex:image rendered="{!OR(enrollment.Translation_Formula__c='Espion (English)', enrollment.Translation_Formula__c='Espion (English GBP)')}" style="align:left" height="2cm" width="5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateSignatures, enrollment.Training_Translations__r.Signature_Image__c)}"/>
+    
+</apex:component>

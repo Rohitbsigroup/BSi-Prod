@@ -1,0 +1,632 @@
+<apex:page standardController="Quote__c" extensions="QuotePhasesControllerV2">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script>
+  $(document).ready(function(){
+  $ = jQuery.noConflict();
+  $("[id$=userId_mlktp]").hide();
+  });
+  </script>
+
+    <!-- CSS STYLE -->
+    <style type="text/css"> 
+        .mainTable {
+            width: 100%;
+            min-width: 911px;
+            height:  260px;
+        }
+        .tableHeader {
+            font: bold 10px "Verdana","Helvetica","American Typewriter";
+            background: #F3F3F3; /* Light grey background */
+            border: 1px solid #CCC;         
+        }
+        .tableCell {
+            border: 1px solid #CCC;
+            vertical-align:middle;          
+        }
+        .tableCell2 {
+            font: 10px "Verdana","Helvetica","American Typewriter";
+            border: 1px solid #CCC;
+            vertical-align:middle;          
+        }
+        .header {
+            min-width: 911px;
+            height: 80px;
+        }
+        .phaseSection {
+            text-align: center;
+            vertical-align:top;
+            /* min-width:335px; */
+            /* white-space:nowrap; */
+        }
+        .phaseNum {
+            font: bold 35px "American Typewriter","Helvetica","Verdana";
+            position: relative;
+            left: -43px;
+            top: -20px;
+            color: white;
+        }
+        .phaseLabel {
+            font: normal 13px "American Typewriter","Helvetica","Verdana";
+            position: relative;
+            top: -28px;
+            color: white;
+        }
+        .textstatus {
+            font: bold 13px "American Typewriter","Helvetica","Verdana";
+        }   
+        .errorMess {
+            font: bold 13px "American Typewriter","Helvetica","Verdana";
+            color: #A23233;
+        }
+        .label {
+            position: relative;
+            left: -50px;
+            top: 9px;
+            height: 80px;
+        }   
+        .bottomButton {
+            position: relative;
+            top: 5px;
+        }
+        .timeCounter {
+            font: bold 27px "Impact";
+            position: relative;
+            left: -38px;
+            top: -13px;
+        }
+        .labelCounter {
+            font: bold 11px "Impact";
+            position: relative;
+            top: -6px;
+        }
+        .TopAlignRow {
+            vertical-align:top;
+        }
+        .formCover {
+            position: absolute;
+            width: 100%;
+            height:  400px;
+            background-color: #fff;
+            opacity:0.8;
+            z-index: 999;
+        }
+        .spinner {
+            background-color: rgba(255, 255, 255, 1);
+            display: table;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .spinnerText {
+            padding-left: 5px;
+            vertical-align: super;
+        }
+    </style>
+    
+    <script type="text/javascript">
+        function setFocusOnLoad() {} 
+    </script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            autoSkipCustomer();
+            console.log('autoSkipCustomer');
+        });
+        function setFocusOnLoad() {}
+    </script>
+    
+    <apex:actionStatus id="status">
+        <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+    </apex:actionStatus>
+
+    <!-- RELOAD THE PAGE SCRIPT -->
+    <apex:outputPanel id="reloadPanel" >
+        <apex:outputPanel rendered="{!reloadNeeded}">
+            <script type="text/javascript">
+                // Redirect the top level window
+                window.top.location.href = '{!reloadPageURL}';
+            </script>
+        </apex:outputPanel>    
+    </apex:outputPanel>
+
+    <apex:outputPanel id="openConga" >
+        <apex:outputPanel rendered="{!reloadNeeded}">
+            <script type="text/javascript">
+                //function openConga() { 
+                    window.open('{!reloadPageURL}', '','scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=yes');  
+                //}
+            </script>
+        </apex:outputPanel> 
+    </apex:outputPanel>
+
+    <!-- NO PRODUCTS WARNING -->
+    <apex:outputPanel rendered="{!noProducts}">
+        <apex:image value="{!$Resource.icon_warning}" width="24" style="vertical-align:middle;"/>
+        &nbsp;<apex:outputText value="There are no products. Please Add products to the Quote." styleclass="errorMess" />   
+    </apex:outputPanel>
+
+    <!-- INCOMPLETE CONFIGURATION WARNING -->
+    <apex:outputPanel rendered="{!!noParts && !configurationCompleted}" layout="block">
+        <apex:image value="{!$Resource.icon_warning}" width="24" style="vertical-align:middle;"/>
+        &nbsp;<apex:outputText value="Product configuration is not complete. Press Configure Quote." styleclass="errorMess" />
+    </apex:outputPanel>
+
+    <!-- NO PARTS WARNING -->
+    <apex:outputPanel rendered="{!noParts}" layout="block">
+        <apex:image value="{!$Resource.icon_warning}" width="24" style="vertical-align:middle;"/>
+        &nbsp;<apex:outputText value="There are no product lines on the quote. Press Configure Quote." styleclass="errorMess" />
+    </apex:outputPanel>
+
+    <!-- FACTS EXCEEDS TEMPLATE LIMIT -->
+    <apex:outputPanel rendered="{!factsExceedDocLimit}" layout="block">
+        <apex:image value="{!$Resource.icon_warning}" width="24" style="vertical-align:middle;"/>
+        &nbsp;<apex:outputText value="The fact information exceeds the template limit. Please see the administrator" styleclass="errorMess" />
+    </apex:outputPanel>
+        
+    <apex:form id="theForm">
+        <apex:actionFunction action="{!autoSkipCustomer}" name="autoSkipCustomer" rerender="theForm"/>
+        <apex:pageMessages id="pageMessages" />
+
+        <table class="mainTable" border="0">
+            <tr>
+                <td colspan="4" class="header" >
+                    <table width="100%">
+                        <tr>    
+                            <td>
+                            <center>
+                                <table cellpadding="8px" style="border-collapse:collapse;" border="1">
+                                    <tbody>
+                                        <tr>
+                                            <!-- CONFIGURATION BUTTONS -->
+                                            <td class="tableCell" style="text-align:center;">
+                                                <!--  CONFIGURE QUOTE -->
+                                                <apex:commandLink value="{!$Label.ConfigureQuote}" action="{!ConfigureProducts}" target="_top" styleclass="btn" style="text-decoration:none;padding:4px 3px;" rendered="{!showConfigureBtn}"/>
+                                                <apex:commandLink value="View Configuration" action="{!ConfigureProducts}" target="_top" styleclass="btn" style="text-decoration:none;padding:4px 3px;" rendered="{!!showConfigureBtn}"/>
+<!--                                                <apex:outputText value="{!$Label.ConfigureQuote}" styleclass="btnDisabled" rendered="{!!showConfigureBtn}" style="text-decoration:none;padding:4px 3px;" />-->
+                                                &nbsp;
+                                                <!--  CLONE QUOTE -->
+                                                <apex:commandLink value="{!$Label.CloneQuote}" action="{!cloneQuote}" styleclass="btn" style="text-decoration:none;padding:4px 3px;" target="_top" rendered="{!showCloneBtn}" />
+                                                <apex:outputText value="{!$Label.CloneQuote}" styleclass="btnDisabled" rendered="{!!showCloneBtn}" style="text-decoration:none;padding:4px 3px;" />
+                                                &nbsp;   
+                                                <apex:commandLink value="Import Quote Parts" action="{!importQuoteParts}" target="_top" styleclass="btn" style="text-decoration:none;padding:4px 3px;" rendered="{!canImport}" />
+                                                <!--  COVER LETTER QUOTE -->
+<!--                                                <apex:commandLink value="Cover Letter" styleclass="btn" style="text-decoration:none;padding:4px 3px;" target="_top" rendered="{!showCloneBtn}" />-->
+<!--                                                <apex:outputText value="Cover Letter" styleclass="btnDisabled" rendered="{!!showCloneBtn}" style="text-decoration:none;padding:4px 3px;" />-->
+                                            </td>
+                                        </tr>
+                                    </tbody>                                        
+                                </table>
+                                </center>
+                            </td>
+                        </tr>
+                    </table>    
+                </td>
+            </tr>
+            
+            <tr height="0px">
+                <td>
+                    <apex:actionRegion >
+                        <apex:outputPanel id="actionpollercontainer">
+                            <apex:actionPoller enabled="{!QuoteSyncRunning}" action="{!retrieveQuoteStatus_Action}" reRender="formSpinnerContainer, pageMessages" interval="5"/>
+                            <apex:outputPanel id="formSpinnerContainer">
+                                <apex:outputPanel id="formDisabler" rendered="{!QuoteSyncRunning}" styleClass="formCover">
+                                    <div id="spinner" class="spinner">
+                                        <apex:image id="spinnerImg" value="/img/loading32.gif" width="25" height="25"/>                            
+                                        <apex:outputLabel value="{!syncStatusMessage}" styleClass="spinnerText"/>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:actionRegion>
+                </td>
+            </tr>
+
+            <tr>
+                <!-- CUSTOMER VALIDATION -->
+                <td class="phaseSection" style="{!IF(!readyToQuote,'opacity:0.3','')}">
+                    <apex:image value="{!$Resource.icon_green}" width="60" rendered="{!OR(ValidationStatusApproved, ValidationStatusNA)}" />
+                    <apex:image value="{!$Resource.icon_red}"   width="60" rendered="{!!OR(ValidationStatusApproved, ValidationStatusNA)}" />
+                    <b class="phaseNum">1</b>
+                    <apex:image value="{!$Resource.image_factsPhase}" styleclass="label" style="z-index:-1;" />
+                    <center>
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2">
+                            <apex:panelGroup rendered="{!AND(!ValidationStatusNA, OR(ValidationStatusDraft, ValidationStatusPending, ValidationStatusApproved, ValidationStatusRejected))}" >
+                                <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!ValidationStatusApproved}" style="cursor:help;" title="Date Signed: {!keyFactsDoc.echosign_dev1__DateSigned__c}" />
+                                <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!ValidationStatusRejected}" />
+                                <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!ValidationStatusPending}" style="cursor:help;" title="Date Sent: {!keyFactsDoc.echosign_dev1__DateSent__c} (days unsigned {!keyFactsDoc.echosign_dev1__DaysUnsigned__c})" />
+                                <apex:image value="{!$Resource.icon_keyfact}"  width="30" rendered="{!AND(!noKeyFactsDoc, ValidationStatusDraft)}" style="cursor:help;" title="Created on {!keyFactsDoc.CreatedDate}" />
+                            </apex:panelGroup>
+
+                            <apex:outputText value="{!keyFactsDoc.echosign_dev1__Status__c}" styleclass="textstatus" rendered="{!AND(!ValidationStatusNA, OR(ValidationStatusDraft, ValidationStatusPending, ValidationStatusApproved, ValidationStatusRejected))}" />
+                                                        
+                            <apex:image value="{!$Resource.icon_warning}"  width="30" rendered="{!ValidationStatusNA}" />
+                            <apex:panelGroup rendered="{!ValidationStatusNA}" >
+                                <apex:outputText value="Step Skipped" styleclass="textstatus" rendered="{!ValidationStatusNA}" />
+                                <br />
+                                Skipped by&nbsp;<apex:outputField value="{!quote.SkippedBy__c}" style="font:12px Arial, sans-serif;" />
+                                <br/>on&nbsp;<apex:outputField value="{!quote.SkippedDate__c}" style="font:12px Arial, sans-serif;" />     
+                            </apex:panelGroup>  
+                            <br/><apex:commandButton value="{!$Label.Reset_Button}" action="{!ResetQuoteStages}" reRender="reloadPanel,pageMessages" rendered="{!ResetVisibility}" status="status" />                         
+                        </apex:panelGrid>
+
+                        <apex:panelGrid columns="1" rendered="{!AND(!ValidationStatusNA, !noKeyFactsDoc)}" style="vertical-align:middle;">
+                            <apex:outputLink value="/{!KeyFactsDoc.Id}" target="_blank">
+                                <apex:outputText value="Latest created on {!KeyFactsDoc.CreatedDate}" style="font:12px Arial, sans-serif;" />
+                            </apex:outputLink>
+                        </apex:panelGrid>
+                                                
+                        <apex:panelGrid columns="1" cellpadding="2" cellspacing="2" rendered="{!readyToQuote}">
+                            <apex:panelGroup rendered="{!OR(showKeyFactsDocBtn, CanSkipFactValidation)}">
+                                <!-- KEY FACTS DOCUMENT -->
+                                <apex:panelGrid columns="2" cellpadding="0" cellspacing="0" rowClasses="TopAlignRow" >
+                                    <apex:panelGroup rendered="{!showKeyFactsDocBtn}" > 
+                                        <apex:commandButton value="{!IF(!ValidationStatusRejected,$Label.KeyFactDocument,$Label.ResendKeyFactDocument)}" action="{!BrowseKeysFactsTemplate}" status="status" />                                 
+<!--
+                                        <apex:commandButton value="{!IF(!ValidationStatusRejected,$Label.KeyFactDocument,$Label.ResendKeyFactDocument)}" action="{!GenerateKeyFactsDocument}" status="status" />
+                                        <br />
+                                        <apex:commandLink style="font-size:10px;" value="Browse Templates" action="{!BrowseKeysFactsTemplate}" />
+-->                                 
+                                    </apex:panelGroup>
+ 
+                                    <!-- SKIP STEP -->
+                                    <apex:commandButton value="Skip this step" action="{!skipCustomer}"  reRender="theForm" rendered="{!CanSkipFactValidation}" status="status" />          
+                                </apex:panelGrid>       
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+                    </center>
+                </td>
+
+                <!-- C-CODE VALIDATION -->
+                <td class="phaseSection" style="{!IF(OR(CCodeStatusNA, !customerComplete),'opacity:0.3','')}">
+                    <apex:image value="{!$Resource.icon_green}" width="60" rendered="{!OR(CCodeStatusApproved, CCodeStatusNA)}"/>
+                    <apex:image value="{!$Resource.icon_red}"   width="60" rendered="{!!OR(CCodeStatusApproved, CCodeStatusNA)}"/>
+                    <b class="phaseNum">2</b>
+                    <img src="{!$Resource.image_ccodePhase}" class="label" style="z-index:-1;"/>
+                    <center>
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2" rendered="{!customerComplete}">
+                            <apex:outputPanel layout="none" rendered="{!!noApprovers}">
+                                <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!CCodeStatusApproved}"/>
+                                <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!CCodeStatusRejected}"/>
+                                <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!CCodeStatusPending}"/>
+                            </apex:outputPanel>
+                            <apex:image value="{!$Resource.icon_warning}"  width="30" rendered="{!noApprovers}" />
+                            <apex:outputText value="Approvers not available" rendered="{!noApprovers}" styleclass="errorMess"/>
+                            <apex:outputText value="{!quote.CCodeStatus__c}" styleclass="textstatus" rendered="{!OR(CCodeStatusApproved, CCodeStatusPending, CCodeStatusRejected)}"/>
+                        </apex:panelgrid>
+                        <apex:panelgrid columns="1" cellpadding="2" cellspacing="2" rendered="{!customerComplete}">
+                            <apex:panelGroup id="ccodeApprovalTable" >
+                                    <table cellpadding="2px" style="border-collapse:collapse;" border="1">
+                                        <thead class="tableHeader">
+                                            <th class="tableCell">Product</th>
+                                            <th class="tableCell"></th>
+                                            <th class="tableCell">Approver</th>
+                                            <th class="tableCell"></th>
+                                        </thead>
+                                    <apex:repeat value="{!qpaMap}" var="qpaId">
+                                        <tbody>
+                                            <tr>
+                                                <td class="tableCell2" style="width:100px;"><apex:outputText value="{!qpaMap[qpaId].Product__r.Name}" /></td>
+                                                <td class="tableCell2" style="width:10px;text-align:center;"><apex:outputText value="{!qpaMap[qpaId].Product__r.CCode__c}" /></td>                                      
+                                                <td class="tableCell2" style="width:40x;">
+                                                    <apex:outputPanel rendered="{!OR(qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusDraft__c, qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusRejected__c)}"> 
+                                                        <apex:selectList value="{!qpaMap[qpaId].CCodeApprover__c}" multiselect="false" size="1" rendered="{!cCodeApproversMap[qpaMap[qpaId].Product__r.CCode__c].options.size>0}">
+                                                            <apex:actionsupport event="onchange" action="{!onApproverSelect}" rerender="pageMessages">
+                                                                <apex:param name="qpaId" value="{!qpaId}" />
+                                                            </apex:actionsupport>
+                                                            <apex:selectOptions value="{!cCodeApproversMap[qpaMap[qpaId].Product__r.CCode__c].Options}"/>
+                                                        </apex:selectList>
+                                                        <apex:outputText style="font:10pt normal;" value="No approver available" rendered="{!cCodeApproversMap[qpaMap[qpaId].Product__r.CCode__c].options.size==0}" styleclass="errorMess" />
+                                                    </apex:outputPanel>
+                                                    <apex:outputText value="{!$Label.SelfApproved}" rendered="{!qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusNA__c}" />
+                                                    <apex:outputText value="{!userMap[qpaMap[qpaId].CCodeApprover__c].Name}" rendered="{!OR(qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusWaiting__c, qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusApproved__c)}" />
+                                                </td>
+                                                <td class="tableCell2" style="width:20px;">
+                                                    <apex:outputLink value="/{!qpaMap[qpaId].Id}" target="_top">
+                                                        <apex:image value="{!$Resource.icon_approved}" width="20" title="Approved on: {!qpaMap[qpaId].CCodeDateTimeApproved__c}" rendered="{!qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusApproved__c}" style="cursor:pointer;"/>
+                                                        <apex:image value="{!$Resource.icon_rejected}" width="20" title="Rejected on: {!qpaMap[qpaId].CCodeDateTimeDeclined__c}" rendered="{!qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusRejected__c}"  style="cursor:pointer;"/>
+                                                        <apex:image value="{!$Resource.icon_clock}"    width="20" title="Submitted on: {!qpaMap[qpaId].CCodeDateTimeSubmitted__c}" rendered="{!qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusWaiting__c}" style="cursor:pointer;"/>
+                                                        <apex:image value="{!$Resource.icon_warning}"  width="20" rendered="{!AND(!ISBLANK(qpaMap[qpaId].Product__r.CCode__c), cCodeApproversMap[qpaMap[qpaId].Product__r.CCode__c].options.size==0, OR(qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusDraft__c, qpaMap[qpaId].CCodeStatus__c == quoteSettings.StatusRejected__c))}" />
+                                                    </apex:outputLink>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </apex:repeat>
+                                    </table>
+                                    <div style="text-align:right;font: 10px Verdana,Helvetica,American Typewriter;">
+                                        <apex:inputCheckbox dir="LTR" value="{!showLocalApprovers}" rendered="{!OR(CCodeStatusDraft, CCodeStatusRejected)}">
+                                            &nbsp;Show local approvers
+                                            <apex:actionSupport event="onclick" action="{!GetCCodeApprovers}" rerender="ccodeApprovalTable" status="status" />
+                                        </apex:inputCheckbox>
+                                    </div>  
+                                    <apex:commandLink value="Request Approval" action="{!approveCCode}" reRender="{!IF(QuoteSyncRunning, 'reloadPanel,theForm', 'reloadPanel,formSpinnerContainer')}" styleclass="btn" style="text-decoration:none;" rendered="{!AND(customerComplete, showCCodeApprovalBtn)}" />
+                            </apex:panelGroup>
+                        </apex:panelgrid>
+                    </center>
+                </td>
+                
+                <!-- DISCOUNT VALIDATION -->                
+                <td class="phaseSection" style="{!IF(OR(!ccodeComplete, !customerComplete),'opacity:0.3','')}">
+                    <apex:image value="{!$Resource.icon_green}" width="60" rendered="{!OR(DiscountStatusApproved, DiscountStatusNA)}"/>
+                    <apex:image value="{!$Resource.icon_red}"   width="60" rendered="{!!OR(DiscountStatusApproved, DiscountStatusNA)}"/>
+                    <b class="phaseNum">3</b>
+
+                    <img src="{!$Resource.image_discountPhase}" class="label" style="z-index:-1;" />
+
+                    <center>
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2">
+                            <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!DiscountStatusApproved}" title="Approved on: {!quote.DiscountDateTimeApproved__c}" style="cursor:help;"/>
+                            <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!DiscountStatusRejected}" title="Rejected on: {!quote.DiscountDateTimeDeclined__c}" style="cursor:help;" />
+                            <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!DiscountStatusPending}"  title="Submitted on:{!quote.DiscountDateTimeSubmitted__c}" style="cursor:help;"/>
+                            <apex:image value="{!$Resource.icon_warning}"  width="30" rendered="{!AND(!DiscountStatusNA, !DiscountStatusApproved, NoDiscountApprover)}" />
+                            <apex:outputText value="{!quote.DiscountStatus__c}" styleclass="textstatus" rendered="{!AND(OR(DiscountStatusApproved, DiscountStatusPending, DiscountStatusRejected), customerComplete, !NoDiscountApprover)}"/>
+                        </apex:panelgrid>
+                        
+                        <apex:panelgrid columns="1" cellpadding="2" cellspacing="2">
+
+                            <apex:panelGroup >
+                                <div style="width:300px;">
+                                    <apex:outputText value="{!$Label.UserDoesNotHaveADiscountMatrix}" rendered="{!noAgentDiscounts}" styleclass="errorMess" />
+                                    <apex:outputText escape="false" value="{!$Label.NoDiscountApproverAvailable}" rendered="{!AND(!noAgentDiscounts, !DiscountStatusNA, !DiscountStatusApproved, NoDiscountApprover)}" styleclass="errorMess" />
+                                </div>
+                            </apex:panelGroup>
+
+                            <apex:panelgrid columns="1" cellpadding="2" cellspacing="2" rendered="{!AND(ccodeComplete, customerComplete)}">
+                                <apex:panelGroup id="discountTable" > 
+                                    <apex:panelGroup >
+                                        <div style="font-weight:bold;">{!$ObjectType.Quote__c.fields.Total_Price_Discount__c.label}:&nbsp; 
+                                            <apex:outputText style="width:30px;text-align:right;" value="{0, number, ###.##}%">
+                                                <apex:param value="{!quote.Total_Price_Discount__c}" />
+                                            </apex:outputText>
+                                        </div>
+                                        <div style="font-weight:bold;">{!$Label.TotalListPrice}:&nbsp; 
+                                            <apex:outputText style="width:30px;text-align:right;" value="{0, number, ###,###,###.##} {!quote.currencyIsoCode}">
+                                                <apex:param value="{!quote.Total_Price__c}" />
+                                            </apex:outputText>
+                                        </div>
+                                        
+                                        <apex:commandLink value="{!$Label.ManagePrices}" action="{!ConfigurePrices}" reRender="pageMessages,reloadPanel,actionpollercontainer" styleclass="btn" style="text-decoration:none;position:relative;top:5px;" rendered="{!AND(ccodeComplete, customerComplete, showUpdateDiscountBtn)}" />
+                                    </apex:panelGroup>
+                                </apex:panelGroup>
+                            </apex:panelgrid>
+                            
+                            <br />
+                            
+                            <apex:panelGroup rendered="{!AND(OR(DiscountStatusDraft, DiscountStatusRejected, DiscountStatusApproved, DiscountStatusPending), customerComplete, cCodeComplete, !NoDiscountApprover)}">
+                                <!--                                 Pre Approvers                              -->
+                                <apex:outputPanel layout="none" rendered="{!OR(RequiresDiscountPreApprover, !ISBLANK(quote.Discount_PreApprover_1__c))}" >
+                                    <apex:outputText value="{!$Label.PricePreApprover}: " style="font:bold 12px Arial, sans-serif;" />
+                                    <apex:repeat value="{!DiscountApproversMap['PreApprover']}" var="approver" rendered="{!OR(DiscountStatusDraft, DiscountStatusRejected)}">
+                                        <apex:outputText value="{!DiscountApproversMap['PreApprover'][approver].Name}"  style="font:11px Verdana, Helvetica, American Typewriter;" />
+                                    </apex:repeat>
+                                    <br />
+                                    <apex:outputPanel rendered="{!AND(showSkipPreApprover, OR(DiscountStatusDraft, DiscountStatusRejected))}">
+                                        <apex:inputCheckbox onclick="if(this.checked) { if(!confirm('{!$Label.SkipDiscountPreApproverWarning}')) this.checked=false;}" value="{!skipPreApprover}" /><apex:outputText value="Skip Pre-Approver" style="font:11px Verdana, Helvetica, American Typewriter;" />
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!OR(DiscountStatusApproved, DiscountStatusPending)}">
+                                        <a href="/{!quote.Discount_PreApprover_1__c}" id="{!quote.Discount_PreApprover_1__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_PreApprover_1__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_PreApprover_1__c}', '/{!quote.Discount_PreApprover_1__c}/m?retURL=%2F{!quote.Discount_PreApprover_1__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_PreApprover_1__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_PreApprover_1__c}', '/{!quote.Discount_PreApprover_1__c}/m?retURL=%2F{!quote.Discount_PreApprover_1__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_PreApprover_1__r.Name}</a>
+                                    </apex:outputPanel>
+                                    <br />
+                                </apex:outputPanel>
+
+                                <!--                                 Approvers                              -->
+                                <apex:outputPanel layout="none" rendered="true" >
+                                    <apex:outputText value="{!$Label.PriceApprovers}: "  style="font:bold 12px Arial, sans-serif;" />
+                                    <apex:repeat value="{!DiscountApproversMap['Approver']}" var="approver" rendered="{!OR(DiscountStatusDraft, DiscountStatusRejected)}">
+                                        <br />&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <apex:outputText value="> {!DiscountApproversMap['Approver'][approver].Name}"  style="font:11px Verdana, Helvetica, American Typewriter;" />
+                                    </apex:repeat>
+                                    <apex:outputPanel rendered="{!OR(DiscountStatusApproved, DiscountStatusPending)}" >
+                                        <apex:outputText value="<br/>&gt; " escape="false" />
+                                        <a href="/{!quote.Discount_Approver_1__c}" id="{!quote.Discount_Approver_1__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_Approver_1__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_Approver_1__c}', '/{!quote.Discount_Approver_1__c}/m?retURL=%2F{!quote.Discount_Approver_1__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_Approver_1__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_Approver_1__c}', '/{!quote.Discount_Approver_1__c}/m?retURL=%2F{!quote.Discount_Approver_1__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_Approver_1__r.Name}</a>                                      
+                                        
+                                        <apex:outputPanel rendered="{!quote.Discount_Approver_2__c != quote.Discount_Approver_1__c}">
+                                            <apex:outputText value="<br/>&gt; " escape="false" />
+                                            <a href="/{!quote.Discount_Approver_2__c}" id="{!quote.Discount_Approver_2__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_Approver_2__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_Approver_2__c}', '/{!quote.Discount_Approver_2__c}/m?retURL=%2F{!quote.Discount_Approver_2__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_Approver_2__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_Approver_2__c}', '/{!quote.Discount_Approver_2__c}/m?retURL=%2F{!quote.Discount_Approver_2__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_Approver_2__r.Name}</a>                                      
+                                        </apex:outputPanel>
+                                        
+                                        <apex:outputPanel rendered="{!quote.Discount_Approver_3__c != quote.Discount_Approver_2__c}">
+                                            <apex:outputText value="<br/>- " escape="false" />
+                                            <a href="/{!quote.Discount_Approver_3__c}" id="{!quote.Discount_Approver_3__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_Approver_3__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_Approver_3__c}', '/{!quote.Discount_Approver_3__c}/m?retURL=%2F{!quote.Discount_Approver_3__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_Approver_3__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_Approver_3__c}', '/{!quote.Discount_Approver_3__c}/m?retURL=%2F{!quote.Discount_Approver_3__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_Approver_3__r.Name}</a>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel rendered="{!quote.Discount_Approver_4__c != quote.Discount_Approver_3__c}">                                       
+                                            <apex:outputText value="<br/>- " escape="false" />
+                                            <a href="/{!quote.Discount_Approver_4__c}" id="{!quote.Discount_Approver_4__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_Approver_4__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_Approver_4__c}', '/{!quote.Discount_Approver_4__c}/m?retURL=%2F{!quote.Discount_Approver_4__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_Approver_4__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_Approver_4__c}', '/{!quote.Discount_Approver_4__c}/m?retURL=%2F{!quote.Discount_Approver_4__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_Approver_4__r.Name}</a>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel rendered="{!quote.Discount_Approver_5__c != quote.Discount_Approver_4__c}">                                       
+                                            <apex:outputText value="<br/>- " escape="false"  />                                     
+                                            <a href="/{!quote.Discount_Approver_5__c}" id="{!quote.Discount_Approver_5__c}" onblur="LookupHoverDetail.getHover('{!quote.Discount_Approver_5__c}').hide();" onfocus="LookupHoverDetail.getHover('{!quote.Discount_Approver_5__c}', '/{!quote.Discount_Approver_5__c}/m?retURL=%2F{!quote.Discount_Approver_5__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!quote.Discount_Approver_5__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!quote.Discount_Approver_5__c}', '/{!quote.Discount_Approver_5__c}/m?retURL=%2F{!quote.Discount_Approver_5__c}&isAjaxRequest=1').show();" target="_blank">{!quote.Discount_Approver_5__r.Name}</a>                                  
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+
+                                <br/>
+                                <apex:commandLink rendered="{!OR(DiscountStatusDraft, DiscountStatusRejected)}" value="Request Approval" action="{!RequestDiscountApproval}" reRender="reloadPanel,theForm" styleclass="btn" style="text-align:right;position:relative;top:5px;text-decoration:none;" status="status" />  
+                            </apex:panelGroup>    
+                        </apex:panelgrid>
+                    </center>
+                </td>
+
+                <!-- SEND PROPOSAL -->
+                <td class="phaseSection" style="{!IF(OR(!customerComplete, !ccodeComplete, !discountComplete),'opacity:0.3','')}">
+                    <apex:image value="{!$Resource.icon_green}" width="60" rendered="{!ProposalStatusApproved}" />
+                    <apex:image value="{!$Resource.icon_red}"   width="60" rendered="{!!ProposalStatusApproved}" />
+                    <b class="phaseNum">4</b>
+                    <apex:image value="{!$Resource.image_proposalPhase}" styleclass="label" style="z-index:-1;" rendered="{!TechReviewStatusNA}" />
+                    <apex:image value="{!$Resource.image_techReviewProposalPhase}" styleclass="label" style="z-index:-1;" rendered="{!!TechReviewStatusNA}" />                  
+                    <center>
+                        <!-- TECHNICAL REVIEW DOCUMENT -->
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2" rendered="{!AND(customerComplete, ccodeComplete, discountComplete)}">
+                            <apex:panelGroup rendered="{!OR(TechReviewStatusApproved, TechReviewStatusRejected, TechReviewStatusPending, TechReviewStatusDraft)}" >
+                                <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!TechReviewStatusApproved}" title="Date Signed: {!TechReviewDoc.echosign_dev1__DateSigned__c}" />
+                                <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!TechReviewStatusRejected}" />
+                                <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!TechReviewStatusPending}" title="Date Sent: {!TechReviewDoc.echosign_dev1__DateSent__c} (days unsigned {!TechReviewDoc.echosign_dev1__DaysUnsigned__c})" />
+                                <apex:image value="{!$Resource.icon_keyfact}"  width="30" rendered="{!AND(!noTechReviewDoc, TechReviewStatusDraft)}" style="cursor:help;" title="Created on {!TechReviewDoc.CreatedDate}" />
+                            </apex:panelGroup>
+                            <apex:outputText value="Tech Review - {!TechReviewDoc.echosign_dev1__Status__c}" styleclass="textstatus" rendered="{!OR(TechReviewStatusDraft, TechReviewStatusPending, TechReviewStatusApproved, TechReviewStatusRejected)}" />
+                        </apex:panelGrid>
+
+                        <!-- TECHNICAL REVIEW DOCUMENT -->                                                      
+                        <apex:panelGrid columns="1" rendered="{!!noTechReviewDoc}" style="vertical-align:middle;">
+                            <apex:outputLink value="/{!TechReviewDoc.Id}" target="_blank">
+                                <apex:outputText value="Latest created on {!TechReviewDoc.CreatedDate}" style="font:12px Arial, sans-serif;" />
+                            </apex:outputLink>
+                        </apex:panelGrid>
+                        <!-- TECHNICAL REVIEW DOCUMENT -->                      
+                        <br />
+                        <apex:panelGroup rendered="{!quote.SkipTechReview__c}" >
+                            <apex:outputText value="Tech Review Skipped" styleclass="textstatus" />
+                            <br />
+                            Skipped by&nbsp;<apex:outputField value="{!quote.SkippedTechReviewBy__c}" style="font:12px Arial, sans-serif;" />
+                            <br/>on&nbsp;<apex:outputField value="{!quote.SkippedTechReviewDate__c}" style="font:12px Arial, sans-serif;" />                              
+                         </apex:panelGroup> 
+
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!AND(customerComplete, ccodeComplete, discountComplete, OR(TechReviewStatusDraft,TechReviewStatusRejected))}">
+                            <apex:outputLabel value="Tech Team:" for="techReviewTeam" styleclass="labelCol" />                                                      
+                            <apex:selectList id="techReviewTeam" value="{!quote.Tech_Review_Team__c}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!TechReviewTeams}" />
+                            </apex:selectList>
+
+                            <!--                                     SKIP STEP -->
+                            <apex:commandLink value="Skip" action="{!SkipTechReview}" reRender="reloadPanel,pageMessages" styleclass="btn" style="float:right;text-decoration:none;" />              
+
+                            <apex:panelGroup >                                
+                                <div style="text-align:right;">
+                                    <apex:commandButton value="{!$Label.TechReviewDocument}" action="{!BrowseTechReviewTemplate}" reRender="theForm" />
+                                </div>
+                            </apex:panelGroup> 
+
+                        </apex:panelGrid>
+
+                       
+
+                        <!-- FINANCE APPROVAL -->
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2" rendered="{!OR(showFinanceApprovalBtn, FinanceStatusApproved, FinanceStatusPending, FinanceStatusRejected)}">
+                            <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!FinanceStatusApproved}" title="Approved on: {!quote.FinanceDateTimeApproved__c}" style="cursor:help;"/>
+                            <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!FinanceStatusRejected}" title="Rejected on: {!quote.FinanceDateTimeDeclined__c}" style="cursor:help;" />
+                            <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!FinanceStatusPending}"  title="Submitted on:{!quote.FinanceDateTimeSubmitted__c}" style="cursor:help;"/>
+                            <apex:outputText value="Finance Approval - {!quote.FinanceStatus__c}" styleclass="textstatus" rendered="{!OR(FinanceStatusApproved, FinanceStatusPending, FinanceStatusRejected)}"/>
+                            <br />
+                            <apex:outputText value="Finance Approver: Undefined"  style="font:bold 12px Arial, sans-serif;" rendered="{!ISBLANK(quote.Finance_Director__c)}" />
+                            <apex:outputText value="Finance Approver: {!UserMap[quote.Finance_Director__c].Name}"  style="font:bold 12px Arial, sans-serif;" rendered="{!!ISBLANK(quote.Finance_Director__c)}" />           
+                        </apex:panelgrid>
+                                                                                    
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!showFinanceApprovalBtn}">
+                            <apex:panelGroup >
+                                <apex:commandButton value="Request Finance Approval" action="{!RequestFinanceApproval}" reRender="reloadPanel,theForm" status="status" />                               
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+
+                        <!-- OPERATIONS TEAM APPROVAL -->
+                        <!-- {!showOperationsApprovalBtn} -->
+                        <!-- {!OperationsReviewStatusApproved}  -->
+                        <!-- {!OperationsReviewStatusPending}  -->
+                        <!-- {!OperationsReviewStatusRejected} -->
+                        <apex:panelgrid columns="2" cellpadding="2" cellspacing="2" rendered="{!OR(showOperationsApprovalBtn, OperationsReviewStatusApproved, OperationsReviewStatusPending, OperationsReviewStatusRejected)}">
+                            <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!OperationsReviewStatusApproved}" title="Approved on: {!quote.OperationsDateTimeApproved__c}" style="cursor:help;"/>
+                            <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!OperationsReviewStatusRejected}" title="Rejected on: {!quote.OperationsDateTimeDeclined__c}" style="cursor:help;" />
+                            <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!OperationsReviewStatusPending}"  title="Submitted on:{!quote.OperationsDateTimeSubmitted__c}" style="cursor:help;"/>
+                            <apex:outputText value="Operations Approval - {!quote.OperationsReviewStatus__c}" styleclass="textstatus" rendered="{!OR(OperationsReviewStatusApproved, OperationsReviewStatusPending, OperationsReviewStatusRejected)}"/>
+                            <br />
+                            <apex:outputText value="Operations Approval Queue: {!quote.Operations_Approval_Queue__c}" style="font : bold 12px Arial, sans-serif;" rendered="{!OR(OperationsReviewStatusApproved, OperationsReviewStatusPending)}" />
+                        </apex:panelgrid>
+                                                                                    
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!showOperationsApprovalBtn}">
+                            <apex:panelGroup >
+                                <apex:commandButton value="Request Operations Approval" action="{!RequestOperationsApproval}" reRender="reloadPanel,theForm" status="status" />                               
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!showRescindOperationsApprovalBtn}">
+                            <apex:panelGroup >
+                                <!-- <apex:commandButton value="Rescind Operations Approval" action="{!RescindOperationsApproval}" reRender="reloadPanel,theForm" status="status" /> -->
+                                <apex:commandButton value="Rescind Operations Approval" action="{!RescindOperationsApproval}" onclick="if (!confirm('{!$Label.RescindWarning}')) return;" reRender="reloadPanel,theForm" status="status" />                                          
+                            </apex:panelGroup>
+                        </apex:panelGrid> 
+
+
+
+                    
+
+
+                                    
+                                                                        
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!AND(!noProposalDoc, customerComplete, ccodeComplete, discountComplete)}">
+                            <apex:panelGroup >
+                                <!--  Approved Offline -->
+                                <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!AND(ProposalSignedOffline, !ProposalStatusApproved)}" />                                
+
+                                <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!ProposalStatusApproved}" title="Date Signed: {!proposalDoc.echosign_dev1__DateSigned__c}" />                                
+                                <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!ProposalStatusRejected}" />
+                                <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!ProposalStatusPending}" title="Date Sent: {!proposalDoc.echosign_dev1__DateSent__c} (days unsigned {!proposalDoc.echosign_dev1__DaysUnsigned__c})" />
+                                <apex:image value="{!$Resource.icon_keyfact}"  width="30" rendered="{!AND(!noProposalDoc, ProposalStatusDraft)}" style="cursor:help;" title="Created on {!proposalDoc.CreatedDate}" />
+                            </apex:panelGroup>
+                            <apex:outputText value="Proposal - {!$Label.ProposalSignedOffline}" styleclass="textstatus" rendered="{!AND(ProposalSignedOffline, !ProposalStatusApproved)}" />
+                            <apex:outputText value="Proposal - {!proposalDoc.echosign_dev1__Status__c}" styleclass="textstatus" rendered="{!OR(ProposalStatusDraft, ProposalStatusPending, ProposalStatusApproved, ProposalStatusRejected)}" />
+                        </apex:panelGrid>
+                        
+                        <apex:panelGrid columns="1" rendered="{!!noProposalDoc}" style="vertical-align:middle;">
+                            <apex:outputLink value="/{!ProposalDoc.Id}" target="_blank">
+                            <apex:outputText value="Latest created on {!ProposalDoc.CreatedDate}" style="font:12px Arial, sans-serif;" />
+                            </apex:outputLink>
+                        </apex:panelGrid>
+
+                        <!-- PROPOSAL DOCUMENT -->                                                          
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!AND(CanAnyoneSendProposal, AND(!ProposalSignedOffline, !ProposalStatusPending, !ProposalStatusApproved, customerComplete, ccodeComplete, discountComplete))}">
+                            <br /><br />
+                            <br />
+                            <apex:panelGroup rendered="{!!CanSendProposal}" >
+                                <apex:outputText value="Proposal will be sent by operations team" styleclass="textstatus" />
+                            </apex:panelGroup>                             
+                            <apex:panelGroup rendered="{!CanSendProposal}">
+                                <apex:commandButton value="{!$Label.ProposalDocument}" action="{!BrowseProposalTemplate}" reRender="theForm" rendered="{!showProposalDocBtn}" status="status" />
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+
+
+                        <!-- SEND PROPOSAL FOR APPROVAL BUTTON -->
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!AND(CanAnyoneSendProposal, AND(!ProposalSignedOffline, !ProposalStatusPending, !ProposalStatusApproved, customerComplete, ccodeComplete, discountComplete, showPsProposalBtn))}">
+                            <br /><br />
+                            <br />                            
+                            <apex:panelGroup rendered="{!showPsProposalBtn}" >
+                            <apex:image value="{!$Resource.icon_approved}" width="30" rendered="{!PSProposalStatusApproved}" title="Approved on: {!quote.PsProposalDateTimeApproved__c}" style="cursor:help;"/>
+                            <apex:image value="{!$Resource.icon_rejected}" width="30" rendered="{!PSProposalStatusRejected}" title="Rejected on: {!quote.PsProposalDateTimeDeclined__c}" style="cursor:help;" />
+                            <apex:image value="{!$Resource.icon_clock}"    width="30" rendered="{!PSProposalStatusPending}"  title="Submitted on:{!quote.PsProposalDateTimeSubmitted__c}" style="cursor:help;"/>
+                            <apex:outputText value="{!quote.PS_Proposal_Approval_Status__c}" styleclass="textstatus" rendered="{!OR(PSProposalStatusApproved, PSProposalStatusPending, PSProposalStatusRejected)}"/>
+                            <br />
+                            <apex:outputText value="Proposal Approver: Undefined"  style="font:bold 12px Arial, sans-serif;" rendered="{!AND(ISBLANK(quote.PS_Proposal_Approver__c), PSProposalStatusApproved ) }" />
+                            <apex:outputText value="Proposal Approver: {!UserMap[quote.PS_Proposal_Approver__c].Name}"  style="font:bold 12px Arial, sans-serif;" rendered="{!AND(!ISBLANK(quote.PS_Proposal_Approver__c),PSProposalStatusApproved) }" />  
+                             
+                                <!-- only show these buttons if it hasn't gone into approval -->                                   
+                                <apex:inputField label="userId" id="userId" value="{!quote.PS_Proposal_Approval_User__c}"  rendered="{!AND(showPsProposalBtn, !PSProposalStatusApproved, !PSProposalStatusPending)}"/>  
+                                <apex:commandButton value="Send Proposal for Approval" action="{!submitProposalForApproval}" 
+                                rendered="{!AND(showPsProposalBtn, !PSProposalStatusApproved, !PSProposalStatusPending)}"  reRender="reloadPanel,theForm"  /> 
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+
+                        <!-- SALES BRIEF DOCUMENT -->
+                        <apex:panelGrid columns="2" cellpadding="2" cellspacing="2" rendered="{!showSalesBriefDocBtn}">
+                            <br />
+                            <apex:panelGroup rendered="{!!CanSendProposal}" >
+                                <apex:outputText value="Statement of Work will be sent by operations team" styleclass="textstatus" />
+                            </apex:panelGroup> 
+                            <apex:panelGroup rendered="{!CanSendProposal}">                                          
+                                <apex:commandButton value="Statement of Work" action="{!BrowseSalesBriefTemplate}" reRender="theForm" styleclass="btn" style="text-decoration:none;padding:4px 3px;" rendered="{!showSalesBriefDocBtn}" />
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+
+
+                       
+                       
+
+                        
+                                                 
+                    </center>
+
+                </td>
+            </tr>
+        </table>
+    </apex:form>
+</apex:page>

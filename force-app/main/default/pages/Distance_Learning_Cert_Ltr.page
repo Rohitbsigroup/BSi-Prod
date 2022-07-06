@@ -1,0 +1,86 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false" pageStyle="all">
+
+<head>
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: "Arial Unicode MS" "Sans-Serif";
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+
+
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0"> 
+<!---- this brings in the date, name and address of the delegate ---->
+<apex:outputText >{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>
+<br/>
+
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Account.Name}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingStreet}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCity}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.Mailing_District__c}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingPostalCode}</apex:outputText>
+<apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCountry}</apex:outputText>
+</apex:panelGrid>
+
+<br/><br/>
+
+<!---- this brings in the Dear and the delegates name ---->
+<apex:outputText rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Japan (Japanese)'),true,false)}" value="{!Enrollment__c.Delegate_name__r.Name} {!Enrollment__c.Training_Translations__r.Dear__c},"/> 
+<apex:outputText rendered="{!IF(OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'),false,true)}" value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Name},"/> 
+<br/><br/>
+
+<!---- this brings in the Enrolment number, Letter heading and the Course name ---->
+<apex:outputText rendered="{!IF(Enrollment__c.Delegate_ID__c = null,False,True)}" value="Registration Number : {!Enrollment__c.Delegate_ID__c}"></apex:outputtext>
+<apex:outputText rendered="{!IF(Enrollment__c.Delegate_ID__c = null,True,False)}" value="Registration Number : {!Enrollment__c.Name}"></apex:outputtext>
+<br/><br/>
+
+
+<!---- Text for the Certificate Letter---->
+<apex:outputText value="Congratulations on completing the {!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c}"></apex:outputText>
+<br/><br/>
+We hope the course has been beneficial to you and wish you every success with your continuing professional development.<br/><br/>
+Please find enclosed your certificate as a recognition of your achievement.<br/><br/>
+
+<br/>
+Kind Regards
+<br/><br/>
+<br/><br/>
+
+
+<apex:outputText escape="false" rendered="{!IF((NOT(IF(((Enrollment__c.Translation_Formula__c = 'Japan (Japanese)')),true,false))),true,false)}" value="{!$User.FirstName} {!$User.LastName} <br/>{!$User.Title}<br/> {!$User.Department} <br/>Tel: +44 (0)1908 815917"/><br/>
+<apex:outputText rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c = 'BSI Certificate in Occupational Health & Safety Management Systems', true, false)}" value="Email: Ohscert.CPD@bsigroup.com"></apex:outputtext>
+<apex:outputText rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c = 'BSI Certificate in Environmental Management Systems', true, false)}" value="Email: msuk.emscert@bsigroup.com"></apex:outputtext>
+<apex:outputText rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c = 'BSI Quality Management Systems Diploma', true, false)}" value="Email: quality.diploma@bsigroup.com"></apex:outputtext>
+</apex:page>

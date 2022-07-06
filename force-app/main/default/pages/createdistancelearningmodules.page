@@ -1,0 +1,11 @@
+<apex:page standardController="Enrollment__c" >
+  
+  <flow:interview name="Create_Distance_Learning_Modules"   >
+  
+  <!---- finishLocation="{!URLFOR(Enrollment__c.Id)}} ---->
+      <apex:param name="EnrolmentName" value="{!Enrollment__c.Name}"/>
+      <apex:param name="EventCountry" value="{!Enrollment__c.Training_Event__r.Event_Country__c}"/>
+      <apex:param name="Taxonomy" value="{!Enrollment__c.Training_Event__r.Taxonomy__c}"/>      
+  </flow:interview>
+  
+</apex:page>

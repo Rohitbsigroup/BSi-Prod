@@ -1,0 +1,102 @@
+<apex:component controller="attendanceRegisterControllerRank" access="global">
+<apex:attribute name="TEId" type="Id" description="Id of the training event" assignTo="{!TrainingEventId}"/>
+<apex:attribute name="TERint" type="Integer" description="Number of rank wanted" assignTo="{!Rint}"/>    
+<head>
+<style type="text/css">
+
+body
+{
+color:#666666;
+font-family:"Tahoma";
+font-size:11pt;
+font-style:normal;
+}
+
+p
+{
+color:#666666;
+font-family:"Tahoma";
+font-size:11pt;
+}
+
+h1
+{
+color:#666666;
+font-family:"Tahoma";
+font-size:16pt;
+font-style:normal;
+}
+
+h2
+{
+color:#666666;
+font-family:"Tahoma";
+font-size:12pt;
+font-style:normal;
+}
+
+h3
+{
+color:#E52013;
+font-family:"Tahoma";
+font-size:11pt;
+font-style:normal;
+}
+
+</style>
+</head>
+
+<body>
+
+ <apex:repeat value="{!Enrollments}" var="er"></apex:repeat>
+                  
+    <table align="left" cellpadding="5" cellspacing="0" styleclass="table"  border="0.1" style="text-align: left; font-size:10pt; width:100%;">
+    
+            <THEAD>
+            <apex:variable var="cnt" value="{!1}" />
+            <apex:variable var="printHeaders" value="{!0}" /> 
+            
+            <apex:repeat value="{!rEnrollmentList}" var="rEonce">
+            <apex:panelGroup rendered="{!IF((rEonce.courseRank = rEonce.courseRankChoice)&&(cnt=1),true,false)}">
+            <apex:variable var="printHeaders" value="{!1}" />
+            
+            <tr><td colspan="4" width="100%" style="vertical-align:top; text-align:left; height:20px"> <b>{!rEonce.enr.Training_Event__r.Course__r.Name}:</b> &nbsp;<apex:outputText value="{0,date,dd'/'MM'/'yyyy}"><apex:param value="{!rEonce.enr.Course_Start_Date__c}" /></apex:outputText>&nbsp;  -  &nbsp;<apex:outputText value="{0,date,dd'/'MM'/'yyyy}"><apex:param value="{!rEonce.enr.Training_Event__r.End_Date3__c}" /></apex:outputText>
+            <br/> <apex:outputText value="{!rEonce.enr.Training_Event__r.Name}"/>&nbsp; ,  &nbsp;<apex:outputText value="{!rEonce.enr.Training_Event__r.SAP_SMO_number__c}"/>
+            </td></tr>
+            <apex:variable var="cnt" value="{!cnt+1}"/>
+
+            </apex:panelGroup>    
+            </apex:repeat>
+             
+            <!-- may be able to hide headers by embedding above boolean variable which is populated to true if rendering occurs-->
+               
+               <apex:panelGroup rendered="{!IF((printHeaders=1),true,false)}">
+               <tr >
+                    <th width="22%" style="text-align: left;" >Participant Name</th>
+                    <th width="22%" style="text-align: left;" >Phone</th>
+                    <th width="22%" style="text-align: left;" >Job Title</th>
+                    <th width="34%" style="text-align: left;" >Company</th>
+                </tr>
+                </apex:panelGroup>
+                
+            </THEAD>
+               
+            <apex:repeat value="{!rEnrollmentList}" var="rE">
+
+            <TBODY >
+            <apex:panelGroup rendered="{!IF(rE.courseRank = rE.courseRankChoice,true,false)}">
+                <tr >               
+                    <td width="22%" style="text-align: left;">{!rE.enr.delegate_name__r.name}</td> 
+                    <td width="22%" style="text-align: left;">{!rE.enr.delegate_name__r.phone}</td> 
+                    <td width="22%" style="text-align: left;">{!rE.enr.delegate_name__r.title}</td>                  
+                    <td width="34%" style="text-align: left;">{!rE.enr.delegate_name__r.Account.name}</td> 
+                </tr>
+               </apex:panelGroup> 
+            </TBODY>
+
+            </apex:repeat>         
+  </table>
+
+
+</body>
+</apex:component>

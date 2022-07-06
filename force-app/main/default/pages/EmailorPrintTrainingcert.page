@@ -1,0 +1,220 @@
+<apex:page standardController="Enrollment__c" recordSetVar="Enrollments" sidebar="false" extensions="UpdateInvoiceDetailsController">
+    <apex:sectionHeader title="Email/Print Certificates"/>
+        <apex:form >
+          <apex:pageBlock >
+             <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save/Send Email" action="{!save}" />
+                    
+                    <apex:commandButton value="Cancel" action="{!cancel}" />
+                </apex:pageBlockButtons>
+             <apex:pageBlockSection title="Selected Enrollments" columns="1" collapsible="False">
+                    <apex:pageBlockTable value="{!selected}" var="Enrollment" id="enrTR">
+                       
+                       <apex:column value="{!Enrollment.name}"/>
+                       <!-- 19 Jan 2017 Vim added code line to include CQI ID -->
+                       <apex:column value="{!Enrollment.CQI_ID__c}"/>
+                       <!-- Vim code ends here -->
+                       <apex:column value="{!Enrollment.Delegate_name__c}"/>
+                       <!-- Vimlesh 29 Sept 2016 - Id attribute added to check booking status in script -->
+                       <apex:column >
+                            <apex:inputField id="bookingStatus" value="{!Enrollment.Booking_status__c}"/> 
+                        </apex:column>
+                       <apex:column headerValue="Invoice Status/Number"><apex:outputField value="{!Enrollment.Invoice_status__c}"/><br/><apex:outputField value="{!Enrollment.Invoice_Number__c}"/></apex:column>
+                       <apex:column value="{!Enrollment.Exam_results__c}"/>
+                       <apex:column value="{!Enrollment.Exam_percentage__c}"/>
+                       <apex:column value="{!Enrollment.Exam_Mark__c}"/>
+                       <apex:column value="{!Enrollment.Hold_Certificate__c}"/>
+                       <apex:column value="{!Enrollment.Certificate_status__c}"/>
+                       <apex:column headervalue="Certificate Tracking"><apex:inputField value="{!Enrollment.Certificate_Tracking_Link__c}"/></apex:column>
+                       
+                       <!-- 26/05/2019 PC update Certificate Language for all records -->
+                       <apex:column >
+                          <apex:facet name="header">
+                              <apex:outputPanel >
+                                <apex:outputLabel value="Cert Lang" for="certLangMaster"/>
+                                <apex:inputField onchange="massUpdateRecords(event, 'certLang')" value="{!dummyEnrollment.Certificate_Language__c}" id="certLangMaster" style="margin-left:10px;"/>
+                              </apex:outputPanel>
+                          </apex:facet>
+                          <apex:inputField id="certLang" value="{!Enrollment.Certificate_Language__c}"/>
+                       </apex:column>
+
+                       <apex:column headerValue="Review PDF/Open to print">
+                           <!--<apex:outputlink target="_blank" value="https://bsi--c.eu1.visual.force.com/apex/EspionPDFcertNewV1?id={!Enrollment.id}">Espion TA - Certificate</apex:outputlink><br/>-->
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificatev4?&Id={!Enrollment.id}">BSI TA - Certificate</apex:outputlink><br/>
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificatev4?bg=0&Id={!Enrollment.id}">BSI TA - Certificate No Back</apex:outputlink><br/>                       
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificateIRCAoldv4?id={!Enrollment.id}">BSI TA - Certificate IRCA</apex:outputlink><br/>
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificateIRCAoldv4?bg=0&id={!Enrollment.id}">BSI TA - Certificate IRCA No Back</apex:outputlink><br/>
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificateCQIIRCAv4?id={!Enrollment.id}">BSI TA - Certificate CQI IRCA</apex:outputlink><br/>
+                           <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificateCQIIRCAv4?bg=0&id={!Enrollment.id}">BSI TA - Certificate CQI IRCA No Back</apex:outputlink><br/>
+                           <apex:outputPanel rendered="{!OR(Enrollment.Training_Event__r.Event_Country__c='AU',Enrollment.Training_Event__r.Event_Country__c='NZ')}"> 
+                               <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/BSITACertificatev4AURABQSA?id={!Enrollment.id}">BSI TA - RABQSA Certificate</apex:outputlink><br/>                      
+                           </apex:outputPanel>
+                           <apex:outputlink target="_blank" value="https://bsi--c.eu1.visual.force.com/apex/TA_coverletter23?id={!Enrollment.id}">BSI TA - Cover Letter</apex:outputlink><br/> 
+                           <apex:outputPanel rendered="{!Enrollment.Training_Event__r.Event_Country__c='UK'}"> 
+                               <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/Distance_Learning_Cert_Ltr?id={!Enrollment.id}">UK Distance Learning Cert Ltr</apex:outputlink><br/>
+                               <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/ReviewPDFcertNewDistance?id={!Enrollment.id}">Distance Learning Cert</apex:outputlink><br/>
+                               <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/ReviewPDFcertNewNoBckgrd?id={!Enrollment.id}"> Portrait Review Certificate no back</apex:outputlink><br/>
+                               <apex:outputlink target="_blank" value="https://bsi--c.um2.visual.force.com/apex/ReviewPDFcertIRCA?id={!Enrollment.id}"> Portrait Review IRCA Certificate no back</apex:outputlink><br/>
+                           </apex:outputPanel>
+                       </apex:column> 
+                       <!-- Updated code by vimlesh on 27 Sept 2016 to allow check box to mark all Certificate print -->
+                       <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <apex:outputLabel value="Cert Printed?" for="Select_All_Marked"/>
+                                    <apex:inputCheckbox onclick="checkAllCertPrint(this)" id="Select_All_certPrint"/>
+                                </apex:outputPanel>
+                            </apex:facet>
+                            <apex:inputField id="certPrintChecked" value="{!Enrollment.Certificate_Printed__c}"/> 
+                        </apex:column>
+                        <!--<apex:column headerValue="Cert Printed?"><apex:inputField value="{!Enrollment.Certificate_Printed__c}"/></apex:column>-->
+                        <!--<apex:column headerValue="Select PDF Certificates to Email"><apex:inputField value="{!Enrollment.Email_PDF_Certificate__c}"/></apex:column>-->
+                        <apex:column >
+                        <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <apex:outputLabel value="Select PDF Certificates to Email" for="Select_All_Marked"/>
+                                    <apex:inputCheckbox onclick="checkAllCertEmail(this)" id="Select_All_certEmail"/>
+                                </apex:outputPanel>
+                            </apex:facet>
+                        <apex:inputField id="certEmailChecked" value="{!Enrollment.Email_PDF_Certificate__c}"/>
+                        </apex:column>
+                        <apex:column >
+                        <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <apex:outputLabel value="Show cert in Portal" for="Select_All_Marked"/>
+                                    <apex:inputCheckbox onclick="checkAllCertPortal(this)" id="Select_All_certPortal"/>
+                                </apex:outputPanel>
+                            </apex:facet>
+                        <apex:inputField id="certPortalChecked" value="{!Enrollment.Show_Certificate_in_Portal__c}"/>
+                        </apex:column>
+                   </apex:pageBlockTable>
+              </apex:pageBlockSection>                         
+        </apex:pageBlock>
+    </apex:form>     
+
+  <!-- 26/05/2018 PC - mass update records -->
+  <script type="text/javascript"> 
+    function massUpdateRecords(e, childName){
+        var elements = document.getElementsByTagName('select');
+        for(var i=0; i<elements.length; i++){
+            if(elements[i].id.indexOf(childName) != -1){
+                elements[i].value = e.currentTarget.value;
+            }
+        }
+    }
+  </script>
+  
+<!-- Script function added by vimlesh on 12 Aug 2016 to check all invoice paid on click of header check box-->
+    <script type="text/javascript">  
+        function checkAllCertPrint(cb)
+        {       
+            var trBody = document.getElementsByTagName("tbody");           
+            for(var i=0; i<trBody.length; i++)
+            {
+                if(trBody[i].id.indexOf("enrTR")!=-1)                          
+                {
+                    var trElem = trBody[i].getElementsByTagName("tr");           
+                    for(var j=0; j<trElem.length; j++)
+                    {
+                        var status = '';
+                        var inputSelect = trElem[j].getElementsByTagName("select");
+                        for(var k=0; k<inputSelect.length; k++)
+                        {
+                            if(inputSelect[k].id.indexOf("bookingStatus")!=-1)                          
+                            {
+                                status = inputSelect[k].value;
+                            }
+                        }
+                        var inputElem = trElem[j].getElementsByTagName("input");
+                        for(var l=0; l<inputElem.length; l++)
+                        {
+                            
+                            if(inputElem[l].id.indexOf("certPrintChecked")!=-1 && status != 'No Show' && status.substring(0, 6) !='Cancel')                          
+                            {
+                                inputElem[l].checked = cb.checked;
+                            }
+                        }
+                        
+                    }
+                }
+            }
+           
+        }
+    </script>
+
+<!-- Script function added by Julie on 24/10/2017 all email cert boxes paid on click of header check box -->   
+         <script type="text/javascript">    
+            function checkAllCertEmail(cb)
+            {                  
+                var trBody = document.getElementsByTagName("tbody");           
+                for(var i=0; i<trBody.length; i++)
+                {
+                    if(trBody[i].id.indexOf("enrTR")!=-1)                          
+                    {
+                        var trElem = trBody[i].getElementsByTagName("tr");           
+                        for(var j=0; j<trElem.length; j++)
+                        {
+                            var status = '';
+                            var inputSelect = trElem[j].getElementsByTagName("select");
+                            for(var k=0; k<inputSelect.length; k++)
+                            {
+                                if(inputSelect[k].id.indexOf("bookingStatus")!=-1)                          
+                                {
+                                    status = inputSelect[k].value;
+                                }
+                            }
+                            var inputElem = trElem[j].getElementsByTagName("input");
+                            for(var l=0; l<inputElem.length; l++)
+                            {
+                                
+                                if(inputElem[l].id.indexOf("certEmailChecked")!=-1 && status != 'No Show' && status.substring(0, 6) !='Cancel')                          
+                                {
+                                    inputElem[l].checked = cb.checked;
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+               
+            }
+     </script>
+     <!-- Script function added by Julie on 20200608 to check all show cert in portal on click of header check box -->   
+         <script type="text/javascript">    
+            function checkAllCertPortal(cb)
+            {                  
+                var trBody = document.getElementsByTagName("tbody");           
+                for(var i=0; i<trBody.length; i++)
+                {
+                    if(trBody[i].id.indexOf("enrTR")!=-1)                          
+                    {
+                        var trElem = trBody[i].getElementsByTagName("tr");           
+                        for(var j=0; j<trElem.length; j++)
+                        {
+                            var status = '';
+                            var inputSelect = trElem[j].getElementsByTagName("select");
+                            for(var k=0; k<inputSelect.length; k++)
+                            {
+                                if(inputSelect[k].id.indexOf("bookingStatus")!=-1)                          
+                                {
+                                    status = inputSelect[k].value;
+                                }
+                            }
+                            var inputElem = trElem[j].getElementsByTagName("input");
+                            for(var l=0; l<inputElem.length; l++)
+                            {
+                                
+                                if(inputElem[l].id.indexOf("certPortalChecked")!=-1 && status != 'No Show' && status.substring(0, 6) !='Cancel')                          
+                                {
+                                    inputElem[l].checked = cb.checked;
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+               
+            }
+     </script>
+</apex:page>

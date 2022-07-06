@@ -1,0 +1,16 @@
+<apex:component access="global">
+
+<apex:attribute name="cnptTrainerName" type="string" description="Name of Trainer" />
+<apex:attribute name="cnptTrainerFirstName" type="string" description="First Name of Trainer"/>
+<apex:attribute name="cnptTrainerPhone" type="string" description="Phone No. of Trainer"/>
+<apex:attribute name="cnptTrainerEmail" type="string" description="Email of Trainer"/>
+
+Your course will be delivered by {!cnptTrainerName}. Please find contact details for {!cnptTrainerFirstName} below, should you have any questions or concerns. Your trainer will be contacting you two weeks out from your course start date.
+
+Trainer Name:      {!cnptTrainerName}
+
+Trainer Phone No.: {!cnptTrainerPhone}
+
+Trainer email:     {!cnptTrainerEmail}
+
+</apex:component>

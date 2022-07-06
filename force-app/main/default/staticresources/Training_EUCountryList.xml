@@ -1,0 +1,31 @@
+<eucountries>
+    <countryOptions>
+        <countryoption name="Austria" code="AT"/>
+        <countryoption name="Belgium" code="BE"/>
+        <countryoption name="Bulgaria" code="BG"/>
+        <countryoption name="Croatia" code="HR"/>
+        <countryoption name="Cyprus" code="CY"/>
+        <countryoption name="Czech Republic" code="CZ"/>
+        <countryoption name="Denmark" code="DK"/>
+        <countryoption name="Estonia" code="EE"/>
+        <countryoption name="Finland" code="FI"/>
+        <countryoption name="France" code="FR"/>
+        <countryoption name="Germany" code="DE"/>
+        <countryoption name="United Kingdom" code="GB"/>
+        <countryoption name="Greece" code="GR"/>
+        <countryoption name="Hungary" code="HU"/>
+        <countryoption name="Ireland" code="IE"/>
+        <countryoption name="Italy" code="IT"/>
+        <countryoption name="Lithuania" code="LT"/>
+        <countryoption name="Luxembourg" code="LU"/>
+        <countryoption name="Malta" code="MT"/>
+        <countryOption name="The Netherlands" code="NL"/>
+        <countryoption name="Poland" code="PL"/>
+        <countryoption name="Portugal" code="PT"/>
+        <countryoption name="Romania" code="RO"/>
+        <countryoption name="Slovakia" code="SK"/>
+        <countryoption name="Slovenia" code="SI"/>
+        <countryoption name="Spain" code="ES"/>
+        <countryoption name="Sweden" code="SE"/>
+    </countryOptions>
+</eucountries>

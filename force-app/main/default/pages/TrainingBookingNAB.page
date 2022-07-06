@@ -1,0 +1,247 @@
+<apex:page controller="TrainingBookingNAB"
+    action="{!initCheck}"
+    language="{!pageLanguage}"
+    standardstylesheets="false"
+    showheader="false"
+    cache="false"
+    applyBodyTag="false"
+    applyHtmlTag="false"
+    docType="html-5.0">
+    <!-- PK(NEB) 12 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <!-- JS 20180920 Updated privacyURL render logic -->
+<html>
+    <head>
+        <title>{!$Label.TrainingBookingTitle}</title>
+          <!-- PK(NEB) 13 Sep 2018 - Added mobile support -->
+        <meta name="viewport" content="width=device-width" />
+        <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}" />
+        <!--[if lte IE 7]>;
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Legacy.css')}" />
+        <![endif]-->
+        <!-- PK(NEB) 12 Sep 2018 - Added mobile specific stylesheet -->
+        <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+
+        <!-- *** General show/hide function *** -->
+        <script type="text/javascript">
+            function divOnOff(id) {
+                var tag = document.getElementById(id);
+                if (tag.style.display !== 'none') {
+                    tag.style.display = 'none';
+                }
+                else {
+                    tag.style.display = 'block';
+                }
+            }
+        </script>
+
+        <!-- *** Google Analytics *** -->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-21147145-1']);
+            _gaq.push(['_setDomainName', 'force.com']);
+            _gaq.push(['_setAllowLinker', true]);
+            _gaq.push(['_trackPageview', 'Step5']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="page">
+
+                <div class="header">
+                    <a class="logo" href="http://bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                    <p class="site-strap ir">Making excellence a habit</p>
+                    <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                    <p class="phone-no">
+                        <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                        <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}" />
+                    </p>
+                </div> <!-- /.header -->
+
+                <div class="main">
+
+                    <ul class="progress clearfix">
+                        <!-- PK(NEB) 12 Sep 2018 - Added new span tags for specific classes for mobile -->
+                        <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                          <li class="{!IF(pageStep = 1,'current-step','inactive-step')}"><span class="step-label-1">{!$Label.TrainingBookingStep1}</span></li>
+                          <li class="{!IF(pageStep = 2,'current-step','inactive-step')}"><span class="step-label-2">{!$Label.TrainingBookingStep2}</span></li>
+                          <li class="{!IF(pageStep = 3,'current-step','inactive-step')}"><span class="step-label-3">{!$Label.TrainingBookingStep3}</span></li>
+                          <li class="{!IF(OR(pageStep = 4, pageStep = 5),'current-step','inactive-step')}"><span class="step-label-4">{!$Label.TrainingBookingStep4}</span></li>
+                          <li class="{!IF(pageStep = 6,'current-step','inactive-step')}"><span class="step-label-5">{!$Label.TrainingBookingStep6}</span></li>
+                        </apex:outputPanel>
+                    </ul>
+
+                    <!-- *** Details *** -->
+                    <h1 class="title">{!courseName}</h1>
+                    <apex:outputPanel rendered="{!pageShowSelection}">
+                        <h2 class="subtitle">
+                            <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                            <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                        </h2>
+                        <h2 class="subtitle">
+                            <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                            <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                        </h2>
+                    </apex:outputPanel>
+
+                    <apex:messages id="stdMessages" styleClass="messages" />
+                    <span id="myMessages"></span>
+
+                    <!-- *** Introduction *** -->
+                    <p class="intro">{!$Label.TrainingBookingOgoneIntro}</p>
+                    <apex:image style="margin-top: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'VISA.gif')}"/>
+                    <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'mastercard.gif')}"/>
+                    <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'Amex.png')}"/>
+
+                    <!-- *** Body *** -->
+                    <apex:panelGroup layout="block" styleClass="two-thirds">
+                        <!-- Submit card details to the NAB Gateway -->
+                        <form name="NAB" action="{!PAYMENT_URL}" method="post" onsubmit="return validate(this);" >
+                            <h2 class="subtitle-first">{!$Label.TrainingBookingOgoneHeading}</h2>
+                            <fieldset class="form-fields">
+                                <div class="field-item">
+                                    <apex:outputLabel value="{!$Label.TrainingBookingOgoneCardNumber} *" />
+                                    <input type="text" name="EPS_CARDNUMBER" maxlength="16" />
+                                </div>
+                                <div class="field-item">
+                                    <apex:outputLabel value="{!$Label.TrainingBookingOgoneCvc} *" />
+                                    <input type="text" name="EPS_CCV" maxlength="4" class="short" />
+                                    <a href="#" class="tooltip-button" onclick="divOnOff('{!$Component.CvcTooltip}');return false;">
+                                        <apex:image style="margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'info.gif')}"/>
+                                    </a>
+                                    <apex:outputText id="CvcTooltip" style="display: none;" styleClass="tooltip-below" value="{!$Label.TrainingBookingOgoneCvcTooltip}" />
+                                </div>
+                                <div class="field-item">
+                                    <apex:outputLabel value="{!$Label.TrainingBookingNabExpiryDate} *" />
+                                    <select name="EPS_EXPIRYMONTH" class="month">
+                                        <apex:repeat var="month" value="{!months}">
+                                            <option value="{!month}">{!month}</option>
+                                        </apex:repeat>
+                                    </select>
+                                    <select name="EPS_EXPIRYYEAR" class="year">
+                                        <apex:repeat var="year" value="{!years}" >
+                                            <option value="{!year}">{!year}</option>
+                                        </apex:repeat>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="EPS_MERCHANT" value="{!EPS_MERCHANT}" />
+                                <input type="hidden" name="EPS_TXNTYPE" value="{!EPS_TXNTYPE}" />
+                                <input type="hidden" name="EPS_REFERENCEID" value="{!EPS_REFERENCEID}" />
+                                <input type="hidden" name="EPS_AMOUNT" value="{!EPS_AMOUNT}" />
+                                <input type="hidden" name="EPS_CURRENCY" value="{!EPS_CURRENCY}" />
+                                <input type="hidden" name="EPS_TIMESTAMP" value="{!EPS_TIMESTAMP}" />
+                                <input type="hidden" name="EPS_FINGERPRINT" value="{!EPS_FINGERPRINT}" />
+                                <input type="hidden" name="EPS_RESULTURL" value="{!EPS_RESULTURL}" />
+                                <input type="hidden" name="EPS_REDIRECT" value="TRUE" />
+                                <input type="hidden" name="3D_XID" value="{!THREED_XID}" />
+                                <input type="hidden" name="EPS_MERCHANTNUM" value="{!EPS_MERCHANTNUM}" />
+                                <input type="hidden" name="EPS_RESULTPARAMS" value="TRUE" />
+                                <input type="hidden" name="L" VALUE="{!paramLanguage}" />
+                                <input type="hidden" name="CT" VALUE="{!paramCountry}" />
+                                <input type="hidden" name="ID" VALUE="{!paramId}" />
+                            </fieldset>
+                            <div style="float: left; width: auto; margin-bottom: 15px;">
+                                <input name="SUBMIT" type="submit" value="Submit" />
+                                <apex:image id="ACTIVE" style="visibility: hidden; margin-top: 5px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'ajax-loader.gif')}"/>
+                            </div>
+
+                            <!-- *** Basic form validation *** -->
+                            <script type="text/javascript">
+                                function validate(form) {
+
+                                    // Hide any existing standard messages
+                                    var stdMessages = document.getElementById('{!$Component.stdMessages}');
+                                    if (stdMessages != null && stdMessages.style.display !== 'none') stdMessages.style.display = 'none';
+
+                                    // Retrieve all the required fields
+                                    var cardno = form.EPS_CARDNUMBER.value;
+                                    var ccv = form.EPS_CCV.value;
+                                    var expmth = form.EPS_EXPIRYMONTH.value;
+                                    var expyr = form.EPS_EXPIRYYEAR.value;
+
+                                    // Display errors (if required)
+                                    var errors = '';
+                                    if (cardno == null || !(/^[0-9]{13}$/.test(cardno) || /^[0-9]{15}$/.test(cardno) || /^[0-9]{16}$/.test(cardno))) errors += '<li>The Credit Card Number must be either 13, 15 or 16 digits long</li>';
+                                    if (ccv == null || !/^[0-9]{3,4}$/.test(ccv)) errors += '<li>The Card Verification Code must be either three or four digits long</li>';
+                                    if (expmth == '' || expyr == '')
+                                    {
+                                        errors += '<li>The expiry date must be specified</li>';
+                                    }
+                                    else
+                                    {
+                                        var today = new Date();
+                                        if (parseInt(expyr) == today.getFullYear() && parseInt(expmth) < (today.getMonth() + 1)) errors += '<li>The expiry date must not be in the past</li>';
+                                    }
+                                    if (errors != '') {
+                                        var myMessages = document.getElementById('myMessages');
+                                        myMessages.innerHTML = '<ul role="alert" id="messages" class="messages">' + errors + '</ul>';
+                                        return false;
+                                    }
+                                    form.SUBMIT.disabled = true;
+                                    var active = document.getElementById('{!$Component.ACTIVE}');
+                                    if (active != null) active.style.visibility = 'visible';
+                                    return true;
+                                }
+                            </script>
+
+                        </form>
+                    </apex:panelGroup>
+
+                    <!-- *** Notes *** -->
+                    <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                        <p>{!$Label.TrainingBookingOgoneNotes}</p>
+                    </apex:outputPanel>
+
+                    <!-- *** Invoice instead option *** -->
+                    <apex:outputPanel layout="block" styleClass="notes" rendered="{!selectedCountry.isInvoiceAllowed}">
+                        <apex:form >
+                            <apex:commandLink id="invoiceInstead" action="{!invoiceInstead}" value="{!$Label.TrainingBookingInvoiceInstead}" immediate="true" />
+                        </apex:form>
+                    </apex:outputPanel>
+
+                </div> <!-- /.main -->
+
+                <div class="footer">
+                    <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                    <ul>
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}">
+                            <li>
+                                <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                            </li>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                            <li>
+                                <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                            </li>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                            <li>
+                                <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                            </li>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                            <li>
+                                <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                            </li>
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                            <li>
+                                <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                            </li>
+                        </apex:outputPanel>
+                    </ul>
+                </div> <!-- /.footer -->
+
+            </div> <!-- /.page -->
+        </div> <!-- /.wrapper -->
+
+    </body>
+</html>
+</apex:page>

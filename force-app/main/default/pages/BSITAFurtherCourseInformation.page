@@ -1,0 +1,261 @@
+<apex:page standardController="Training_Event__c" extensions="CertificateController" showHeader="false" pageStyle="all" lightningStylesheets=""
+        contentType="{!renderedContentType}" renderAs="{!renderingService}">
+    
+    <apex:panelGroup rendered="{! renderingService != 'PDF' }">        
+        <apex:stylesheet value="{!$Resource.Aboutmycoursecss}"/>
+    </apex:panelGroup>   
+    <apex:panelGroup rendered="{! renderingService = 'PDF' }">        
+        <apex:stylesheet value="{!$Resource.AboutmycoursecssPDF}"/>
+    </apex:panelGroup>  
+                
+<!--         
+08/09/2020 - JS - Created based on BSITAAboutMyCourse 
+-->
+<!-- renderAs="PDF" -->
+<head>
+    <meta http-equiv="Content-Type" content="{! renderedContentType }" />                   
+</head>
+
+<body>
+
+    <apex:form rendered="{! renderingService != 'PDF' }"
+               style="text-align: right; margin-right: 10px;">
+               
+        <apex:commandLink action="{! saveToPdf }" value="Save to PDF">
+            <apex:param assignTo="{! renderedFileName }" value="{!Training_Event__c.Name}.pdf"/> <!-- JS was pagename  -->
+        </apex:commandLink>
+        <hr/>        
+    </apex:form>
+    
+<!--JS - replace image with just logo-->
+        <apex:form rendered="{! renderingService = 'PDF' }">
+         <apex:image value="{!URLFOR($Resource.CLP_BSIBanner)}" width="18.5cm" 
+             style="position: static;"/>            
+        
+        </apex:form>   
+    
+
+<!----Course name and Start Date -->
+      <p>
+          <apex:outputtext styleClass="big" value="{!Training_Event__c.Course__r.Product_Name_Local__c}"/> <apex:outputtext styleClass="big" rendered="{!IF(Training_Event__c.Event_Country__c ='CN',true,false)}" Value="课程"/>
+      </p>
+
+  
+
+<!--For all courses this shows the translation of "date(s)" shows course dates  -->     
+      <p><apex:outputPanel >
+            <apex:outputtext styleClass="med" value="{!Training_Event__c.Name}"/>:&nbsp;
+         </apex:outputPanel> 
+         <!--JS 20181207 updated course dates component position -->
+           <apex:outputText >
+             <c:Course_Dates format="{!Training_Event__c.Course__r.Training_Translations__r.Date_Format__c}" 
+                duration="{!Training_Event__c.Course_Duration_Days__c}" 
+                start1="{!Training_Event__c.Start_date__c}" 
+                end1="{!Training_Event__c.End_Date_of_Section_1__c}" 
+                start2="{!Training_Event__c.Start_Date_of_Section_2__c}" 
+                end3="{!Training_Event__c.End_Date3__c}" 
+                country="{!Training_Event__c.Event_Country__c}"
+                module="{!Training_Event__c.Module_Event__c}"
+                split="{!Training_Event__c.Split_Date_Event__c}"
+                source="email"
+            /> 
+           </apex:outputText>
+      </p>
+  
+      
+      
+<!--CUSTOMER INFO FOR UK -->
+    <apex:outputPanel rendered="{!AND(Training_Event__c.Event_Country__c ='UK',Training_Event__c.Course__r.Course_Delivery__c ='In-House')}" >
+         <h3>Company Info</h3>
+         <p>      
+            Account Name: {!Training_Event__c.Company_for_In_House_Course__r.Name}<br/>
+            Key Account: {!Training_Event__c.In_House_Key_Account__c}<br/>
+            Training Event Owner: {!Training_Event__c.Owner.Name}<br/>                                 
+            <apex:repeat value="{!Training_Event__c.Enrollments__r}" var="enr">
+                <apex:panelGroup rendered="{!IF(AND(enr.Inhouse_Booking_Contact__c,OR(CONTAINS('Booked',enr.Booking_status__c),CONTAINS('Booked - BSI Employee',enr.Booking_status__c),CONTAINS('Booked - Resit',enr.Booking_status__c),CONTAINS('No Show',enr.Booking_status__c))),true,false)}">                    
+                    Booking Contact: {!enr.Delegate_name__r.Name}<br/>
+                    Contact Details: {!enr.Delegate_phone__c}<br/>
+                </apex:panelGroup>                        
+            </apex:repeat>                      
+         </p>          
+    </apex:outputPanel> 
+ 
+ 
+ 
+<!-- SCHEDULE - from either event or Course -->
+    <apex:outputPanel rendered="{!NOT(Training_Event__c.Course__r.Course_Format__c ='E-Learning')}" >
+         <h3>{!Training_Event__c.Course__r.Training_Translations__r.Schedule__c}</h3>
+         <p>      
+            <apex:outputField rendered="{!NOT(ISBLANK(Training_Event__c.ScheduleTE__c))}" value="{!Training_Event__c.ScheduleTE__c}"/>      
+            <apex:outputField rendered="{!ISBLANK(Training_Event__c.ScheduleTE__c)}" value="{!Training_Event__c.Course__r.Schedule__c}"/>       
+         </p>          
+    </apex:outputPanel> 
+    
+    
+<!--Further INFO FOR UK (Instructor accommodation, travel etc) -->
+    <apex:outputPanel rendered="{!Training_Event__c.Event_Country__c ='UK'}" >
+         <h3>Travel and Accommodation</h3>
+         <p>      
+            Travel Booked?:&nbsp;&nbsp;{!IF(Training_Event__c.Instructor_Travel_Booked__c, 'Y','N')}<br/>
+            Booking Ref (Travel):&nbsp;&nbsp;{!Training_Event__c.Instructors_Travel_Booking_Ref__c}<br/>
+            Accommodation:&nbsp;&nbsp;{!Training_Event__c.Instructor_Accommodation_Booking_Ref__c}<br/>
+            Accommodation website:&nbsp;&nbsp;{!Training_Event__c.Instructor_Accommodation_Website__c}<br/>
+         </p>          
+    </apex:outputPanel>     
+ 
+ 
+<!-- JS COURSE MATERIALS - Mimeo  -->         
+    <apex:outputPanel rendered="{!NOT(Training_Event__c.Master_Training_Event__r.Regional_CLL_Event__c)}"> 
+    <apex:outputPanel rendered="{!AND(OR(Training_Event__c.Event_Country__c = 'UK',Training_Event__c.Course__r.Mimeo_Materials__c),NOT(ISBLANK(Training_Event__c.Course__r.TrainingPreRequisites__c)))}">
+        <h3>{!Training_Event__c.Course__r.Training_Translations__r.Course_Materials__c}</h3>
+        <p>
+            <apex:outputField value="{!Training_Event__c.Course__r.TrainingPreRequisites__c}"/>
+            <apex:outputtext escape="false" rendered="{!NOT(ISBLANK(Training_Event__c.Bespoke_Pre_course_Materials__c))}"><br/><br/></apex:outputtext>
+            <apex:outputField rendered="{!NOT(ISBLANK(Training_Event__c.Bespoke_Pre_course_Materials__c))}" value="{!Training_Event__c.Bespoke_Pre_course_Materials__c}"/>
+            <apex:outputtext escape="false" rendered="{!NOT(ISBLANK(Training_Event__c.Bespoke_Pre_course_Materials__c))}"><br/></apex:outputtext> 
+        </p>              
+    </apex:outputPanel>
+    </apex:outputPanel> 
+    
+<!-- COURSE MATERIALS - Aditional UK fields  -->   
+     
+    <apex:outputPanel rendered="{!Training_Event__c.Event_Country__c ='UK'}" >
+    <p>
+            Exam Type:&nbsp;&nbsp;{!Training_Event__c.Exam__c}<br/>
+            Materials Type:&nbsp;&nbsp;{!Training_Event__c.Materials__c}<br/>
+            Hard Copy Loan Standards:&nbsp;&nbsp;{!Training_Event__c.Hard_Copy_Loan_Standard__c}<br/>
+            Exam Paper Reference:&nbsp;&nbsp;{!Training_Event__c.Exam_paper_reference__c}<br/>
+        <apex:outputPanel rendered="{!NOT(Training_Event__c.Course__r.Bespoke_Event__c)}" >
+            Materials Version :&nbsp;&nbsp;{!Training_Event__c.Course__r.Version__c}<br/>
+            Materials Release Month:&nbsp;&nbsp;{!Training_Event__c.Course__r.Release_Month_of_Course__c}<br/>
+            Materials Release Year:&nbsp;&nbsp;{!Training_Event__c.Course__r.Release_Year_of_Course__c}<br/>
+            Materials Google Drive URL:&nbsp;&nbsp;<apex:outputLink value="{!Training_Event__c.Course__r.Materials_Google_Drive_URL__c}">{!Training_Event__c.Course__r.Materials_Google_Drive_URL__c}</apex:outputLink> <br/> 
+        </apex:outputPanel>
+            Bespoke Materials Google Drive URL:&nbsp;&nbsp;<apex:outputLink value="{!Training_Event__c.Bespoke_Materials_Google_Drive_URL__c}">{!Training_Event__c.Bespoke_Materials_Google_Drive_URL__c}</apex:outputLink> <br/> 
+                
+    </p> 
+    </apex:outputPanel> 
+ 
+<!-- CLL - Virtual - VL log in details -->
+     <apex:outputPanel rendered="{!Training_Event__c.Course__r.Course_Format__c ='Virtual Learning'}">  
+        <h3>{!Training_Event__c.Course__r.Training_Translations__r.Login_Details__c}</h3>
+        <p>
+            <apex:outputField rendered="{!NOT(ISBLANK(Training_Event__c.Course__r.Training_Translations__r.VL_Login_Text__c))}" value="{!Training_Event__c.Course__r.Training_Translations__r.VL_Login_Text__c}" />
+            <apex:outputField value="{!Training_Event__c.VL_Login__c}"/>
+        </p>    
+      </apex:outputPanel>
+
+<!--SG and IN and UK and JP Link to delegate register  -->
+    
+    <apex:outputPanel rendered="{!OR(Training_Event__c.Event_Country__c ='SG', Training_Event__c.Event_Country__c ='IN',Training_Event__c.Event_Country__c ='UK',Training_Event__c.Event_Country__c ='JP')}" > 
+    
+        <h3>Delegates</h3>   
+        <p>
+        <!-- these didn't work Download spreadsheet:&nbsp;&nbsp; <apex:outputLink value="{!$Label.Community_Client_Learning_Portal_URL_Delegate_List}&&{!Training_Event__c.Id}&&_self" id="spreadsheetlink">{!$Label.Community_Client_Learning_Portal_URL_Delegate_List}{!Training_Event__c.Id}</apex:outputLink>
+        <br/>
+        Download spreadsheet2:&nbsp;&nbsp; <apex:outputLink value="{!$Label.Community_Client_Learning_Portal_URL_Delegate_List}&&{!Training_Event__c.Id}&&'_self'" id="spreadsheetlink2">Del list2</apex:outputLink>
+        <br/>-->
+        Download spreadsheet:&nbsp;&nbsp; <apex:outputfield value="{!Training_Event__c.Delegate_Register_Link__c}"></apex:outputfield>
+        <br/><br/>
+        Clicking on the Delegate List link will open a new tab and download the spreadsheet.  You can then close the new tab and return to here.   
+        </p> 
+    </apex:outputPanel>
+        
+    
+<!--UK TABLE OF DELEGATES WITH DIETARY AND ACCOMM  --> 
+    <apex:outputPanel rendered="{!Training_Event__c.Event_Country__c ='UK'}" > 
+    
+    <br/>   
+    <p> 
+    <div>
+        <table  width="97%" align="left" cellpadding="4"  cellspacing="0" border="0.1" style=" top: 2.5cm; text-align: center; font-size:10pt;">
+        
+                <THEAD>
+                    <tr>
+                        <th width="1.5cm" style="border:0px solid #000000;border-right:0;"> </th>
+                        
+                        <th width="5cm" style="border:1px solid #000000;border-right:0;">{!$ObjectType.Enrollment__c.fields.Del_Name__c.Label}</th>
+                        <th width="5cm" style="border:1px solid #000000;border-right:0;">Email</th>
+                        <th width="5cm" style="border:1px solid #000000;border-right:0;">Company</th>
+                        <th width="5cm" style="border:1px solid #000000;border-right:0;">Dietary Requirements</th>
+                        <th width="5cm" style="border:1px solid #000000;border-right:0;">Accommodation Option</th>
+                        <th width="5cm" style="border:1px solid #000000;">Country Code</th>
+                        
+                    </tr>
+                </THEAD>
+                    <apex:repeat value="{!enrollments}" var="enr">
+                <TBODY>
+                    <apex:outputPanel layout="none" rendered="{!OR(CONTAINS('Booked',enr.Booking_status__c),CONTAINS('Booked - BSI Employee',enr.Booking_status__c),CONTAINS('Booked - Resit',enr.Booking_status__c))}">   
+                   
+                    <tr >
+                        <td height="1.5cm" width="1.5cm" style="border:0px solid #000000;border-right:0;"> </td>
+    
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!enr.Del_Name__c}</td> 
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!enr.Delegate_Email__c}</td>     
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!enr.Delegate_Company_Name__c}</td>
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!enr.Dietary_Requirements__c}</td>
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;border-right:0;">{!enr.Accomodation__c}<br/>Nights: {!ROUND(enr.No_of_Nights_Accommodation__c,0)}</td>
+                        <td style="text-align:left;border:1px solid #000000;border-top:0;">{!enr.Training_Event__r.Country_Office_ISO_code__c}</td>
+                    </tr>
+                    </apex:outputPanel>
+                </TBODY>
+                </apex:repeat>
+        </table>
+    </div>    
+    </p>    
+    </apex:outputPanel>
+
+
+
+ 
+<!--UK In-House Requirements fields   -->
+    
+    <apex:outputPanel rendered="{!Training_Event__c.Event_Country__c ='UK'}" >
+    
+    <div>
+    <table width="100%" align="left" cellpadding="3" cellspacing="0" style="text-align: left; font-size:10pt;">
+        <tr><td height="1.5cm"></td></tr>
+        <tr><td></td></tr>
+    </table>
+    
+    </div>
+    <div>
+    <p>
+    <br/>
+    <br/>
+ 
+    <h3></h3>  
+    
+    <table  width="97%" align="left" cellpadding="3" cellspacing="0" style="text-align: left; font-size:10pt;">
+    <thead>
+        <tr>
+            <th colspan="2"><h3>In House Course Requirements</h3></th>
+        </tr>
+        
+    </thead>
+    <tbody> 
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    <apex:outputPanel rendered="{!Training_Event__c.Course__r.Bespoke_Event__c}" >        
+        <tr><td style="border:0.5px solid #000000;border-right:0;">Bespoke Course Name</td><td style="border:0.5px solid #000000;"><apex:outputfield value="{!Training_Event__c.Bespoke_Course_Name_for_Certificate__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">Bespoke Development Status</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Development_Status__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">Bespoke Development Tutor</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Bespoke_Development_Tutor__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">Bespoke Live Examples</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Live_examples_to_be_used__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">Bespoke Learning Points</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Areas_to_Cover__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;border-bottom:0;">Bespoke Specific Focus</td><td style="border:0.5px solid #000000;border-top:0;border-bottom:0;"><apex:outputfield value="{!Training_Event__c.Areas_of_Focus__c}"></apex:outputfield></td></tr>
+    </apex:outputPanel> 
+        <tr><td style="border:0.5px solid #000000;border-right:0;">In House Core Purpose</td><td style="border:0.5px solid #000000;"><apex:outputfield value="{!Training_Event__c.Core_Purpose_of_Training__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">In House Learning</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Learning_Objectives__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">In House Previous Knowledge</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Current_Level_of_Comprehension__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">In House Business Area</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Delegate_Business_Area__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">In House Further Information</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Further_Information_on_requirements__c}"></apex:outputfield></td></tr>
+        <tr><td style="border:0.5px solid #000000;border-right:0;border-top:0;">Maximum Delegates</td><td style="border:0.5px solid #000000;border-top:0;"><apex:outputfield value="{!Training_Event__c.Max_seats__c}"></apex:outputfield></td></tr>
+    </tbody>
+    </table>
+    </p> 
+    </div>     
+    </apex:outputPanel> 
+</body> 
+
+</apex:page>

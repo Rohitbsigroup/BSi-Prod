@@ -1,0 +1,19 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId">
+    <lightning:recordEditForm aura:id="recordEditForm" recordId="{!v.recordId}" objectApiName="Account">
+        <lightning:messages />
+        <lightning:card title="Client SWOT">
+                <lightning:inputField fieldName="Key_Client_Strength__c"/>
+                <lightning:inputField fieldName="Key_Client_Weakness__c"/>
+                <lightning:inputField fieldName="Key_Client_Opportunity__c"/>
+                <lightning:inputField fieldName="Key_Client_Threat__c"/>
+        </lightning:card>
+        <lightning:card title="BSI SWOT">
+            	<lightning:inputField fieldName="Key_BSI_Strength__c"/>
+                <lightning:inputField fieldName="Key_BSI_Weakness__c"/>
+                <lightning:inputField fieldName="Key_BSI_Opportunity__c"/>
+                <lightning:inputField fieldName="Key_BSI_Threat__c"/>
+        </lightning:card>
+        <lightning:button class="slds-m-top_small" type="reset" label="Cancel" />
+        <lightning:button class="slds-m-top_small" type="submit" label="Save" />
+    </lightning:recordEditForm>
+</aura:component>

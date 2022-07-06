@@ -1,0 +1,319 @@
+<apex:page renderAs="pdf" standardController="Personal_Qualification__c" applyBodyTag="false" applyHtmlTag="false" pageStyle="all"  showHeader="false" lightningStylesheets="" >
+<!-- BSITAPQCertificatev5 
+
+01/10/2019 - JS - Updated for global qualifications
+
+-->
+<html>
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+
+@page
+{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 landscape;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;
+}
+<apex:panelGroup rendered="{!NOT(Personal_Qualification__c.Training_Translations__r.Name = 'China (Chinese)')}">
+    .footer {
+        position: fixed;
+        left: 12mm;
+        bottom: 6mm;
+        z-index:+2;
+        font-size: 7pt;
+        line-height: 4px;
+        }
+
+</apex:panelGroup>       
+<apex:panelGroup rendered="{!Personal_Qualification__c.Training_Translations__r.Name = 'China (Chinese)'}">       
+    .footer {
+        position: fixed;
+        left: 12mm;
+        bottom: 13mm;
+        z-index:+2;
+        font-size: 7pt;
+        line-height: 4px;
+        }
+</apex:panelGroup>
+
+.logo {
+   position: relative;
+   left: 10mm;
+   bottom: -3mm;
+   z-index:+2;
+   }
+.logo2 {
+   position: relative;
+   left: 0mm;
+   bottom: - 0mm;
+   z-index:+2;
+   }
+.small8 {
+    font-size: 7pt;
+    text-align: left;
+    line-height: 4px;
+    }
+.size8 {
+    font-size: 8pt;
+    text-align: left;
+    }
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+    }
+.size12 {
+    font-size: 12pt;
+    text-align: left;
+    }
+.size15 {
+    font-size: 15pt;
+    text-align: left;
+    }
+.size20 {
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size28 {
+    font-weight: bold;
+    font-size: 28pt;
+    text-align: left;
+    line-height: 28px;
+    }
+.size33 {
+    font-weight: bold;
+    font-size: 33pt;
+    text-align: left;
+    line-height: 34px;
+    }      
+.size35 {
+    font-weight: bold;
+    font-size: 35pt;
+    text-align: left;
+    line-height: 34px;
+    }
+</style>
+
+</head>
+
+
+<!-- BACKGROUND IMAGE -->
+<img src="{!URLFOR($Resource.TrainingCertificatesv4, 'BSI_training_certificate_newv4-2014.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="29.7cm" height="21cm"/>
+<body>
+
+<!-- TOP--><apex:image height="2cm" style="position: fixed; left: 19cm; top:1.3cm; z-index:1" url="{!URLFOR($Resource.TrainingCertificateQualLogos, Personal_Qualification__c.Certificate_Logo__c)}"/>
+
+<!-- BOTTOM-->
+<!--<apex:image height="1.8cm" style="position: fixed; left: 1.2cm; top:17.7cm; z-index:1" url="{!URLFOR($Resource.TrainingCertificateQualLogos, Personal_Qualification__c.Qualification__r.Master_Qualification__r.Certificate_Logo__c)}"/>
+-->
+<!--table to insert the text in the correct places -->
+
+<table width="99%" align="center" table-layout="fixed"  >
+     <!---- this inserts a space at the top---->
+    <tr>
+        <td width ="0.7cm" ></td>
+        <td height="120"></td>
+    </tr>
+    <!--BSI TRAINING ACADEMY-->        
+    <tr>
+        <td width="0.7cm"></td>
+        <td align="left" valign="bottom" height="40">
+        <!---- this brings in the text "BSI Training Academy" for all countries in size 33.  For JP is is size 28 and for KR the translation is displayed for "Local" and as BSI Training Academy for "English"---->
+            <apex:outputText styleClass="size33" rendered="{!NOT(OR(Personal_Qualification__c.Training_Translations__r.Name = 'Japan (Japanese)',AND(Personal_Qualification__c.Training_Translations__r.Name = 'Korea (Korean)',Personal_Qualification__c.Certificate_Language__c = "English")))}" value="{!Personal_Qualification__c.Training_Translations__r.BSI_Training_Academy__c}"/>
+            <apex:outputText styleClass="size28"  rendered="{!Personal_Qualification__c.Training_Translations__r.Name = 'Japan (Japanese)'}" value="{!Personal_Qualification__c.Training_Translations__r.BSI_Training_Academy__c}"/>
+            <apex:outputText styleClass="size33" rendered="{!AND(Personal_Qualification__c.Training_Translations__r.Name = 'Korea (Korean)', Personal_Qualification__c.Certificate_Language__c = "English")}" value="BSI Training Academy"/>
+        </td>
+    </tr>
+    <tr>        
+        <apex:panelGroup rendered="{!NOT(Personal_Qualification__c.Training_Translations__r.Name = 'Turkey (Turkish)')}"> <td width="0.7cm" height="50"></td></apex:panelGroup>
+        <apex:panelGroup rendered="{!Personal_Qualification__c.Training_Translations__r.Name = 'Turkey (Turkish)'}"> <td width="0.3cm" height="80"></td></apex:panelGroup>
+        
+        <td align="left" valign="bottom" styleClass="size12">
+    <!-- THIS IS TO CERTIFY --> 
+           <apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Text_Box_1__c}"  styleClass="size12" />        
+        </td>
+    </tr>
+    <!---- this inserts a space ---->
+    <tr>
+        <td width="0.7cm"></td>
+        <td height="12"></td>
+    </tr>
+    <tr>
+        <td width="0.7cm" height="20"></td>
+        <td align="left" valign="middle">
+        
+            <!--Try new Delegate Name component-->
+            <c:Delegate_Name2 pq="{!Personal_Qualification__c}"
+                              source="qual"/>
+
+       </td>
+    </tr>
+
+    <tr> 
+        <td width="0.7cm"></td>
+        <td height="60" align="left" valign="middle">
+            <!--Try new Attended component - fufilled requirements for AU-->
+            <c:Attended2 pq="{!Personal_Qualification__c}"
+                              source="qual"/>
+        </td>
+    </tr>
+    <tr>
+        <td width="0.7cm" height="20" ></td>
+        <td align="left" valign="middle">
+        </td>
+    </tr>
+</table>
+    
+<table width="99%" align="center" table-layout="fixed"  >
+    <tr>
+        <td width="0.7cm" height="50"></td>
+        <td align="left" height="1cm" valign="top"> 
+        <!-- This brings in the Qualification name (and code for AU local quals)-->    
+            <apex:outputText rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}" value="{!Personal_Qualification__c.Qualification_Code__c} - {!Personal_Qualification__c.Qualification_Name__c}" styleClass="size22"/>
+            <apex:outputText rendered="{!Personal_Qualification__c.RecordType.Name = 'BSI Qualification'}" value="{!Personal_Qualification__c.Qualification_Name__c}" styleClass="size22"/>            
+        </td>
+    </tr>    
+    <!-- space before signature -->    
+    <tr>           
+         <td width ="0.7cm" height="15" ></td>
+         <td align="left" valign="middle"></td>                   
+    </tr>   
+</table>
+
+<!-- SIGNATURE --> 
+<table width="99%" align="center" table-layout="fixed" >
+    <tr>
+        <td width="0.7cm"></td>
+        <td frame="below" style="align:left; valign:bottom; border-bottom: 1px solid #000;" height="50">
+
+            <!--Try new component for Signature2 -->
+            <c:Signature2 pq="{!Personal_Qualification__c}"
+                                source="qual"/>
+           
+        </td>
+        <td width ="15.0cm"></td>
+    </tr>
+</table>
+
+<!--TRAINING MANAGERS NAME FROM TRANSLATIONS (ALL Countries)-->     
+      <table width="99%" align="center" table-layout="fixed"   >
+        <tr>
+            <td height="30"  width="0.7cm" ></td>
+            <td valign="top">
+                <apex:outputText styleClass="size12" value="{!Personal_Qualification__c.Training_Translations__r.Training_Manager__c}"/>
+            </td>
+        </tr>
+    </table>
+
+<br/>
+
+<!-- This pulls in the Dates,certificate number,student number etc depending on the qual  -->
+<table width="99%" align="centre" table-layout="fixed"   >
+    <tr>
+        <td width ="0.55cm" ></td>    
+       
+        <td width="3.5m" align="left">
+            <apex:outputText styleClass="size10" rendered="{!NOT(Personal_Qualification__c.Certificate_Language__c='English')}" value="{!Personal_Qualification__c.Training_Translations__r.Date__c} :"/>
+            <apex:outputText styleClass="size10" rendered="{!Personal_Qualification__c.Certificate_Language__c='English'}" Value="Date :" />
+        </td> 
+        
+        <td align="left" width="5cm">
+            <apex:outputText styleClass="size10" rendered="{!OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR')}" value="{0,date,yyyy/MM/dd}">
+                <apex:param value="{!Personal_Qualification__c.Date_Qualification_Completed__c}"/>
+            </apex:outputText>
+            <apex:outputText styleClass="size10" rendered="{!NOT(OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR'))}" value="{0,date,dd/MM/yyyy}">
+                <apex:param value="{!Personal_Qualification__c.Date_Qualification_Completed__c}"/>
+            </apex:outputText>
+        </td>
+        <td align="left" width="1.3cm"></td>
+        <apex:panelgroup rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}">
+             <td width="3.5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Certificate_Number__c}"  styleClass="size10"/></td>         
+            <td width="5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Name}"/></td>
+        </apex:panelgroup>
+    </tr>
+    <tr>
+        <td width="0.55cm" ></td>
+        <apex:panelgroup rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}">
+            <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="Student Number :"/> </td> 
+            <td align="left" width="5cm"><apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.Delegate_Number__c}"/></td>
+        </apex:panelgroup>
+        <apex:panelgroup rendered="{!Personal_Qualification__c.RecordType.Name = 'BSI Qualification'}"> 
+
+        <td width="3.5cm" align="left">
+            <apex:outputText styleClass="size10" rendered="{!NOT(Personal_Qualification__c.Certificate_Language__c='English')}" value="{!Personal_Qualification__c.Training_Translations__r.Certificate_Number__c}" />
+            <apex:outputText styleClass="size10" rendered="{!Personal_Qualification__c.Certificate_Language__c='English'}"  Value="Certificate Number :" />
+        </td> 
+            
+            <td width="5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Name}"/></td>          
+        </apex:panelgroup>   
+        <td align="left" width="1.3cm"></td>    
+        <td width="3.5cm" align="left"><apex:outputText rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}" value="Provider Number :" styleClass="size10"/></td>
+        <td width="5cm" align="left"><apex:outputText rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}" value="40532"/></td>
+    </tr>
+       <tr>
+        <td width ="0.55cm" ></td>        
+        <apex:panelgroup rendered="{!Personal_Qualification__c.Qualification__r.Level__c = 'Certified Professional'}">
+            <!-- EXPIRY DATE FOR CERTIFIEFD PROFESSIONAL -->
+            <td width="3.5cm" align="left">
+                <apex:outputText rendered="{!NOT(Personal_Qualification__c.Certificate_Language__c='English')}" value="{!Personal_Qualification__c.Training_Translations__r.Expiry_Date__c} :"  styleClass="size10"/>
+                <apex:outputText rendered="{!Personal_Qualification__c.Certificate_Language__c='English'}"   value="Expiry Date :"  styleClass="size10"/>
+            </td>           
+            <td width="5cm" align="left">
+                <apex:outputText styleClass="size10" rendered="{!OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR')}" value="{0,date,yyyy/MM/dd}">
+                    <apex:param value="{!Personal_Qualification__c.Expiry_Date__c}"/>
+                </apex:outputText>
+                <apex:outputText styleClass="size10" rendered="{!NOT(OR(Personal_Qualification__c.Qualification__r.Country__c = 'JP',Personal_Qualification__c.Qualification__r.Country__c ='KR'))}" value="{0,date,dd/MM/yyyy}">
+                    <apex:param value="{!Personal_Qualification__c.Expiry_Date__c}"/>
+                </apex:outputText>
+            </td>
+            <td></td> 
+        </apex:panelGroup>
+    </tr>
+</table>
+<br /> 
+
+<!----This brings in the AQF & NTR Logo ---->     
+<table width="99%" align="centre" table-layout="fixed"  >   
+    <tr>
+    <td align="left">
+        <!-- was 2.5cm by 5cm -->
+        <apex:image rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}" styleClass="logo" height="2cm" width="4cm" url="{!Personal_Qualification__c.Training_Translations__r.AQF_Logo__c}"/>
+        <!-- was 2.5cm by 2.5cm -->      
+        <apex:image rendered="{!Personal_Qualification__c.RecordType.Name = 'Australia Personal Qualification'}" styleClass="logo" height="2cm" width="2cm" url="{!Personal_Qualification__c.Training_Translations__r.NRT_Logo__c}"/>     
+    </td>
+    </tr>
+</table>
+
+
+<!-- this sets out the office address in the footer at the bottom of the page -->
+
+<table width="99%" align="left" valign="middle" table-layout="fixed">
+    <tr>
+        <td width="0.7cm"></td>
+        <td valign="bottom">
+            <apex:panelGroup styleClass="footer">
+            {!Personal_Qualification__c.Training_Translations__r.Royal_Charter__c}<br/><br/><br/>
+            {!Personal_Qualification__c.Training_Translations__r.Office_Address__c}            
+            </apex:panelGroup>
+        </td>     
+    </tr> 
+</table>
+
+</body>
+
+</html>
+
+</apex:page>

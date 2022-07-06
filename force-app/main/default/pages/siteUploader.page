@@ -1,0 +1,139 @@
+<apex:page controller="SiteUploader" tabStyle="Account">
+   	<!-- CSS STYLE -->
+   	<style type="text/css">
+   		.text {
+			font-family: "Courier",Times,serif;
+			font-size: 12px;
+			text-align: left;
+			color: black;
+		}
+		.highlight {
+			font-family: "Courier",Times,serif;
+			font-size: 13px;
+			font-weight: bold;
+			text-align: left;
+			color: red;
+		}
+   	</style>
+   	
+	<apex:form >
+     	<apex:sectionHeader subtitle="Upload Sites" title="Bulk upload from CSV files"/>
+      	<apex:pagemessages />
+		<!-- IMPORT SECTION -->
+      	<apex:pageBlock title="Import multiple Sites from a CSV file">
+      	<apex:pageBlockButtons location="top">  		
+      		<apex:commandButton action="{!back}" value="{!$Label.Done}" style="float:right;font-size:15px"/>
+      	</apex:pageBlockButtons>
+      	<center>
+      	<apex:panelGrid columns="1" cellspacing="5" cellpadding="5" width="100%" bgcolor="#A23233" rendered="{!!showCSV}">
+       		<apex:outputText value="No CSV Template found. Please contact your administrator." style="font-size:14px;font-weiht:bold;color:white"/>
+		</apex:panelGrid>
+		<apex:panelGrid columns="1" cellspacing="5" cellpadding="5" width="100%" bgcolor="#2B9639" rendered="{!emailSent}">
+       		<apex:outputText value="Your email has been sent." style="font-size:14px;font-weiht:bold;color:white"/>
+		</apex:panelGrid>
+		</center>
+      	<br/>
+      	<center>
+      		<apex:panelGrid columns="3" width="300px" cellpadding="2" cellspacing="2">
+	      		<apex:inputFile value="{!docFile.body}" filename="{!docFile.name}" fileSize="{!docFile.BodyLength}" contentType="{!docFile.ContentType}" size="40" />
+	      		<apex:commandButton action="{!readFile}" value="Upload File" id="theButton2" style="font-size:15px"/>
+       		</apex:panelGrid>
+
+       		<br/><br/>
+       		<apex:outputPanel rendered="{!showCSV}">
+       		<table cellspacing="5px" cellpadding="2px">
+       		<tr>
+       		<td style="vertical-align:middle;">
+       		<!--<apex:outputText value="Note: Please use the standard template to upload Sites. Click the icon to download the template." styleClass="highlight"/>-->
+       		<apex:image value="{!$Resource.icon_csv}" width="35"/>
+       		</td><td style="vertical-align:middle;">
+       		<apex:outputLink value="{!templateURL}" target="_blank" styleclass="btn" style="text-decoration:none;font-size:20px;height:30px;">
+       			Download CSV
+       		</apex:outputLink>
+       		<p />
+      		<apex:outputLink value="{!countryCodesURL}" target="_blank">
+       			(Download Country Code List)
+       		</apex:outputLink>
+       		</td>
+       		<td style="vertical-align:middle;">
+       		<apex:image value="{!$Resource.icon_email}" width="35"/>
+       		</td><td style="vertical-align:middle;">
+       		<apex:commandLink value="Send CSV to customer" action="{!sendCSV}" target="_top" styleclass="btn" style="text-decoration:none;font-size:20px;height:30px;"/>
+       		<!--<a href="{!templateURL}" target="_blank">
+       			<apex:image value="{!$Resource.icon_csv}" width="60"/>
+       		</a>-->    			
+       		</td>
+       		</tr>
+       		<tr>     		
+       		<td colspan="4" align="center" style="vertical-align:middle;">
+       			<apex:selectList value="{!customer}" size="1" style="font-weight:bold;font-size:14px">
+					<apex:selectOptions value="{!Customers}" />
+				</apex:selectList>
+			</td>
+       		</tr>
+       		</table>
+       		</apex:outputPanel>
+       		<!--<br/><font color="red"> <b>Note: Please use the standard template to upload Sites. <a href="{!URLFOR($Resource.template_sites)}" target="_blank"> Click here </a> to download the template. </b> </font>-->
+      	</center>
+		<br/>
+      	</apex:pageBlock> 
+      	
+      	<!-- RESULTS SECTION -->
+      	<apex:pageBlock title="Results (First 20 records)" rendered="{!NOT(ISNULL(Errors)) || NOT(ISNULL(Success))}">
+      		<apex:pageblocktable value="{!Errors}" var="error" rendered="{!NOT(ISNULL(Errors))}">
+	      	<apex:column width="30">
+				<apex:image value="{!$Resource.icon_markerdel}" width="30"/>
+			</apex:column>             
+			<apex:column headerValue="Error Message"> 
+				<apex:outputText value="{!error}" style="color:#A23233"/>
+			</apex:column> 
+      		</apex:pageblocktable>
+      		<apex:pageblocktable value="{!Success}" var="s" rendered="{!NOT(ISNULL(Success))}">
+	      	<apex:column width="30">
+				<apex:image value="{!$Resource.icon_marker}" width="30"/>
+			</apex:column>
+	      	<apex:repeat value="{!columnList}" var="flds">                 
+			<apex:column headerValue="{!$ObjectType.Site__c.fields[flds].label}"> 
+				<apex:outputField value="{!s[flds]}"/>
+			</apex:column> 
+			</apex:repeat>
+      		</apex:pageblocktable>  
+      		<!--<apex:pageblocktable value="{!uploadedSites}" var="s" rendered="{!NOT(ISNULL(uploadedSites))}">
+	      	<apex:column width="30">
+				<apex:image value="{!$Resource.icon_marker}" width="30"/>
+			</apex:column>
+	      	<apex:repeat value="{!columnList}" var="flds">                 
+			<apex:column headerValue="{!$ObjectType.Site__c.fields[flds].label}"> 
+				<apex:outputField value="{!s[flds]}"/>
+			</apex:column> 
+			</apex:repeat>
+      		</apex:pageblocktable> -->
+      	</apex:pageBlock>
+      	
+      	<!-- INSTRUCTIONS -->
+      	<apex:pageBlock title="Instructions">
+      		<table width="100%">
+      		<tr>
+      			<td><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+      			<td style="vertical-align:middle;"><apex:outputText value="You can upload a maximum value of <b>5,000</b> cells (columns x rows)" escape="false" styleClass="text"/></td>
+      		</tr>
+      		<tr>	
+      			<td><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+      			<td style="vertical-align:middle;"><apex:outputText value="You can upload a maximum value of <b>1,000</b> rows" escape="false" styleClass="text"/></td>
+      		</tr>
+      		<tr>	
+      			<td><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+      			<td style="vertical-align:middle;"><apex:outputText value="File format must be <b>CSV</b>. In Excel go to <b>Save as...</b> and choose <b>CSV</b>." escape="false" styleClass="text"/></td>
+      		</tr>
+      		<tr>	
+      			<td><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+      			<td style="vertical-align:middle;"><apex:outputText value="Download the template from the link below, do not modify the names of the headers. You can change the order of the columns." styleClass="text"/></td>
+      		</tr>
+      		<tr>	
+      			<td><apex:image value="{!$Resource.icon_info}" width="30"/></td>
+      			<td style="vertical-align:middle;"><apex:outputText value="After pressing <b>Upload</b> wait for the results to display and then press <b>{!$Label.Done}</b>." escape="false" styleClass="text"/></td>
+      		</tr>
+      		</table>
+      	</apex:pageBlock>      
+   	</apex:form>   
+</apex:page>

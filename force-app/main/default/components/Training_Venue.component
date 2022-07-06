@@ -1,0 +1,178 @@
+<apex:component access="global">
+
+<!--JS  IF EDITING PLEASE UPDATE BOTH HTML AND TEXT VERSION-->
+ 
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+    <apex:attribute name="ver" description="HTML or text version" type="String" access="global"/>
+
+    <!-- HTML version -->
+    <apex:panelGroup rendered="{!ver='HTML'}">
+        <p>
+
+        <!-- not JP,KR,TH,CN,TW, 12/10/2016 NL -->
+        <apex:panelGroup rendered="{!NOT(OR(enrollment.Training_Event__r.Event_Country__c = 'CN', enrollment.Training_Event__r.Event_Country__c='JP', 
+        enrollment.Training_Event__r.Event_Country__c='KR', enrollment.Training_Event__r.Event_Country__c='NL', enrollment.Training_Event__r.Event_Country__c='TH', 
+        enrollment.Training_Event__r.Event_Country__c='TW'))}"> 
+            <apex:outputText style="font-weight:bold" value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Room__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Room__c}<br/></apex:outputText>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Street__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_city__c}<br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Postal_Zip_code__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Postal_Zip_code__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Country__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Country__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}<br/></apex:outputText>
+        </apex:panelGroup>
+    
+        <!---- NL 12/10/2016 -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='NL')}"> 
+            <apex:outputText style="font-weight:bold" value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <br/>
+    
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Street__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Postal_Zip_code__c} {!enrollment.Training_Event__r.Training_Venue__r.Venue_city__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Country__c}<br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}<br/></apex:outputText>
+        </apex:panelGroup>
+    
+        <!-- CN, JP, TW -->
+        <apex:panelGroup rendered="{!OR(enrollment.Training_Event__r.Event_Country__c='CN', enrollment.Training_Event__r.Event_Country__c='JP', enrollment.Training_Event__r.Event_Country__c='TW')}"> 
+            <apex:outputText style="font-weight:bold" value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <br/>
+    
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}<br/>                               
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}<br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}<br/></apex:outputText>
+        </apex:panelGroup>
+    
+        <!-- KR 20140709 -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='KR')}"> 
+            <apex:outputText style="font-weight:bold" value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <br/>
+    
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Country__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}<br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}<br/></apex:outputText>
+        </apex:panelGroup>
+    
+        <!-- TH 20140811 -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='TH')}"> 
+            <apex:outputText style="font-weight:bold" value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <br/>
+    
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_State__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}<br/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Country__c}<br/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}<br/></apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}<br/></apex:outputText>
+        </apex:panelGroup>
+        </p>
+    
+        <!--JS 20180823 added logic for location details text-->
+        <apex:panelGroup rendered="{!AND(enrollment.Training_Event__r.Course_Type_Formula__c ='Public',NOT(OR(enrollment.Training_Event__r.Change_of_Date__c, enrollment.Training_Event__r.Change_of_Venue__c)))}">
+            <p>{!enrollment.Training_Translations__r.Location_Details__c}</p>
+        </apex:panelGroup>
+        
+    </apex:panelGroup>
+    <!-- end HTML version -->
+
+
+    <!-- plain text version -->
+    <apex:panelGroup rendered="{!ver!='HTML'}">
+
+        <!-- not JP,KR,TH,CN,TW, 12/10/2016 NL -->
+        <apex:panelGroup rendered="{!NOT(OR(enrollment.Training_Event__r.Event_Country__c='CN', enrollment.Training_Event__r.Event_Country__c='JP', enrollment.Training_Event__r.Event_Country__c='KR', enrollment.Training_Event__r.Event_Country__c='NL', enrollment.Training_Event__r.Event_Country__c='TH', enrollment.Training_Event__r.Event_Country__c='TW'))}"> 
+            <apex:outputText value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Room__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Room__c}</apex:outputText>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Street__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_city__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Postal_Zip_code__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Country__c}                        
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}</apex:outputText>
+        </apex:panelGroup>
+
+        <!-- NL 12/10/2016 -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='NL')}"> 
+            <apex:outputText value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Street__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Postal_Zip_code__c} {!enrollment.Training_Event__r.Training_Venue__r.Venue_city__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Country__c}           
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}</apex:outputText>           
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}</apex:outputText>
+        </apex:panelGroup>
+
+        <!-- CN, JP, TW -->
+        <apex:panelGroup rendered="{!OR(enrollment.Training_Event__r.Event_Country__c='CN', enrollment.Training_Event__r.Event_Country__c='JP', enrollment.Training_Event__r.Event_Country__c='TW')}">
+            <apex:outputText value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/> 
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}</apex:outputText>
+        </apex:panelGroup>
+
+        <!-- KR -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='KR')}"> 
+            <apex:outputText value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/> 
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Country__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}</apex:outputText>
+        </apex:panelGroup>
+
+        <!-- TH -->
+        <apex:panelGroup rendered="{!(enrollment.Training_Event__r.Event_Country__c='TH')}"> 
+            <apex:outputText value="{!enrollment.Training_Event__r.Training_Venue__r.Name}"/>
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Street__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_City__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_State__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Post_Zip_Code__c}
+            {!enrollment.Training_Event__r.Training_Venue__r.Local_Country__c}
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Venue_Website__c}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(enrollment.Training_Event__r.Training_Venue__r.Phone__c))}">
+            {!enrollment.Training_Event__r.Training_Venue__r.Phone__c}</apex:outputText>
+        </apex:panelGroup>
+
+        
+        <!--JS 20180823 added logic for location details text-->
+        <apex:panelGroup rendered="{!AND(enrollment.Training_Event__r.Course_Type_Formula__c ='Public',NOT(OR(enrollment.Training_Event__r.Change_of_Date__c, enrollment.Training_Event__r.Change_of_Venue__c)))}">
+            {!enrollment.Training_Translations__r.X14_Cht_space__c}
+            {!enrollment.Training_Translations__r.Location_Details__c}
+        </apex:panelGroup>
+    </apex:panelGroup>
+    <!-- end plain text version -->
+</apex:component>

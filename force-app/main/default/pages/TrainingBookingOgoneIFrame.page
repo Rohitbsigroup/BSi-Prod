@@ -1,0 +1,148 @@
+<!-- Created by Mahmood (Cognizant) on 30-01-2020 for PCI-DSS compliance -->
+<apex:page controller="TrainingBookingOgoneIFrameCtr"
+    language="{!pageLanguage}"
+    standardstylesheets="false"
+    showheader="false"
+    cache="false"
+    applyBodyTag="false"
+    applyHtmlTag="false"
+    action="{!validatePage}"
+    docType="html-5.0">
+
+    <!-- Displayed the default display -->
+    <apex:panelGroup layout="none" rendered="{!NOT(paramMode='3D')}">
+    <html>
+        <head>
+            <title>{!$Label.TrainingBookingTitle}</title>
+            <meta name="viewport" content="width=device-width" />
+            <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}" />
+            <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+
+            <!-- *** General show/hide function *** -->
+            <script type="text/javascript">
+                function divOnOff(id) {
+                    var tag = document.getElementById(id);
+                    if (tag.style.display !== 'none') {
+                        tag.style.display = 'none';
+                    }
+                    else {
+                        tag.style.display = 'block';
+                    }
+                }
+            </script>
+
+            <!-- *** Google Analytics *** -->
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-21147145-1']);
+                _gaq.push(['_setDomainName', 'force.com']);
+                _gaq.push(['_setAllowLinker', true]);
+                _gaq.push(['_trackPageview', 'Step5']);
+
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+            </script>
+
+        </head>
+        <body>
+            <div class="wrapper">
+                <div class="page">
+
+                    <div class="header">
+                        <a class="logo" href="http://bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                        <p class="site-strap ir">Making excellence a habit</p>
+                        <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                        <p class="phone-no">
+                            <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                            <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}" />
+                        </p>
+                    </div> <!-- /.header -->
+
+                    <div class="main">
+                        
+                        <!-- *** Details *** -->
+                        <h1 class="title">{!courseName}</h1>
+                        <apex:outputPanel rendered="{!pageShowSelection}">
+                            <h2 class="subtitle">
+                                <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                                <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                            </h2>
+                            <h2 class="subtitle">
+                                <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                                <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                            </h2>
+                        </apex:outputPanel>
+
+                        <apex:messages id="messages" styleClass="messages" />
+                        <div id="details" style="{!IF(pageIsValid && Not(isUncertain), 'display:block;', 'display:none;' )}">
+                            <!-- *** Introduction *** -->
+                            <p class="intro">{!$Label.TrainingBookingOgoneIntro}</p>
+                            <apex:image style="margin-top: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'VISA.gif')}"/>
+                            <apex:image style="margin-top: 10px; margin-left: 10px; border: 0;" url="{!URLFOR($Resource.TrainingBookingResources, 'mastercard.gif')}"/>
+                            <!-- check every few seconds if the payment is made -->
+                            <apex:form id="paymentstatus">
+                                <apex:actionPoller action="{!successPage}" reRender="paymentstatus" interval="10" /> <!-- enabled="{!pageIsValid}" -->
+                            </apex:form>
+
+                            <!-- *** Body - iFrame with Ingenico/Ogone flex checkout *** -->
+                            <apex:panelGroup layout="block" styleClass="two-thirds">
+                                <apex:iframe frameborder="false" width="100%" height="400px" src="{!flexCheckout_URL}" scrolling="true" />
+                            </apex:panelGroup>
+
+                            <!-- *** Notes *** -->
+                            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                                <p>{!$Label.TrainingBookingOgoneNotes}</p>
+                                <p>{!$Label.TrainingBookingOgoneNotes2}</p>
+                            </apex:outputPanel>
+                        </div>
+                        <!-- *** Invoice instead option *** -->
+                        <apex:outputPanel layout="block" rendered="{!selectedCountry.isInvoiceAllowed}"
+                                          style="border: 1px solid transparent;border-radius:3px;background-color: #f3f3f3;border-color: #d6d6d6;display:flex;flex-direction:row;font-size:16px;padding: 15px;overflow: hidden;zoom: 1;">
+                            <img src="https://img.icons8.com/cotton/64/000000/invoice.png" style="height: 32px;"/>
+                            <apex:form style="padding-top: 5px;">
+                                <apex:commandLink action="{!invoiceInstead}" value="{!$Label.TrainingBookingInvoiceInstead}" immediate="true" />
+                            </apex:form>
+                        </apex:outputPanel>
+                    </div> <!-- /.main -->
+
+                    <div class="footer">
+                        <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                        <ul>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}"> 
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                                <li>
+                                    <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                                </li>
+                            </apex:outputPanel>
+                        </ul>
+                    </div> <!-- /.footer -->
+
+                </div> <!-- /.page -->
+            </div> <!-- /.wrapper -->
+        </body>
+    </html>
+    </apex:panelGroup>
+</apex:page>

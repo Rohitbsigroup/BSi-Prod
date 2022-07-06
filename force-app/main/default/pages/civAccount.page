@@ -1,0 +1,6 @@
+<apex:page standardController="Account" sidebar="false" showHeader="false">
+
+	<c:civMain theRecord="{!Account}" theCompany="{!Account.Name}"
+            	thePostcode="{!Account.BillingPostalCode}" thePhone="{!Account.Phone}" />
+
+</apex:page>

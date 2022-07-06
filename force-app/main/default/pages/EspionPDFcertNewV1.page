@@ -1,0 +1,306 @@
+<apex:page renderAs="PDF" standardController="Enrollment__c" applyBodyTag="false" applyHtmlTag="false" showHeader="false" pageStyle="all">
+
+  <head>
+        <!-- EspionPDFcertNewV1 Checked Out  DATE
+
+        09/09/2016 - Vimlesh Azad - Created new code to match Espion requirements
+
+        -->
+
+        <style type="text/css" media="print">
+            body {
+                font-family: Arial Unicode MS;
+                font-size: 10pt;
+            
+                
+            }
+          
+            @page {
+                
+                @bottom-left {
+                    content: element(footer);
+                }
+                
+                size: A4 landscape;
+                margin-top: .0cm;
+                margin-left: 0cm;
+                margin-right: 0cm;
+                margin-bottom: 0cm;
+            }
+
+            .footer {
+                position: fixed;
+                left: 12mm;
+                bottom: 6mm;
+                z-index: +2;
+                font-size: 7pt;
+            }
+
+            .small8 {
+                font-size: 7pt;
+                text-align: left;
+            }
+
+            .size12 {
+                font-size: 12pt;
+                text-align: left;
+            }
+
+            .size15 {
+                font-size: 15pt;
+                text-align: left;
+            }
+
+            .size22 {
+                font-weight: bold;
+                font-size: 22pt;
+                text-align: left;
+              
+            }
+
+            .size33 {
+                font-weight: bold;
+                font-size: 33pt;
+                text-align: left;
+                
+            }
+        </style>
+    </head>
+ <!---- this sets the background template image for the certificate---->
+    
+    <img  src="{!$Resource.rcsEspion_WatermarkImage}" align="right" width="12.0cm" />
+    <body >
+ <!---- this creates a table to insert the text in the correct places---->
+        
+        <table width="99%" align="center" table-layout="fixed">
+            
+            <tr>
+                <td width="0.7cm"></td>
+                <td align="left" valign="top">
+                    <!---- this brings in the text "Bsi Training Academy" for all countries---->
+                    <img  src="{!$Resource.rcsEspion_Email_header}" width="11cm" height="2.5cm" />
+                </td>
+            </tr>
+
+            <!---- this inserts a space at the top---->
+            <tr>
+                <td width="0.7cm"></td>
+                <td ></td>
+            </tr>
+            <tr>
+                <td width="0.7cm"></td>
+                <td align="left" valign="bottom">
+                    <!---- this brings in the text "Bsi Training Academy" for all countries---->
+                    <apex:outputtext styleclass="size33" value="{!Enrollment__c.Training_Translations__r.BSI_Training_Academy__c}" />
+                </td>
+            </tr>
+            <tr>
+                <td width="0.7cm"></td>
+                <td height="3cm"></td>
+            </tr>
+
+            <tr>
+                <td width="0.7cm"></td>
+                <td align="left" valign="bottom">
+                    
+                    <!---- this brings in the text to state "This is to certify that"---->
+                    <apex:outputtext styleclass="size12" value="{!Enrollment__c.Training_Translations__r.Text_Box_1__c}" />
+                </td>
+            </tr>
+            <!---- this inserts a space ---->
+            <tr>
+                <td width="0.7cm" colspan="2"></td>
+             
+            </tr>
+            <tr>
+                <td width="0.7cm" height="20"></td>
+                <td align="left" valign="middle">
+                    <apex:outputtext value="{!Enrollment__c.Delegate_name__r.Name}" styleclass="size22" />
+                </td>
+            </tr>
+            <tr>
+                <td width="0.7cm"></td>
+                <td height="60" align="left" valign="middle">
+                    
+                    <!--  this brings in the correct text dependant on exam results for all other countries  -->
+
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = null,true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", false,true)}" value="{!Enrollment__c.Training_Translations__r.Text_Box_2__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = null,true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", true,false)}" value="Has attended:" />
+                        <!-- IRCA TO NOT USE --><!-- some here were testing for IRCA-->
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'NON - Fail exam',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", false,true)}" value="{!Enrollment__c.Training_Translations__r.Text_Box_2__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'NON - Fail exam',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", true,false)}" value="Has attended:" />
+                        <!-- IRCA TO NOT USE --><!-- some more were testing for IRCA-->
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'NON - Pass exam',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", false,true)}" value="{!Enrollment__c.Training_Translations__r.Text_box_3__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'NON - Pass exam',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", true,false)}" value="Has attended and passed:" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'IOSH - Pass',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", false,true)}" value="{!Enrollment__c.Training_Translations__r.Text_box_3__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'IOSH - Pass',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", true,false)}" value="Has attended and passed:" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'IOSH - Fail',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", false,true)}" value="{!Enrollment__c.Training_Translations__r.Text_Box_2__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(Enrollment__c.Exam_results__c = 'IOSH - Fail',true,false)&&IF(Enrollment__c.Certificate_Language__c = " english", true,false)}" value="Has attended:" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(((Enrollment__c.Exam_results__c = 'Six Sigma - Pass')&&(Enrollment__c.Translation_Formula__c = 'India (English)')&&(CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c," green")|| (contains(Enrollment__c.training_event__r.Course_Name_for_Certificate__c,"black" ))) ),true,false)}" escape="false" value="{!Enrollment__c.Training_Translations__r.IN_Six_Sigma_Pass__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(((Enrollment__c.Exam_results__c = 'Six Sigma - Fail') &&(Enrollment__c.Translation_Formula__c = 'India (English)')&&((CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c," green") || (contains(Enrollment__c.training_event__r.Course_Name_for_Certificate__c,"black" )) ))),true,false)}" escape="false" value="{!Enrollment__c.Training_Translations__r.Text_Box_2__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF((((Enrollment__c.Exam_results__c = 'Six Sigma - Fail')||(Enrollment__c.Exam_results__c = 'Six Sigma - Pass'))&&(Enrollment__c.Translation_Formula__c = 'India (English)')&&(CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c,'YELLOW'))),true,false)}" value="{!Enrollment__c.Training_Translations__r.IN_Yellow_Six_Sigma__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(((Enrollment__c.Exam_results__c = 'Six Sigma - Pass')&&(Enrollment__c.Translation_Formula__c = 'UK (English)')&&(CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c,'Six Sigma'))),true,false)}" value="{!Enrollment__c.Training_Translations__r.Text_box_3__c}" />
+                        <apex:outputtext styleclass="size12" rendered="{!IF(((Enrollment__c.Exam_results__c = 'Six Sigma - Fail')&&(Enrollment__c.Translation_Formula__c = 'UK (English)')&&(CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c,'Six Sigma'))),true,false)}" value="{!Enrollment__c.Training_Translations__r.Text_Box_2__c}" />
+
+                </td>
+            </tr>
+        </table>
+        <table  width="99%" align="center" table-layout="fixed">
+            <tr>
+                <td width="0.7cm" height="70"></td>
+                <td align="left" height="1cm" valign="top">
+                    
+                    <!----For other cases: This brings in the course name.  This is the Course Name for Certificate field on the training event ---->
+
+                        <apex:outputpanel rendered="{!IF(OR(Enrollment__c.Certificate_Language__c = "Local",Enrollment__c.Certificate_Language__c="" , Enrollment__c.Certificate_Language__c=""), true,false)}"> 
+                            <apex:outputtext styleclass="size22" escape="false" value="{!Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c}" />
+                        </apex:outputpanel>
+
+                        <apex:outputtext rendered="{!IF(OR(Enrollment__c.Certificate_Language__c = "english",Enrollment__c.Certificate_Language__c="English"), true,false)}" escape="false" value="{!Enrollment__c.Training_Event__r.English_Course_Name_for_CertificateF__c}" styleclass="size22" />
+                        <!----Both option Course Name ---->
+                        <apex:outputpanel rendered="{!IF(OR(Enrollment__c.Certificate_Language__c = "both",Enrollment__c.Certificate_Language__c="Both"), true,false)}">
+                            <apex:outputtext rendered="{!IF(Enrollment__c.Training_Event__r.RecordType.Name = 'Global Training Event (Bespoke)',false,true)}" escape="false" value="{!Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c}" styleclass="size22" />
+                            <apex:outputtext rendered="{!IF(Enrollment__c.Training_Event__r.RecordType.Name = 'Global Training Event (Bespoke)',true,false)}" escape="false" value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}" styleclass="size22" />
+                            <br />
+                            <apex:outputtext escape="false" value="{!Enrollment__c.Training_Event__r.English_Course_Name_for_CertificateF__c}" styleclass="size22" />
+                        </apex:outputpanel>
+
+
+                        <!----Special option Course Name ---->
+                        <apex:outputtext rendered="{!IF(OR(Enrollment__c.Certificate_Language__c = "special",Enrollment__c.Certificate_Language__c="Special"), true,false)}" escape="false" value="{!Enrollment__c.Training_Event__r.Special_Course_Name_for_Certificate__c}" styleclass="size22" />
+                </td>
+            </tr>
+        </table>
+        <!---- This displays the text "For and on behalf of:" and the SIGNATURE ------------------------------------------------------------------------------------  -->
+        <table  width="99%" align="center" table-layout="fixed">
+            <tr>
+                <td width="0.7cm"></td>
+
+                <!-- Vimlesh (23 Aug 2016) updated td style to allow signature line as TD border instead of additional hr tag -->
+                <td frame="below" style="align:left; valign:bottom; border-bottom: 2px solid #000;">
+                    <apex:image height="2cm" url="{!Enrollment__c.Training_Translations__r.Signature__c}" />
+                </td>
+                <td width="16.4cm"></td>
+            </tr>
+        </table>
+        <!---- This adds the managers name under the line---->
+        <table width="99%" align="center" table-layout="fixed">
+            <tr>
+                <td height="30" width="0.7cm"></td>
+                <td valign="top">
+                    <apex:outputtext styleclass="size12" value="{!Enrollment__c.Training_Translations__r.Training_Manager__c}" />
+                </td>
+            </tr>
+            <br />
+            <tr>
+                <td width="0.7cm"></td>
+                <td>
+                    <table>
+
+                        <tr>
+                            <!--row 1------------------------------------------------------------------------------------------------------------------------------ -->
+                            <td width="4.5cm" align="left">
+                                <apex:outputtext styleclass="size10" value="Date:" />
+                            </td>
+                            <td align="left" width="12cm">
+                                    <!---- For when not UK Six Sigma Pass ---->
+                                    <apex:outputpanel rendered="{!IF(((Enrollment__c.Exam_results__c = 'Six Sigma - Pass')&&(Enrollment__c.Translation_Formula__c = 'UK (English)')&&(CONTAINS(Enrollment__c.Training_Event__r.Course_Name_for_Certificate__c," six sigma"))),false,true)}">
+
+                                        <!-- For a course which is not an IRCA resit pass with 1 day or less duration shows the start date only -->
+
+                                        <apex:outputtext rendered="{!IF(((Enrollment__c.Training_Event__r.Course_Duration_Days__c <= 1) && IF(((Enrollment__c.Booking_status__c='Booked - Resit')&&(Enrollment__c.Exam_results__c = 'IRCA - Pass exam & pass CA')&&(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)),true,false)}" value="{0,date,dd/MM/yyyy}">
+                                            <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                        </apex:outputtext>
+
+                                        <!----For a course which is not an IRCA resit pass with more than 1 day duration and normal dates shows the start and end dates ---->
+
+                                        <apex:outputtext rendered="{!IF(((Enrollment__c.Training_Event__r.Course_Duration_Days__c > 1) && (NOT(Enrollment__c.Training_Event__r.Split_Date_Event__c)) && IF(((Enrollment__c.Booking_status__c='Booked - Resit')&&(Enrollment__c.Exam_results__c = 'IRCA - Pass exam & pass CA')&&(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy}">
+                                            <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                            <apex:param value="{!Enrollment__c.Training_Event__r.End_Date3__c}" />
+                                        </apex:outputtext>
+
+                                        <!----For a course which is not an IRCA resit pass with more than 1 day duration with split dates shows the start and end dates of all sections ---->
+
+                                        <apex:outputpanel rendered="{!IF(((Enrollment__c.Training_Event__r.Course_Duration_Days__c > 1) && (Enrollment__c.Training_Event__r.Split_Date_Event__c) && IF(((Enrollment__c.Booking_status__c='Booked - Resit')&&(Enrollment__c.Exam_results__c = 'IRCA - Pass exam & pass CA')&&(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c ='IRCA')),false,true)),true,false)}">
+                                            <apex:outputtext rendered="{!IF(AND((Enrollment__c.Training_Event__r.Course_Duration_Days__c>2),(Enrollment__c.Training_Event__r.End_Date3__c - Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c >0) , (Enrollment__c.Training_Event__r.End_Date_of_Section_1__c - Enrollment__c.Training_Event__r.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy} - {3,date,dd/MM/yyyy}">
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.End_Date3__c}" />
+                                            </apex:outputtext>
+
+                                            <apex:outputtext rendered="{!IF(AND(((Enrollment__c.Training_Event__r.Course_Duration_Days__c>2)),(Enrollment__c.Training_Event__r.End_Date3__c - Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c =0) , (Enrollment__c.Training_Event__r.End_Date_of_Section_1__c - Enrollment__c.Training_Event__r.Start_date__c >0)),true,false)}" value="{0,date,dd/MM/yyyy} - {1,date,dd/MM/yyyy} & {2,date,dd/MM/yyyy}">
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" />
+                                            </apex:outputtext>
+
+                                            <apex:outputtext rendered="{!IF(AND(((Enrollment__c.Training_Event__r.Course_Duration_Days__c>2)),(Enrollment__c.Training_Event__r.End_Date3__c - Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c >0) , (Enrollment__c.Training_Event__r.End_Date_of_Section_1__c - Enrollment__c.Training_Event__r.Start_date__c =0)),true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy} - {2,date,dd/MM/yyyy}">
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.End_Date3__c}" />
+                                            </apex:outputtext>
+
+                                            <apex:outputtext rendered="{!IF(Enrollment__c.Training_Event__r.Course_Duration_Days__c=2,true,false)}" value="{0,date,dd/MM/yyyy} & {1,date,dd/MM/yyyy}">
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.Start_date__c}" />
+                                                <apex:param value="{!Enrollment__c.Training_Event__r.End_Date3__c}" />
+                                            </apex:outputtext>
+                                        </apex:outputpanel>
+
+                                    </apex:outputpanel>
+                            </td>
+                        </tr><!--row 1 finish --------------------------------------------------------------------------------------------------------------------- -->
+                        <tr>
+                            <!--row 2 ----------------------------------------------------------------------------------------------------------------------------- -->
+                            <!-- This pulls in the Certificate Number (= Enrolment No.) for the delegate -->
+                            <td width="4.5cm" align="left">
+                                <apex:outputtext value="Certificate Number:" />
+                            </td>
+                            <!-- IRCA TO NOT USE -->
+                            <td width="12cm" align="left"><apex:outputtext styleclass="size10" value="{!Enrollment__c.Name}" /> </td>
+
+                        </tr><!--row 2 finish ----------------------------------------------------------------------------------------------------------------------- -->
+
+                    </table>
+                </td>
+            </tr>
+
+        </table>
+
+        <br /><br />
+
+        <!---- For joint delivery courses (SEG/ICEL) and for IEMA, JRCA and JATA, this puts the logo in the bottom left hand corner---->
+        <table width="99%" align="left" valign="middle" table-layout="fixed">
+            <tr>
+                <td width="0.9cm"></td>
+                <td>
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Joint_Delivery__c = 'SEG',true,false)}" height="1.75cm" width="2.25cm" url="{!Enrollment__c.Training_Translations__r.SEG_logo__c}" />
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c = 'ICEL',true,false)}" url="{!Enrollment__c.Training_Translations__r.ICEL_Logo__c}" />
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c = 'IEMA'&& Enrollment__c.Exam_results__c = 'IEMA - Pass exam',true,false)}" url="{!Enrollment__c.Training_Translations__r.IEMA_Logo__c}" height="1.75cm" width="1.75cm" />
+                    <!-- JRCA was 2.5 by 2 but tried reduction -->
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Exam_results__c = 'JRCA - Pass',true,false)}" height="2cm" width="1.6cm" url="{!Enrollment__c.Training_Translations__r.JRCA_Logo__c}" />
+                    <!-- JATA was 2 by 3.5 but tried reduction -->
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Certified_Course__c = 'JATA',true,false)}" height="1.5cm" width="2.625cm" url="{!Enrollment__c.Training_Translations__r.JATA_Logo__c}" />
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Joint_Delivery__c = 'City of London Police',true,false)}" height="1.3cm" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=015D0000003uZnn&oid=00DD0000000mhEp" />
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Joint_Delivery__c = 'Cloud Security Alliance',true,false)}" height="1.5cm" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=015D0000003uZno&oid=00DD0000000mhEp" />
+                    <apex:image styleclass="logo" rendered="{!IF(Enrollment__c.Training_Event__r.Course__r.Joint_Delivery__c = 'IOSH',true,false)}" height="1.5cm" url="https://bsi--c.eu1.content.force.com/servlet/servlet.ImageServer?id=015D0000003uZoM&oid=00DD0000000mhEp" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- this sets out the office address in the footer at the bottom of the page -->
+
+        <table width="99%" align="left" valign="middle" table-layout="fixed">
+            <tr>
+                <td width="0.7cm"></td>
+                <td valign="bottom">
+                    <apex:panelgroup styleclass="footer">
+                        {!Enrollment__c.Training_Translations__r.Office_Address__c}
+                    </apex:panelgroup>
+                </td>
+            </tr>
+        </table>
+      
+</body>
+
+</apex:page>

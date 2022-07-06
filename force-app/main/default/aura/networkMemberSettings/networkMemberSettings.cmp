@@ -1,0 +1,169 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" extends="c:lightningUtility" controller="NetworkMemberSettingsController" access="global" description="Component to Customise My Settings Community page">
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="recordId"         type="String"	     access="global" default=""/>
+    <aura:attribute name="networkId"        type="String"	     access="global" default=""/>
+    <aura:attribute name="title"            type="String"        access="global" default="Marketing Preferences"/>
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="hasPermissions"   type="Boolean"	     access="private" default="false"/>
+    <aura:attribute name="toggleMode"       type="Boolean"	     access="private" default="true"/>
+    <aura:attribute name="networkMember"    type="NetworkMember" access="global" default="{}"/>
+
+    <!--HANDLER -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!--BODY-->
+    <aura:if isTrue="{!v.hasPermissions}">
+
+        <!-- Email Preferences Section -->
+        <lightning:layout class="slds-hint-parent">
+            <h1 class="slds-text-heading_large slds-m-bottom_xxx-small slds-p-left_x-small">{!v.title}</h1>
+            <lightning:buttonIcon iconName="utility:edit" class="slds-m-bottom_xxx-small slds-m-left_small" iconClass="slds-button__icon_hint" variant="bare" alternativeText="Edit" onclick="{!c.toggleViewEdit}"/>
+        </lightning:layout>
+
+        <div class="slds-grid slds-wrap ">
+
+            <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
+
+
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableAllFeedsEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableAllFeedsEmail}"
+                                     disabled="{!v.toggleMode}"/>
+                </span>
+            </div>
+
+            <!--<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small ">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableEndorsementEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableEndorsementEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableProfilePostEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableProfilePostEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableFollowersEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableFollowersEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableLikeEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableLikeEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableChangeCommentEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableChangeCommentEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisProfPostCommentEmail}"
+                                     checked="{!v.networkMember.PreferencesDisProfPostCommentEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableLaterCommentEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableLaterCommentEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableBookmarkEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableBookmarkEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisCommentAfterLikeEmail}"
+                                     checked="{!v.networkMember.PreferencesDisCommentAfterLikeEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableMentionsPostEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableMentionsPostEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisMentionsCommentEmail}"
+                                     checked="{!v.networkMember.PreferencesDisMentionsCommentEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableItemFlaggedEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableItemFlaggedEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-p-around_x-small slds-checkbox_stacked">
+                <span class="slds-checkbox slds-checkbox_stacked">
+                    <lightning:input type="checkbox"
+                                     label="{!$Label.c.BSIUserSettings_PreferencesDisableDirectMessageEmail}"
+                                     checked="{!v.networkMember.PreferencesDisableDirectMessageEmail}"
+                                     disabled="{!or(v.toggleMode, not(v.networkMember.PreferencesDisableAllFeedsEmail))}" />
+                </span>
+            </div>-->
+
+        </div>
+
+        <aura:if isTrue="{!not(v.toggleMode)}">
+            <div class="slds-m-top_medium slds-align_absolute-center">
+                <lightning:button variant="neutral" label="Cancel" title="cancel"   onclick="{!c.handleCancel}" />
+                <lightning:button variant="brand"   label="Save"   title="save"     onclick="{!c.handleSave}"  />
+            </div>
+        </aura:if>
+
+        <aura:set attribute="else">
+            <p class="slds-align_absolute-center">{!$Label.c.BSIUserSettings_NoPermissions}</p>
+        </aura:set>
+    </aura:if>
+
+</aura:component>

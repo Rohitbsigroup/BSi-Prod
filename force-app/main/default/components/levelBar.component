@@ -1,0 +1,64 @@
+<apex:component controller="LevelBarController">
+	<!-- CSS STYLE -->
+	<style type="text/css">
+		.main {
+			height: 60px;
+			padding-left: 5px;
+		}
+		.bar {
+			position: relative;
+			height: 33px;
+			width: 335px;
+			top:-48px;		
+		} 
+		.level {
+			background-image:url({!URLFOR($Resource.levelbar,'LevelBar/'&colorBar)});
+			position: relative;
+			height: 33px;
+			left:0px;
+			top:-33px;
+			z-index: 90;
+		}
+		.cursor {
+			position:relative;
+			top: -10px;
+			z-index: 99;
+		}
+		.textArea {
+			//background-image:url({!URLFOR($Resource.levelbar,'LevelBar/levelbg.png')});
+			position: relative;
+			height: 37px;
+			top: -50px;		
+		}
+		.text {
+			position: relative;
+			font-family: "Futura",Arial,Times,Serif;
+			font-size:14px;
+			top:-11px;
+			left:-50px;
+			color:#ff6b00;
+		}
+	</style>
+	
+	<!-- ATTRIBUTES -->
+	<apex:attribute name="levelNum" assignTo="{!levelNum}" description="The Level Number" type="String" required="true"/>
+	<div class="main">
+		<!--<div class="textArea" style="left:{!textAreaLeft}px">
+			<apex:image url="{!URLFOR($Resource.levelBar,'LevelBar/text-cursor.png')}" >
+			
+			</apex:image>
+			<apex:outputText value="{!levelNum}%" styleClass="text" style="{!IF(levelNum == '100','left:-56px','')}"/>
+		</div>-->
+		<apex:image url="{!URLFOR($Resource.levelBar,'LevelBar/level-cursor.png')}" style="left:{!cursorLeft}px;" styleclass="cursor"/>
+		<div class="bar">
+			<apex:image url="{!URLFOR($Resource.levelBar,'LevelBar/level-bar.png')}"/>
+			<div style="width:{!levelNum}%;" class="level">
+			</div>
+		</div>
+		<div class="textArea" style="left:{!textAreaLeft}px">
+			<apex:image url="{!URLFOR($Resource.levelBar,'LevelBar/text-cursor-bottom.png')}" />
+			<apex:outputText value="{!levelNum}%" styleClass="text" style="{!IF(levelNum == '100','left:-56px','')}"/>
+		</div>
+		
+	</div>
+</apex:component>

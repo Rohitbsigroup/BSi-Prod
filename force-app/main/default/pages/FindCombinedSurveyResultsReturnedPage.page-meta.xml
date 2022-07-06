@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>36.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Trying to get code coverage on Controller for Component used in Email Template (this is not ideal but have not yet found any other way CMoriarty 25-02-16</description>
+    <label>FindCombinedSurveyResultsReturnedPage</label>
+</ApexPage>

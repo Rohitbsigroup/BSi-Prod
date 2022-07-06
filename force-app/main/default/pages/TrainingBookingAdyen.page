@@ -1,0 +1,251 @@
+<apex:page controller="TrainingBookingAdyenIFrameCtr"
+            language="{!pageLanguage}"
+            standardstylesheets="false"
+            showheader="false"
+            cache="false"
+            applyBodyTag="false"
+            applyHtmlTag="false"
+            docType="html-5.0">
+
+        <html>
+            <head>
+                <title>{!$Label.TrainingBookingTitle}</title>
+                <!-- PK(NEB) 13 Sep 2018 - Added mobile support -->
+                <meta name="viewport"     content="width=device-width" />
+                <!-- <script src="code.jquery.com/jquery-1.10.2.js"></script> -->
+                <link rel="shortcut icon" href="{!URLFOR($Resource.TrainingBookingResources, 'favicon.ico')}" />
+                <link rel="stylesheet"    href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown.css')}"  type="text/css" />
+
+                <!-- PK(NEB) 12 Sep 2018 - Added mobile specific stylesheet -->
+                <link rel="stylesheet" type="text/css" media="only screen and (max-width: 760px)" href="{!URLFOR($Resource.TrainingBookingResources, 'Cutdown_Mobile.css')}" />
+                <apex:form >
+                    <apex:actionFunction action="{!successPage}" name="successPage"/>
+                    <apex:actionFunction action="{!invoiceInstead}" name="invoiceInstead"/>
+                </apex:form>
+                <!-- *** General show/hide function *** -->
+                <script type="text/javascript">
+                    function divOnOff(id) {
+                        var tag = document.getElementById(id);
+                        if (tag.style.display !== 'none') {
+                            tag.style.display = 'none';
+                        }
+                        else {
+                            tag.style.display = 'block';
+                        }
+                    }
+                </script>
+
+            </head>
+            <body>
+                <script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/4.4.0/adyen.js"
+                        integrity="sha384-mvvGjiQq2a7XBBMlfLkQQjrwV+YbpDVsss71qoEkBKoEouLAlfMJcnr/8DzOrQ90"
+                        crossorigin="anonymous"></script>
+
+                <link rel="stylesheet"
+                      href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/4.4.0/adyen.css"
+                      integrity="sha384-mo0b8EioLFFmLA6BNC6/7F8p5yNmuwfaFPJHisXhxgQ6DARbK1GEaKGJ1iTLCG04"
+                      crossorigin="anonymous"></link>
+
+                <style>
+                    .adyen-checkout__label__text, .adyen-checkout__payment-method__name, .adyen-checkout__button__text {
+                        font-size: 16px;
+                    }
+                    .adyen-checkout__checkbox__label, .adyen-checkout__error-text {
+                        font-size: 14px;
+                    }
+                    .adyen-checkout__input {
+                        font-size: 2em;
+                    }
+                </style>
+
+                <div class="wrapper">
+                    <div class="page">
+
+                        <div class="header">
+                            <a class="logo" href="http://bsigroup.com"><img src="{!URLFOR($Resource.TrainingBookingResources, 'logo_116.png')}" alt="BSI" /></a>
+                            <p class="site-strap ir">Making excellence a habit</p>
+                            <p class="questions">{!$Label.TrainingBookingQuestions}</p>
+                            <p class="phone-no">
+                                <apex:outputText rendered="{!selectedCountry=''}" value="{!$Label.TrainingBookingPhoneNo}" />
+                                <apex:outputText rendered="{!NOT(selectedCountry='')}" value="{!selectedCountry.phoneNo}" />
+                            </p>
+                        </div>
+
+                        <div class="main">
+
+                            <ul class="progress clearfix">
+                                <!-- PK(NEB) 12 Sep 2018 - Added new span tags for specific classes for mobile -->
+                                <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                                    <li class="{!IF(pageStep = 1,'current-step','inactive-step')}"><span class="step-label-1">{!$Label.TrainingBookingStep1}</span></li>
+                                    <li class="{!IF(pageStep = 2,'current-step','inactive-step')}"><span class="step-label-2">{!$Label.TrainingBookingStep2}</span></li>
+                                    <li class="{!IF(pageStep = 3,'current-step','inactive-step')}"><span class="step-label-3">{!$Label.TrainingBookingStep3}</span></li>
+                                    <li class="{!IF(OR(pageStep = 4, pageStep = 5),'current-step','inactive-step')}"><span class="step-label-4">{!$Label.TrainingBookingStep4}</span></li>
+                                    <li class="{!IF(pageStep = 6,'current-step','inactive-step')}"><span class="step-label-5">{!$Label.TrainingBookingStep6}</span></li>
+                                </apex:outputPanel>
+                            </ul>
+
+                            <!-- *** Details *** -->
+                            <h1 class="title">{!courseName}</h1>
+                            <apex:outputPanel rendered="{!pageShowSelection}">
+                                <h2 class="subtitle">
+                                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                                </h2>
+                                <h2 class="subtitle">
+                                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                                </h2>
+                            </apex:outputPanel>
+
+                            <apex:messages id="messages" styleClass="messages" />
+
+                            <apex:panelGroup layout="block" style="padding-top: 10px; padding-bottom: 10px;">
+                                <div id="dropin-container"></div>
+                            </apex:panelGroup>
+
+                            <!-- *** Notes *** 
+                            <apex:outputPanel layout="block" styleClass="notes" rendered="{!NOT($Label.TrainingBookingStep2Notes='')}">
+                                <p>{!$Label.TrainingBookingOgoneNotes}</p>
+                                <p>{!$Label.TrainingBookingOgoneNotes2}</p>
+                            </apex:outputPanel> -->
+                           
+                            <!-- *** Invoice instead option *** -->
+                            <apex:outputPanel layout="block" rendered="{!selectedCountry.isInvoiceAllowed}"
+                                                style="border: 1px solid transparent;border-radius:3px;background-color: #f3f3f3;border-color: #d6d6d6;display:flex;flex-direction:row;font-size:16px;padding: 15px;overflow: hidden;zoom: 1;">
+                                <img src="https://img.icons8.com/cotton/64/000000/invoice.png" style="height: 32px;"/>
+                                <apex:form style="padding-top: 5px;">
+                                    <apex:commandLink action="{!invoiceInstead}" value="{!$Label.TrainingBookingInvoiceInstead}" immediate="true" />
+                                </apex:form>
+                            </apex:outputPanel>
+                        </div>
+
+                        <div class="footer">
+                            <apex:outputPanel layout="none" rendered="{!selectedCountry.countryOptionsDefault = 'South Korea'}">
+                                <apex:outputText escape="false" value="㈜비에스아이그룹코리아,    서울시 종로구 인사동5길 29 태화빌딩 8층,    대표자: 송경수 <br/>
+                                                사업자등록번호: 104-81-44779, 통신판매업 신고번호 제 01-2287호,  전화:02-777-4123~4" /><br/><br/>
+                            </apex:outputPanel>
+                            <p class="copyright">{!$Label.TrainingBookingCopyright}</p>
+                            <ul>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.privacyUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.privacyUrl}">{!$Label.TrainingBookingPrivacyLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.cookieUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.cookieUrl}">{!$Label.TrainingBookingCookieLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.accessibilityUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.accessibilityUrl}">{!$Label.TrainingBookingAccessibilityLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.termsUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.termsUrl}">{!$Label.TrainingBookingTermsLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!AND(NOT(selectedCountry=''),NOT(selectedCountry.siteMapUrl=''))}">
+                                    <li>
+                                        <apex:outputLink target="_blank" value="{!selectedCountry.siteMapUrl}">{!$Label.TrainingBookingSiteMapLink}</apex:outputLink>
+                                    </li>
+                                </apex:outputPanel>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <script>
+
+                    const configuration = {
+                        paymentMethodsResponse: JSON.parse('{!paymentMethods}'), // The `/paymentMethods` response from the server.
+                        clientKey: '{!CLIENT_KEY}', // Web Drop-in versions before 3.10.1 use originKey instead of clientKey.
+                        locale: "{!LOCALE}",
+                        environment: "{!ENVIRONMENT}",
+                        onSubmit: (state, dropin) => {
+                            makePayment(state.data.paymentMethod, dropin);
+                        },
+                        onAdditionalDetails: (state, dropin) => {
+                            // Your function calling your server to make a `/payments/details` request
+                            // makeDetailsCall(state.data)
+                            // .then(response => {
+                            //     dropin.handleAction(response.action);
+                            // })
+                            // .catch(error => {
+                            //     throw Error(error);
+                            // });
+                        },
+                        paymentMethodsConfiguration: {
+                            card: { // Example optional configuration for Cards
+                                hasHolderName: true,
+                                holderNameRequired: true,
+                                enableStoreDetails: true,
+                                hideCVC: false, // Change this to true to hide the CVC field for stored cards
+                                name: 'Credit or debit card'
+                            }
+                        }
+                    };
+
+                    function makePayment(paymentMethod, dropin) {
+                        Visualforce.remoting.Manager.invokeAction(
+                            '{!$RemoteAction.TrainingBookingAdyenIFrameCtr.makePayment}',
+                            JSON.stringify(paymentMethod),
+                            '{!objBooking.currencyIsoCode}',
+                            '{!objBooking.Total_Price__c}',
+                            '{!selectedEvent.event.Course__r.Product_Name_Local__c}',
+                            window.location.protocol + "//" + window.location.host + "/training" + '{!returnURL}',
+                            '{!selectedCountry.description}',
+                            function(result, event) {
+                                if(event.status) {
+                                    if(result.resultCode === "Authorised" || result.resultCode === "Received" || result.resultCode === "Pending") {
+                                        dropin.setStatus('success', { message: result.resultCode});
+                                        successPage();
+                                    } else if(result.resultCode === "Refused" || result.resultCode === "Error") {
+                                        dropin.setStatus('error', { message: result.resultCode});
+                                        var x = document.getElementById('payByInvoice');
+                                        x.style.display = 'block';
+                                    } else if(result.resultCode === "RedirectShopper") {
+                                        dropin.handleAction(result.action);
+                                    } else {
+                                        dropin.setStatus('error', { message: result.resultCode});
+                                        var x = document.getElementById('payByInvoice');
+                                        x.style.display = 'block';
+                                    }
+                                }
+
+                            },
+                        );
+                    }
+
+                    function checkRedirect(dropin) {
+                        if('{!redirectResponse}' != null) {
+                            var result = JSON.parse('{!redirectResponse}');
+                            if(result.resultCode === "Authorised" || result.resultCode === "Received" || result.resultCode === "Pending") {
+                                dropin.setStatus('success', { message: result.resultCode});
+                                successPage();
+                            } else if(result.resultCode === "Refused" || result.resultCode === "Error" || result.resultCode === "Cancelled") {
+                                dropin.setStatus('error', { message: result.resultCode});
+                                var x = document.getElementById('payByInvoice');
+                                x.style.display = 'block';
+                            }
+                        }
+                    }
+
+                    const checkout = new AdyenCheckout(configuration);
+
+                    const dropin = checkout
+                        .create('dropin', {
+                        // Starting from version 4.0.0, Drop-in configuration only accepts props related to itself and cannot contain generic configuration like the onSubmit event.
+                            openFirstPaymentMethod: true
+                        })
+                        .mount('#dropin-container');
+                    checkRedirect(dropin);
+
+
+                </script>
+
+            </body>
+        </html>
+</apex:page>

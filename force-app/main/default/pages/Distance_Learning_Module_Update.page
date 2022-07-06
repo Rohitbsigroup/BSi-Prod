@@ -1,0 +1,30 @@
+<apex:page standardController="Distance_Learning__c" recordSetVar="Distance_Learning" sidebar="false">
+    <apex:sectionHeader title="Update Distance Learning Modules"/>
+            <apex:form >
+            <apex:pageBlock >
+                <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton action="{!quicksave}" value="Update"/>
+                </apex:pageBlockButtons>                            
+                <apex:pageBlockSection title="Selected Modules" columns="1" collapsible="False">
+                
+                <apex:pageBlockTable value="{!selected}" var="Modules">
+                       <apex:column value="{!Modules.Module_Number__c}"/>
+                       <apex:column headerValue="Module Status"><apex:inputField value="{!Modules.Module_Status__c}"/></apex:column>
+                       <apex:column headerValue="Materials from Delegate Ph1"><apex:inputField value="{!Modules.Materials_received_from_Delegate__c}"/></apex:column>
+                       <apex:column headerValue="Marked by Ph1"><apex:inputField value="{!Modules.Schedule_to_be_marked_by__c}"/></apex:column>
+                       <apex:column headerValue="Schedule Date for Marking"><apex:inputField value="{!Modules.Schedule_Date_for_Marking__c}"/></apex:column>
+                       <apex:column headerValue="Materials Sent to Instructor Ph1"><apex:inputField value="{!Modules.Materials_Sent_to_Instructor__c}"/></apex:column>                
+                       <apex:column headerValue="Materials from Instructor Ph1"><apex:inputField value="{!Modules.Marked_Materials_from_Instructor__c}"/></apex:column>
+                       <apex:column headerValue="No of Hours to Mark"><apex:inputField value="{!Modules.No_of_Hours_to_Mark__c}"/></apex:column>
+                       <apex:column headerValue="1st Feedback to Delegate"><apex:inputField value="{!Modules.X1st_Feedback_sent_to_Delegate__c}"/></apex:column> 
+                       <apex:column headerValue="Final Feedback to Delegate"><apex:inputField value="{!Modules.Final_Feedback_sent_to_Delegate__c}"/></apex:column>                                              
+               
+               </apex:pageBlockTable>          
+              
+                </apex:pageBlockSection>                         
+              </apex:pageBlock>
+            </apex:form>
+</apex:page>

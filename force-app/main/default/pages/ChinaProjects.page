@@ -1,0 +1,4 @@
+<apex:page standardController="Training_Solutions__c" sidebar="true">
+  <apex:sectionHeader title="China Projects"/>
+  <apex:enhancedList type="China_Projects__c" height="600" rowsPerPage="25" id="AccountList" />
+</apex:page>

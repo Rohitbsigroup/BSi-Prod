@@ -1,0 +1,235 @@
+<apex:page renderAs="pdf" standardController="Personal_Qualification__c" applyBodyTag="false" applyHtmlTag="false"  showHeader="false" >
+<!-- ReviewPDFtranscriptNewDQ_V1 Checked Out NAME DATE -->
+<html>
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS; font-size: 10pt;}
+
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 portrait;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:0cm;         
+}
+.footer {
+   position: fixed;
+   left: 12mm;
+   bottom: 6mm;
+   z-index:+2;
+   font-size: 7pt;
+   line-height: 4px;
+   }
+
+.logo {
+   position: relative;
+   left: 10mm;
+   bottom: -3mm;
+   z-index:+2;
+   }
+.logo2 {
+   position: relative;
+   left: 0mm;
+   bottom: - 0mm;
+   z-index:+2;
+   }
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+    }
+.size12 {
+    font-size: 12pt;
+    text-align: left;
+    } 
+.size15 {
+    font-weight: bold;
+    font-size: 15pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size20 {
+    font-weight: bold;
+    font-size: 20pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.size22 {
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+    line-height: 34px;
+    }     
+.size33 {
+    font-weight: bold;  
+    font-size: 33pt;
+    text-align: left;
+    line-height: 34px;
+    }   
+.size35 {
+    font-weight: bold;
+    font-size: 35pt;
+    text-align: left;
+    line-height: 34px;
+    }
+.small8 {
+    font-size: 8pt;
+    text-align: left;
+    line-height: 4px;
+   }
+
+</style>
+
+</head>
+
+
+
+<!---- this sets the background template image for the certificate---->
+
+<img src="{!URLFOR($Resource.TrainingCertificatesv3, 'BSI_training_certificate_newv3.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="21cm" height="29.7"/>
+
+<!--<img src="{!URLFOR($Resource.TrainingCertificatesv4, 'BSI_training_certificate_newv4-2014.jpg')}" style="position: fixed; left: 0cm; top:0cm; z-index:-2" width="29.7cm" height="21cm"/>-->
+<body>
+
+ <table width="99%" align="center" table-layout="fixed">
+     <!---- this inserts a space at the top---->
+    <tr>
+        <td width ="0.4cm" ></td>
+        <!--<td height="140"></td>-->
+    <td height="140"></td>
+    </tr>
+    <tr>
+        <td width ="0.4cm" ></td>
+        <td align="left" valign="bottom" height="40">
+        <!---- this brings in the text "Bsi Training Academy" for all countries---->
+        <apex:outputText styleClass="size33"  value="{!Personal_Qualification__c.Training_Translations__r.BSI_Training_Academy__c}"/>
+        </td>
+    </tr>
+</table>
+
+<table width="98%" align="center" table-layout="fixed">
+    <!---- this inserts a space on top of 2nd page ---->
+    <!--<tr>
+    <td width ="0.4cm" ></td>
+    <td height="200"></td>
+    </tr>-->
+
+<!---- this inserts a space at the top----> 
+    <tr>
+    <td width ="0.4cm" ></td>
+    <td height="40"></td><!-- was 140 -->
+    </tr>     
+    <tr> 
+    <td width ="0.6cm" ></td>
+    <td align="left" valign="bottom" height="40">
+<!---- this brings in the text to state "Transcript Of Results" ---->
+    <apex:outputText value="Transcript Of Results" styleClass="size20" /> 
+    <hr></hr>
+    </td>
+    </tr>
+</table>
+<table align="center" table-layout="fixed" cellspacing="0" cellpadding="0">    
+    <!---- This pulls in the Dates,certificate number,student number for the course ---->
+    <tr>
+    <!---- This pulls the Delegate Name, Certificate Number ---->
+    <td width="1.4cm" ></td>
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="Delegate Name:"/> </td> 
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.Name}"/></td>
+    <td width="1.4cm" align="left"></td>
+    <td width="3.5cm" align="left"><apex:outputText value="Certificate Number :"  styleClass="size10"/></td>
+    <td width="3.5cm" align="left"><apex:outputText value="{!Personal_Qualification__c.Name}"/></td>
+    </tr>     
+    <tr> 
+    <!---- This pulls the Delegate Address and student number ---->
+    <td width="1.4cm" ></td>
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10"  value="Delegate Address:"/></td> 
+    <td width="5cm" align="left"><br/>
+    <apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.MailingStreet}, "/>
+    <apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.MailingCity}, {!Personal_Qualification__c.Delegate__r.MailingState}, {!Personal_Qualification__c.Delegate__r.MailingCountry}, {!Personal_Qualification__c.Delegate__r.Mailingpostalcode}"/></td> 
+    <td width="1.4cm" align="left" ></td>
+    <td width="3.5cm" align="left"><apex:outputText styleClass="size10" value="Student Number:"/></td>
+    <td width="5cm" align="left"><apex:outputText styleClass="size10"  value="{!Personal_Qualification__c.Delegate__r.Delegate_Number__c}"/></td>
+    </tr>      
+    <tr> 
+<!---- This pulls the complete date ----> 
+    <td width="1.4cm" ></td>
+    <td width="3.5cm" align="left"></td>
+    <td width="1.4cm" ></td>
+    <t/><td width="3.5cm" align="Left"><apex:outputText styleClass="size10" value="Date:"/></td>
+    <td width="3.5cm" align="left" ><apex:outputField styleClass="size10"  value="{!Personal_Qualification__c.Date_Qualification_Completed__c}"/></td>
+    </tr>          
+</table>
+<table width="99%" align="center" table-layout="fixed">   
+    <tr>
+    <td height="15"></td>
+    </tr>
+    <tr>
+    <td width="0.4cm" height="44" ></td>
+    <td align="left" valign="middle">
+<!---- This displays the text "The above student has been assessed in accordance with the requirements of" ----> 
+    <apex:outputText value="The above student has been assessed in accordance with the requirements of:" styleClass="size10"/>
+    </td>
+    </tr>
+    <tr>
+    <td width="0.4cm" height="64" ></td>
+    <td align="left" valign="middle"> 
+<!----This brings in the Qualification code and name ---->
+    <apex:outputText value="{!Personal_Qualification__c.Qualification_Code__c} - {!Personal_Qualification__c.Qualification_Name__c}" styleClass="size15"/></td>
+    </tr>     
+</table> 
+<!---- this creates a table to insert the text in the correct places----> 
+<table width="99%" align="center" table-layout="fixed">
+    <tr>
+    <td width ="0.5cm" ></td>
+    <td  align="left" height="2.8cm" valign="top">
+<!----This creats the table and brings Completion Date,unit number, unit name and result ---->
+       <apex:dataTable value="{!Personal_Qualification__c.Competency__r}" var="CAN" columns="4" cellspacing="10"> 
+       <apex:column value="{! CAN.Completion_Date__c}" headerValue="Completion Date" />
+       <apex:column value="{! CAN.Unit_Code__c}" headerValue="Unit Number" />
+       <apex:column value="{! CAN.Unit__r.Name}" headerValue="Unit Name" />
+       <apex:column width="4cm" value="{! CAN.Rating__c}" headerValue="Result" />
+       </apex:dataTable>
+    </td>
+    </tr><br/>
+    <tr>
+    <td width ="0.4cm" ></td>
+    <td><hr></hr></td>
+    </tr>
+    <tr>
+    <td width ="1.3cm" ></td>
+    <td> <apex:outputText value="C = Competent" styleClass="size12"/></td>
+    </tr>
+    <tr>
+    <td width ="1.3cm" ></td>
+    <td><apex:outputText value="NYC = Not Yet Competent" styleClass="size12"/></td>
+    </tr>  
+</table>
+
+  
+
+<!-- this sets out the office address in the footer at the bottom of the page -->
+ 
+<table width="99%" align="left" valign="middle" table-layout="fixed">
+<tr>
+     <td width ="0.4cm" ></td>  
+     <td  valign="bottom">
+ 
+    <apex:panelGroup styleClass="footer">
+    <apex:outputText escape="false" styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Certificate_Property__c}"/>
+    <apex:outputText styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Royal_Charter__c}"/>
+    <br/><br/><br/>
+    <apex:outputText styleClass="small8" value="{!Personal_Qualification__c.Training_Translations__r.Office_Address__c}"/> 
+       <!--  {!Enrollment__c.Training_Translations__r.Royal_Charter__c}<br/><br/><br/>
+         {!Enrollment__c.Training_Translations__r.Office_Address__c}-->
+    </apex:panelGroup> 
+     </td>     
+</tr> 
+</table>
+
+</body>
+
+</html>
+
+</apex:page>

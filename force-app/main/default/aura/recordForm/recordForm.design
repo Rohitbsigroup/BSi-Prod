@@ -1,0 +1,26 @@
+<design:component>
+    <design:attribute name="recordId"
+                      label="Record Id"
+                      default="{!userId}"
+                      description="To of current User"/>
+
+    <design:attribute name="title"
+                      label="Component Title"
+                      default="My Settings"
+                      description="Title of this Component"/>
+
+    <design:attribute name="object"
+                      label="Object Name"
+                      default="User"
+                      description="Salesforce Object which this component queries"/>
+
+    <design:attribute name="fieldList"
+                      label="Fields"
+                      default="Name,Field__c"
+                      description="List of Fields of this object: provided Comma-separated"/>
+
+    <design:attribute name="allowEdit"
+                      label="Enable Edit"
+                      default="true"
+                      description="To enable record edit functionality"/>
+</design:component>

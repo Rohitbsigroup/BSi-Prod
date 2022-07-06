@@ -1,0 +1,29 @@
+<apex:component access="global">
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+    
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Joint_Delivery__c='SEG'}" height="1.75cm" width="2.25cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'seg_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c='ICEL'}" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'icel_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c='IEMA', enrollment.Exam_results__c='IEMA - Pass exam')}" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'iema_logo.jpg')}" height="1.75cm" width="1.75cm" />
+    <!-- removing CLL Logo as brand stopped use <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Course_Format__c='Virtual Learning'}" height="1.5cm" style="padding-top:20px" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'virtual_learning_logo.png')}"/>-->
+    <!--moved to top right -->
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c='JATA'}" height="1.2cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'jata_logo.gif')}"/>
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Joint_Delivery__c='City of London Police'}" height="1.3cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'city_of_london_police_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Joint_Delivery__c='Cloud Security Alliance'}" height="1.5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'cloud_security_alliance_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Joint_Delivery__c='IOSH'}" height="1.5cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'iosh_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c='Probitas', enrollment.Exam_results__c='Pass exam & pass CA')}" height="1cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'probitas_authentication_logo.png')}"/>
+    <apex:image styleClass="logo" rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c='SSIP', enrollment.Exam_results__c='Pass exam & pass CA')}" height="1.2cm" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'ssip_logo.jpg')}"/>
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c='FSSC'}" width="120" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'FSSC_22000_logo_.png')}"/>  
+    <apex:image styleClass="logo" rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c='Vital'}" width="160" 
+    url="{!URLFOR($Resource.TrainingCertificateLogos, 'VITAL.png')}"/>               
+</apex:component>

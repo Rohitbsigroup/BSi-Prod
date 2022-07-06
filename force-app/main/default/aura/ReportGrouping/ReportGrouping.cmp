@@ -1,0 +1,38 @@
+<aura:component >
+    <aura:attribute name="numColumns" type="Integer" description="total number of columns to display so we can make our grouping rows wide enough"/>
+    <aura:attribute name="groupingsDown" type="String[]"/>
+    <aura:attribute name="groupingsAcross" type="String[]"/>
+    <aura:attribute name="stackedDataLabels" type="String[]" description="The number of data columns in a stacked Matrix report, else zero for Summary or Tabular reports"/> 
+    <aura:attribute name="level" type="Integer" description="holds level of grouping so we know which grouping to access"/>
+    <aura:attribute name="factMap" type="Map" description="row data from report"/>
+    <aura:attribute name="colourKeyMap" type="Map" description="Holds colour rows, colourKey entries and colourKey title"/>
+<!--    
+    <aura:handler name="init" value="{!this}" action="c.setLabel"/>
+    <aura:handler name="change" value="{!v.factMap}" action="c.setLabel"/> 
+-->
+    <!-- If this is a Matrix report, flatten multiple groupings onto a single row -->
+    <aura:iteration items="{!v.groupingsDown}" var="aGrouping">
+        <tr class="{!'level-row-'+v.level}">
+            <aura:if isTrue="{!v.level>0}">
+                <td colspan="{!v.level}"></td>
+            </aura:if>
+            <td colspan="{!v.numColumns-v.level}" class="{!'level-col-'+v.level}"> 
+                <c:ReportDataCell cell="{!aGrouping}"/>
+            </td>
+        </tr>
+        <!-- If there are any remaining groupings, recurse downwards -->
+        <aura:if isTrue="{!aGrouping.groupings != null }">
+            <c:ReportGrouping numColumns="{!v.numColumns}" groupingsDown="{!aGrouping.groupings}" groupingsAcross="{!v.groupingsAcross}" stackedDataLabels="{!v.stackedDataLabels}" level="{!v.level+1}" factMap="{!v.factMap}" colourKeyMap="{!v.colourKeyMap}"/>
+            <!-- else just show row data -->
+            <aura:set attribute="else">
+                <aura:if isTrue="{! v.groupingsAcross.length==0}">
+                    <c:GroupingDataCells numKeyCols="{!v.level+1}" groupingKey="{!aGrouping.key}" factMap="{!v.factMap}"/>
+                    <aura:set attribute="else">
+	                    <c:StackedDataCells numKeyCols="{!v.level+1}" groupingKey="{!aGrouping.key}" groupingsAcross="{!v.groupingsAcross}" stackedDataLabels="{!v.stackedDataLabels}" factMap="{!v.factMap}" colourKeyMap="{!v.colourKeyMap}"/>
+                    </aura:set>
+                </aura:if>
+            </aura:set>
+        </aura:if>
+    </aura:iteration>    
+
+</aura:component>

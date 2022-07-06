@@ -1,0 +1,15 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId">
+     <aura:method name="getHtml" action="{!c.getHtml}" />
+        <lightning:recordEditForm aura:id="recordEditForm" recordId="{!v.recordId}" objectApiName="Account">
+        <lightning:messages />
+        <lightning:card title="{!v.name}">
+                <lightning:inputField fieldName="AccountSource"/>
+                <lightning:inputField fieldName="BillingCity"/>
+                <lightning:inputField fieldName="BillingCountry"/>
+            	<lightning:inputField fieldName="Website"/>
+                <lightning:inputField fieldName="CEO_MD__c"/>
+        </lightning:card>
+        <lightning:button class="slds-m-top_small" type="reset" label="Cancel" />
+        <lightning:button class="slds-m-top_small" type="submit" label="Save" />
+    </lightning:recordEditForm>
+</aura:component>

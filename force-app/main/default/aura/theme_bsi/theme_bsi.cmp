@@ -1,0 +1,122 @@
+<aura:component implements="forceCommunity:themeLayout,forceCommunity:availableForAllPageTypes,force:hasRecordId" extends="c:lightningUtility" access="global" description="BSI Custom Theme Layout" controller="ThemeBSIAura">
+
+    <!-- GLOBAL DESIGN ATTRIBUTES -->
+    <aura:attribute name="logoName"      type="String" access="global" default=""/>
+    <aura:attribute name="mediaChannels" type="String" access="global" required="false"  default=""/>
+    <aura:attribute name="headerLinks"   type="String" access="global" required="false"  default=""/>
+    <aura:attribute name="footerLinks"   type="String" access="global" required="false"  default=""/>
+    <aura:attribute name="isFooter"      type="Boolean" access="global" default="false"/>
+
+    <!-- PUBLIC ATTRIBUTES -->
+    <aura:attribute name="profileMenu"   type="Aura.Component[]" required="false"/>
+    <aura:attribute name="navBar"        type="Aura.Component[]" required="false"/>
+    <aura:attribute name="newHeader"     type="Aura.Component[]" required="false"/>
+    <aura:attribute name="logo"          type="Aura.Component[]" required="false"/>
+    <aura:attribute name="footerLogo"    type="Aura.Component[]" required="false"/>
+    <aura:attribute name="footer"		 type="Aura.Component[]" required="false"/>
+
+    <aura:attribute name="hasRecordAccess"  type="Boolean" default="true"/>
+    <aura:attribute name="isInternalUser"   type="Boolean" default="false"/>
+    <aura:attribute name="recordIdsAccess"  type="String[]"/>
+    <aura:attribute name="redirectNoAccess" type="String"/>
+
+    <aura:attribute name="recordIdTest" 	type="String"/>
+    <aura:attribute name ="recordId"      	type="String" default="{!v.recordId}"/>
+
+
+    <!-- PRIVATE ATTRIBUTES -->
+    <aura:attribute name="lstMediaChannel" type="Object[]" default=""/>
+    <aura:attribute name="lstHeaderLink"   type="Object[]" default=""/>
+    <aura:attribute name="lstFooterLink"   type="Object[]" default=""/>
+    <aura:attribute name="currentYear"     type="String"   default="2020"/>
+    <aura:attribute name="isLoading" 	   type="Boolean"  default="true"/>
+    <aura:attribute name="hasAccess" 	   type="Boolean"  default="false"/>
+
+    <!-- HANDLERS -->  
+	<aura:handler name="init" value="{!this}"        action="{!c.doInit}"/>
+    <aura:handler event="forceCommunity:routeChange" action="{!c.routeChange}"/>
+    
+    <aura:if isTrue="{!not(v.isFooter)}">
+        <div class="themeLayout">    
+            <div class="headerRow">
+                <div class="container">
+                    <div class="inner-header">
+                        <div class="right custom-inline">    
+                            <div class="profileMenu custom-inline custom-vertical-align slds-m-horizontal_small">
+                                <div class="notifications custom-inline custom-vertical-align slds-m-horizontal_small">
+                                    <forceCommunity:notifications/>
+                                </div>
+                                
+                                <!--profile div-->
+                                
+                            </div>
+                            <div>
+                                {!v.profileMenu}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navBarContainer">
+                <div class="left">
+                    <div class="logo-image">
+                        {!v.logo}
+                    </div>
+                </div>
+                <div class="navBar">
+                    {!v.navBar}
+                    
+                </div>
+                
+            </div>
+            
+            <div class="newHeader">
+                {!v.newHeader}
+            </div>
+        </div>
+    </aura:if>
+    <div class="themeLayout">
+        <div class="{!v.isFooter ? 'mainBody mainBodyIsFooter' : 'mainBody'}" >
+            <div class="{!v.isFooter ? 'container bodyContainer' : 'container'}" aura:id="body-container">
+                {!v.body}
+            </div>
+            <div style="clear:both;"></div>
+            <div class="{!v.isFooter ? 'themefooter themefooterIsFooter' : 'themefooter'}">
+                <div class="container">
+                    <div class="left-footer">
+                        <div class="logo-image-footer">
+                            {!v.footerLogo}
+                        </div>
+                    </div>
+                    <div class="inner">
+                        <div class="copyright">
+                            <p>&copy; {!$Label.c.CLP_CopyrightLabel}&nbsp;{!v.currentYear}</p>
+                        </div>
+                        
+                        <div class="social-media slds-col--padded">
+                            <ul>
+                                <aura:iteration items="{!v.lstMediaChannel}" var="item">
+                                    <li>
+                                        <a href="{!item.ref}"><img src="{!item.picW}"/></a>
+                                    </li>
+                                </aura:iteration>
+                            </ul>     
+                        </div>
+                        
+                        <div class="nav">
+                            <ul>
+                                <aura:iteration items="{!v.lstFooterLink}" var="item">
+                                    <li>
+                                        <a href="{!item.lnk}">{!item.txt}</a>
+                                    </li>
+                                </aura:iteration>
+                            </ul>
+                        </div>
+                    </div>
+                </div>    
+            </div>
+        </div>
+    </div>
+
+</aura:component>

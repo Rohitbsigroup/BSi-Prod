@@ -1,0 +1,92 @@
+<apex:component access="global">
+    
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>
+ 
+       <!--NOT IRCA OR FSSC-->
+       <apex:panelGroup rendered="{!NOT(OR(enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA',enrollment.Training_Event__r.Course__r.Certified_Course__c ='FSSC'))}">
+       
+           <!--JAPAN -->
+               <apex:panelGroup rendered="{!AND(enrollment.Translation_Formula__c = 'Japan (Japanese)',OR(enrollment.Certificate_Language__c = 'Local',enrollment.Certificate_Language__c = 'Both'))}">               
+                    <apex:outputText styleClass="size22" rendered="{!AND(enrollment.Exam_results__c = 'JRCA - Pass',enrollment.Training_Event__r.Course__r.Certified_Course__c ='JRCA')}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_1__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size22" rendered="{!AND(enrollment.Exam_results__c = 'JATA - Pass',enrollment.Training_Event__r.Course__r.Certified_Course__c ='JATA')}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_1__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size22" rendered="{!enrollment.Exam_results__c = 'NON - Pass exam'}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_1__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size22" rendered="{!enrollment.Exam_results__c = 'Pass exam & pass CA'}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_1__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size22" rendered="{!AND(NOT(enrollment.Training_Event__r.Course__r.Certified_Course__c ='JRCA'),OR(enrollment.Exam_results__c = Null, CONTAINS(enrollment.Exam_results__c,'Fail'),CONTAINS(enrollment.Exam_results__c,'fail')))}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_2__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size22" rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c ='JRCA',OR(enrollment.Exam_results__c = Null, CONTAINS(enrollment.Exam_results__c,'Fail'),CONTAINS(enrollment.Exam_results__c,'fail'),CONTAINS(enrollment.Exam_results__c,'JRCA - Pass CA')))}" value="{!enrollment.Training_Translations__r.JP_Cert_Header_2__c}<br/>" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.RecordType.Name='E-Learning')}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam & pass CA',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>               
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>               
+               
+               </apex:panelGroup>
+               <apex:panelGroup rendered="{!AND(enrollment.Translation_Formula__c = 'Japan (Japanese)',enrollment.Certificate_Language__c = 'English')}">
+                    <apex:outputText styleClass="size12" rendered="{!NOT(enrollment.RecordType.Name="E-Learning")}"  value="This is to certify that"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.RecordType.Name='E-Learning')}" value="Certificate of achievement" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam & pass CA',enrollment.RecordType.Name='E-Learning' )}" value="Certificate of achievement" escape="false"/>
+               
+               </apex:panelGroup>
+
+            
+           <!--TURKEY --> 
+                <apex:panelGroup rendered="{!enrollment.Translation_Formula__c = 'Turkey (Türkçe)'}">
+                    <!---- this brings in the text to state KATILIM BELGESİ or BAŞARI BELGESİ for Turkey---->
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = null,true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Fail exam',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Pass exam',true,false)}" value="{!enrollment.Training_Translations__r.JP_Attended_and_Fail__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Fail exam & pass CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Pass exam & fail CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Pass exam & pass CA',true,false)}" value="{!enrollment.Training_Translations__r.JP_Attended_and_Fail__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'NON - Fail exam & fail CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'Fail exam & pass CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'Pass exam & fail CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'Pass exam & pass CA',true,false)}" value="{!enrollment.Training_Translations__r.JP_Attended_and_Fail__c}"/>
+                    <apex:outputText styleClass="size16tall" rendered="{!IF(enrollment.Exam_results__c = 'Fail exam & fail CA',true,false)}" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>        
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.RecordType.Name='E-Learning')}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam & pass CA',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                </apex:panelGroup>
+           
+            <!-- OTHER COUNTRIES (KR is blank for Local Language) -->
+                <apex:panelGroup rendered="{!AND(NOT(enrollment.Translation_Formula__c = 'Japan (Japanese)'), NOT(enrollment.Translation_Formula__c = 'Turkey (Türkçe)'))}">               
+                    <apex:outputText styleClass="size12" rendered="{!AND(OR(enrollment.Certificate_Language__c = 'Local',enrollment.Certificate_Language__c = 'Both'),NOT(enrollment.RecordType.Name="E-Learning"))}" escape="false" value="{!enrollment.Training_Translations__r.Text_Box_1__c}"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Certificate_Language__c = 'English',NOT(enrollment.RecordType.Name="E-Learning"))}"  value="This is to certify that"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.RecordType.Name='E-Learning')}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam & pass CA',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>
+                    <apex:outputText styleClass="size12" rendered="{!AND(enrollment.Exam_results__c = 'NON - Pass exam',enrollment.RecordType.Name='E-Learning' )}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}" escape="false"/>              
+                </apex:panelGroup>
+        </apex:panelGroup>
+        
+        <!--IRCA-->
+        <apex:panelGroup rendered="{!enrollment.Training_Event__r.Course__r.Certified_Course__c ='IRCA'}">
+
+            <!--CQI IRCA - brings in Certificate of...-->    
+                <apex:panelGroup rendered="{!enrollment.Course_Start_Date__c>DATE(2016,12,31)}">               
+                    <apex:outputText styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'IRCA - Pass exam & fail CA'}" value="Certificate of attendance "/>
+                    <apex:outputText styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'IRCA - Fail exam & pass CA'}" value="Certificate of attendance "/>
+                    <apex:outputText styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'IRCA - Fail exam & fail CA'}" value="Certificate of attendance "/>
+                    <apex:outputText styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'IRCA - Pass CA'}" value="Certificate of attendance "/>
+                    <apex:outputText escape="false" styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'IRCA - Pass exam & pass CA'}" value="<b>Certificate of achievement </b>"/>
+                    <apex:outputText styleClass="size12bold" rendered="{!enrollment.Exam_results__c = 'NON - Pass exam'}" value="Certificate of achievement "/>   
+                </apex:panelGroup>    
+        
+            <!--OLD IRCA-->                    
+                <apex:panelGroup rendered="{!enrollment.Course_Start_Date__c<DATE(2016,12,31)}">               
+                    <apex:outputText styleClass="size12"  value="This is to certify that "/>  
+                </apex:panelGroup>
+        </apex:panelGroup>
+        
+       <!--FSSC-->
+       <apex:panelGroup rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c ='FSSC',NOT(enrollment.Translation_Formula__c = 'Japan (Japanese)'))}">
+            <!-- brings in Certificate of... NOT JP--> 
+            <apex:outputText styleClass="size12" rendered="{!AND(OR(enrollment.Exam_results__c = 'NON - Pass exam',enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.Exam_results__c = 'NON - Pass exam & pass CA'),enrollment.Training_Event__r.Course__r.Course_Type__c='Lead Auditor')}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}"/>
+            <apex:outputText styleClass="size12" rendered="{!AND(CONTAINS(enrollment.Exam_results__c, "Fail"),enrollment.Training_Event__r.Course__r.Course_Type__c="Lead Auditor")}" value="{!enrollment.Training_Translations__r.Cert_of_Attendance_for_Certs__c}"/>
+            <apex:outputText styleClass="size12" rendered="{!NOT(enrollment.Training_Event__r.Course__r.Course_Type__c='Lead Auditor')}" value="{!enrollment.Training_Translations__r.Cert_of_Attendance_for_Certs__c}"/>                                       
+       </apex:panelGroup>
+       <apex:panelGroup rendered="{!AND(enrollment.Training_Event__r.Course__r.Certified_Course__c ='FSSC',enrollment.Translation_Formula__c = 'Japan (Japanese)')}">
+            <!-- brings in Certificate of... JP larger text size-->                     
+                <apex:outputText styleClass="size22" rendered="{!AND(OR(enrollment.Exam_results__c = 'NON - Pass exam',enrollment.Exam_results__c = 'Pass exam & pass CA',enrollment.Exam_results__c = 'NON - Pass exam & pass CA'),enrollment.Training_Event__r.Course__r.Course_Type__c='Lead Auditor')}" value="{!enrollment.Training_Translations__r.Online_Exam_Text_Box_1__c}"/>
+                <apex:outputText styleClass="size22" rendered="{!AND(CONTAINS(enrollment.Exam_results__c, "Fail"),enrollment.Training_Event__r.Course__r.Course_Type__c="Lead Auditor")}" value="{!enrollment.Training_Translations__r.Cert_of_Attendance_for_Certs__c}"/>
+                <apex:outputText styleClass="size22" rendered="{!NOT(enrollment.Training_Event__r.Course__r.Course_Type__c='Lead Auditor')}" value="{!enrollment.Training_Translations__r.Cert_of_Attendance_for_Certs__c}"/>                                                  
+       </apex:panelGroup> 
+        
+
+</apex:component>

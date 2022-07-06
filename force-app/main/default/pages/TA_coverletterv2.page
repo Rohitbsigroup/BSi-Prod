@@ -1,0 +1,283 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false">
+
+<!--
+14/08/2018 PC – Added in CN component
+18/12/2018 JS - Updated to Email Signatures for CN and MY, added in dates component, tidied code
+-->
+
+
+<head>
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: Arial Unicode MS;
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+
+
+<apex:outputText escape="false" rendered="{!IF((Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'),true,false)}" value="<br/><br/>"/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<!---Date of letter and Address on left of the page (all countries except France) --->
+    <apex:panelGrid rendered="{!NOT(Enrollment__c.Translation_Formula__c = 'France (French)')}" styleClass="size11left" width="100%" cellspacing="0" cellpadding="0">                     
+            <apex:outputText value="{0,date,{!Enrollment__c.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!NOW()}"/> </apex:outputText> 
+            <br/>
+            <apex:outputText rendered="{!Enrollment__c.Translation_Formula__c = 'Italy (Italiano)'}"><br/> </apex:outputText>
+            <apex:outputText rendered="{!NOT(Enrollment__c.Translation_Formula__c = 'Korea (Korean)')}">{!Enrollment__c.Delegate_name__r.Name}</apex:outputText>
+            <apex:outputText rendered="{!Enrollment__c.Translation_Formula__c = 'Korea (Korean)'}">{!Enrollment__c.Delegate_name__r.LastNameLocal} {!Enrollment__c.Delegate_name__r.FirstNameLocal}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.Account.Name))}" >{!Enrollment__c.Delegate_name__r.Account.Name}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.MailingStreet))}" >{!Enrollment__c.Delegate_name__r.MailingStreet}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.MailingCity))}" >{!Enrollment__c.Delegate_name__r.MailingCity}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.MailingState))}" value="{!Enrollment__c.Delegate_name__r.MailingState}"/>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.MailingPostalCode))}" >{!Enrollment__c.Delegate_name__r.MailingPostalCode}</apex:outputText>
+            <apex:outputText rendered="{!NOT(ISBLANK(Enrollment__c.Delegate_name__r.MailingCountry))}">{!Enrollment__c.Delegate_name__r.MailingCountry}</apex:outputText>       
+    </apex:panelGrid>
+
+
+<!---Address and Date of letter and on right of the page (for France) --->
+    <apex:panelGrid rendered="{!Enrollment__c.Translation_Formula__c = 'France (French)'}" styleClass="size11left" width="100%" cellspacing="0" cellpadding="0">         
+        <br/> <!---- MD HAD TO MOVE THIS FROM INSIDE TABLE TO FIX ALIGNMENT ---->
+        <table width="30%" align="right" table-layout="fixed" >  
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.Name}</apex:outputText> 
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.Account.Name}</apex:outputText>
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.MailingStreet}</apex:outputText>
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.MailingPostalCode}   {!Enrollment__c.Delegate_name__r.MailingCity}</apex:outputText>
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.Mailing_District__c}</apex:outputText>
+                <apex:outputText >{!Enrollment__c.Delegate_name__r.MailingCountry}</apex:outputText>
+                <apex:outputText >{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>           
+        </table>
+    </apex:panelGrid>
+    
+<!-- Adds breaks for countries except China & Germany.-->
+
+    <apex:outputText escape="false" rendered="{!NOT(OR(Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)', Enrollment__c.Translation_Formula__c = 'China (Chinese)'))}" value="<br/>"/>
+    
+<!-- For Italy Only: Adds the Course name and Dates above the Dear with some additional text-->
+    <apex:outputPanel rendered="{!Enrollment__c.Translation_Formula__c = 'Italy (Italiano)'}">
+        <apex:outputText rendered="{!NOT(Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke')}" styleClass="size14" value="Oggetto: Invio attestato del corso {!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c}, "/>
+        <apex:outputText rendered="{!    Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke' }" styleClass="size14" value="Oggetto: Invio attestato del corso {!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "/>
+        <!--JS Date component 20181218 -->
+        <c:Course_Dates format="{!Enrollment__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Enrollment__c.Training_Event__r.Course_Duration_Days__c}" 
+                start1="{!Enrollment__c.Training_Event__r.Start_date__c}" 
+                end1="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" 
+                start2="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" 
+                end3="{!Enrollment__c.Training_Event__r.End_Date3__c}" 
+                country="{!Enrollment__c.Training_Event__r.Event_Country__c}"
+                module="{!Enrollment__c.Training_Event__r.Module_Event__c}"
+                split="{!Enrollment__c.Training_Event__r.Split_Date_Event__c}"
+                source="email"
+            />                
+    </apex:outputpanel>   
+    <br/><br/>
+    
+<!-- For Japan & Korea Only: Enrolment name then translation for "Dear". For all other countries except Germany, Japan & Korea adds translation for "Dear" then Enrolment Name -->
+    <apex:outputText rendered="{!Enrollment__c.Translation_Formula__c = 'Japan (Japanese)'}" value="{!Enrollment__c.Delegate_name__r.Name} {!Enrollment__c.Training_Translations__r.Dear__c},"/> 
+    <apex:outputText rendered="{!Enrollment__c.Translation_Formula__c = 'Korea (Korean)'}" value="{!Enrollment__c.Delegate_name__r.LastNameLocal} {!Enrollment__c.Delegate_name__r.FirstNameLocal} {!Enrollment__c.Training_Translations__r.Dear__c},"/>
+    <apex:outputText rendered="{!NOT(OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)', Enrollment__c.Translation_Formula__c = 'Korea (Korean)'))}" value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Name},"/> 
+    <br/><br/>
+ 
+<!-- Not IT,JP,TH: Adds the Course name and Dates above the Dear with some additional text-->
+<apex:outputPanel rendered="{!NOT(OR(Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)'))}">
+        <apex:outputPanel rendered="{!NOT(Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke')}"> <apex:outputText styleClass="size14" value="Ref: "></apex:outputText><apex:outputText rendered="{!(Enrollment__c.Translation_Formula__c = 'UK (English)')}">{!Enrollment__c.Name}/</apex:outputText><apex:outputText value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c}, "/> </apex:outputpanel>
+        <apex:outputPanel rendered="{!    Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke' }"> <apex:outputText styleClass="size14" value="Ref: "></apex:outputText><apex:outputText rendered="{!(Enrollment__c.Translation_Formula__c = 'UK (English)')}">{!Enrollment__c.Name}/</apex:outputText><apex:outputText value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "/> </apex:outputpanel>
+        <!--JS Date component 20181218 -->
+        <c:Course_Dates format="{!Enrollment__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Enrollment__c.Training_Event__r.Course_Duration_Days__c}" 
+                start1="{!Enrollment__c.Training_Event__r.Start_date__c}" 
+                end1="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" 
+                start2="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" 
+                end3="{!Enrollment__c.Training_Event__r.End_Date3__c}" 
+                country="{!Enrollment__c.Training_Event__r.Event_Country__c}"
+                module="{!Enrollment__c.Training_Event__r.Module_Event__c}"
+                split="{!Enrollment__c.Training_Event__r.Split_Date_Event__c}"
+                source="email"
+            />                
+    </apex:outputpanel> 
+
+<!-- Line breaks - not IT, TH-->    
+    <apex:outputText rendered="{!NOT(OR(Enrollment__c.Translation_Formula__c = 'Italy (Italiano)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)'))}"> <br/><br/> </apex:outputText>
+
+<!-- For Germany Only: Adds translation for "Dear" then Enrolment Salutation and Lastname-->
+ <apex:outputText escape="false" rendered="{!Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)'}" value="{!Enrollment__c.Training_Translations__r.Dear__c} {!Enrollment__c.Delegate_name__r.Salutation} {!Enrollment__c.Delegate_name__r.LastName},<br/><br/>"/>    
+       
+<!-- If it is an IRCA Resit Enrolment adds additional text & the Original dates of the IRCA Course --> 
+    <apex:outputpanel rendered="{!AND(Enrollment__c.Booking_status__c='Booked - Resit',Enrollment__c.Training_Event__r.Course__r.Certified_Course__c ='IRCA')}">
+        <apex:outputText escape="false" value="{!Enrollment__c.Training_Translations__r.IRCA_validation_explanation__c}"></apex:outputText>
+        <c:Course_Dates format="{!Enrollment__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Course_Duration_Days__c}" 
+                start1="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c}" 
+                end1="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date_of_Section_1__c}" 
+                start2="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_Date_of_Section_2__c}" 
+                end3="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c}" 
+                country="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Event_Country__c}"
+                module="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Module_Event__c}"
+                split="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Split_Date_Event__c}"
+                source="email"
+            /> 
+        
+        
+        <apex:outputText value="  {0,date,{!Enrollment__c.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.Start_date__c}"/></apex:outputText> <apex:outputText value=" - {0,date,{!Enrollment__c.Training_Translations__r.Date_Format__c}}"> <apex:param value="{!Enrollment__c.Original_IRCA_Course_Enrollment__r.Training_Event__r.End_Date3__c}"/></apex:outputText>
+    <br/><br/>
+    </apex:outputpanel>
+    
+<!--JS 20200803 created 2 sections for UK - one to show for booking contacts, and the normal letter for others-->
+<!-- In-House booking contact first-->
+
+    <apex:panelGroup rendered="{!AND(Enrollment__c.Translation_Formula__c = 'UK (English)',Enrollment__c.Inhouse_Booking_Contact__c)}"> 
+        <br/><br/>
+        Thank you for choosing the BSI Training Academy. We hope all delegates enjoyed the experience and gained some valuable skills from attending the training course. 
+        <br/><br/>
+        We are pleased to congratulate all the delegates on completing the course. Please find enclosed the training certificates, which confirms everyone’s attendance.    
+        <br/><br/>
+    </apex:panelGroup>
+    
+<!--Delegate-->
+    <apex:panelGroup rendered="{!NOT(AND(Enrollment__c.Translation_Formula__c = 'UK (English)',Enrollment__c.Inhouse_Booking_Contact__c))}"> 
+            
+
+            <!--- Adds the Cover Letter Text 1 - "Thank you for choosing..." --->
+                <apex:outputText escape="false" value="{!Enrollment__c.Training_Translations__r.Cover_letter_text1__c}"></apex:outputText>
+                <br/><br/>
+            
+            <!-- covering letter text2 or covering letter text3 from training translations depending on exam results -->
+            
+                <apex:outputText rendered="{!OR(
+                        Enrollment__c.Exam_results__c = 'IRCA - Pass exam & pass CA',
+                        Enrollment__c.Exam_results__c = 'NON - Pass exam',
+                        Enrollment__c.Exam_results__c = 'IEMA - Pass exam',
+                        Enrollment__c.Exam_results__c = 'Six Sigma - Pass',
+                        Enrollment__c.Exam_results__c = 'ISEB - Pass',
+                        Enrollment__c.Exam_results__c = 'RABQSA TPECS - Pass',
+                        Enrollment__c.Exam_results__c = 'APMG - Pass',
+                        Enrollment__c.Exam_results__c = 'CCAA - Pass',
+                        Enrollment__c.Exam_results__c = 'EXIN - Pass',
+                        Enrollment__c.Exam_results__c = 'ITSMF - Pass',
+                        Enrollment__c.Exam_results__c = 'JATA - Pass',
+                        Enrollment__c.Exam_results__c = 'JRCA - Pass',
+                        Enrollment__c.Exam_results__c = 'Self Study Assessment Pass',
+                        Enrollment__c.Exam_results__c = 'IOSH - Pass',
+                        Enrollment__c.Exam_results__c = 'NON - Pass exam & pass CA',
+                        Enrollment__c.Exam_results__c = 'Pass exam & pass CA'
+                        )}" 
+                        value="{!Enrollment__c.Training_Translations__r.Cover_letter_text2__c}<br/><br/>" escape="false"/>
+                        
+                <apex:outputText rendered="{!OR(
+                        Enrollment__c.Exam_results__c = 'IRCA - Pass exam & fail CA',
+                        Enrollment__c.Exam_results__c = 'IRCA - Fail exam & pass CA',
+                        Enrollment__c.Exam_results__c = 'IRCA - Fail exam & fail CA',
+                        Enrollment__c.Exam_results__c = 'IRCA - Pass CA',
+                        Enrollment__c.Exam_results__c = 'Pass CA',
+                        Enrollment__c.Exam_results__c = 'NON - Fail exam',
+                        Enrollment__c.Exam_results__c = 'IEMA - Fail exam',
+                        Enrollment__c.Exam_results__c = 'Six Sigma - Fail',
+                        Enrollment__c.Exam_results__c = 'ISEB - Fail',
+                        Enrollment__c.Exam_results__c = 'APMG - Fail',
+                        Enrollment__c.Exam_results__c = 'CCAA - Fail',
+                        Enrollment__c.Exam_results__c = 'EXIN - Fail',
+                        Enrollment__c.Exam_results__c = 'ITSMF - Fail',
+                        Enrollment__c.Exam_results__c = 'JATA - Fail',
+                        Enrollment__c.Exam_results__c = 'JRCA - Fail',
+                        Enrollment__c.Exam_results__c = 'IOSH - Fail',
+                        Enrollment__c.Exam_results__c = null,
+                        Enrollment__c.Exam_results__c = 'NON - Pass exam & fail CA',
+                        Enrollment__c.Exam_results__c = 'NON - Fail exam & pass CA',
+                        Enrollment__c.Exam_results__c = 'NON - Fail exam & fail CA',
+                        Enrollment__c.Exam_results__c = 'Pass exam & fail CA',
+                        Enrollment__c.Exam_results__c = 'Fail exam & pass CA',
+                        Enrollment__c.Exam_results__c = 'Fail exam & fail CA'
+                        )}" 
+                        value="{!Enrollment__c.Training_Translations__r.Cover_letter_text3__c}<br/><br/>" escape="false"/>
+        
+        </apex:panelGroup>    
+
+<!---- for MEA shows the number of CPD points = duration hours of the course.-->
+    <apex:outputPanel rendered="{!Enrollment__c.Translation_Formula__c = 'MEA (English)'}"> 
+    You have earned <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!Enrollment__c.Training_Event__r.Course_Duration_Hours__c}"/></apex:outputText> CPD Points.
+                <br/><br/>
+    </apex:outputPanel>
+
+
+<!---- covering letter text4 from training translations (Letter ending).-->
+    <apex:outputText escape="false" value="{!Enrollment__c.Training_Translations__r.Cover_letter_text4__c}"></apex:outputText>
+    <br/><br/>
+
+<!---- "Yours sincerely" text.-->
+    <apex:outputText value="{!Enrollment__c.Training_Translations__r.Yours_sincerely__c}"/><br/><br/>
+    
+<!---- "Academy Manager name and contact details" text. Image of Signature included for Australia & France-->
+    <apex:image rendered="{!Enrollment__c.Training_Translations__r.Name = 'Australia (English)'}" height="1.5cm" width="2cm" url="{!Enrollment__c.Training_Translations__r.Cover_Letter_Signature__c}"/>
+    <apex:outputText escape="false" rendered="{!Enrollment__c.Translation_Formula__c = 'Australia (English)'}" value="<br/>"/>
+    <apex:image rendered="{!Enrollment__c.Training_Translations__r.Name = 'France (French)'}" height="2.0cm" width="4cm" url="{!URLFOR($Resource.TrainingCertificateSignatures, Enrollment__c.Training_Translations__r.Signature_Image__c)}"/>
+    <apex:outputText escape="false" rendered="{!Enrollment__c.Translation_Formula__c = 'France (French)'}" value="<br/>"/>
+    <apex:outputField rendered="{!NOT(OR(Enrollment__c.Training_Translations__r.Name = 'Malaysia (English)',Enrollment__c.Training_Translations__r.Name = 'Malaysia (Malay)'))}" value="{!Enrollment__c.Training_Translations__r.Academy_Manager__c}"/>
+    
+    
+    <apex:outputText escape="false" rendered="{!OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Thailand (Thai)')}" value="<br/><br/>"/>
+
+
+<!---For Japan & Thailand Only: Adds Course name and Dates as reference for the letter-->
+    <apex:outputPanel rendered="{!OR(Enrollment__c.Translation_Formula__c = 'Japan (Japanese)',Enrollment__c.Translation_Formula__c = 'Thailand (Thai)')}">
+        <apex:outputText rendered="{!NOT(Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke')}" styleClass="size14" value="{!Enrollment__c.Training_Event__r.Course__r.Product_Name_Local__c}, "/>
+        <apex:outputText rendered="{!    Enrollment__c.Training_Event__r.RecordType.Name ='Global_Training_Event_Bespoke' }" styleClass="size14" value="{!Enrollment__c.Training_Event__r.Bespoke_Course_Name_for_Certificate__c}, "/>
+        <apex:outputText rendered="{!Enrollment__c.Translation_Formula__c = 'Thailand (Thai)'}"><br/>ในวันที่อบรม </apex:outputtext> &nbsp;
+        <!--JS Date component 20181218 -->
+        <c:Course_Dates format="{!Enrollment__c.Training_Translations__r.Date_Format__c}" 
+                duration="{!Enrollment__c.Training_Event__r.Course_Duration_Days__c}" 
+                start1="{!Enrollment__c.Training_Event__r.Start_date__c}" 
+                end1="{!Enrollment__c.Training_Event__r.End_Date_of_Section_1__c}" 
+                start2="{!Enrollment__c.Training_Event__r.Start_Date_of_Section_2__c}" 
+                end3="{!Enrollment__c.Training_Event__r.End_Date3__c}" 
+                country="{!Enrollment__c.Training_Event__r.Event_Country__c}"
+                module="{!Enrollment__c.Training_Event__r.Module_Event__c}"
+                split="{!Enrollment__c.Training_Event__r.Split_Date_Event__c}"
+                source="email"
+            />                
+    </apex:outputpanel>    
+    <br/>
+
+<!---For India Only: Adds User Name, Office Phone number and User email address -->
+    <apex:outputText escape="false" rendered="{!IF(Enrollment__c.Translation_Formula__c = 'India (English)',true,false)}" value="<br/>{!$User.FirstName} {!$User.LastName} <br/>{!Enrollment__c.Training_Event__r.Indian_Office_Number__c}<br/>E:- {!$User.Email}"/>
+
+<!---For China and MY: Adds extra signature text depending on the Region selected on the Training Event.-->
+    <!--JS 20181218 component for CN and MY sign-off   -->
+    <apex:outputpanel rendered="{!Enrollment__c.Training_Translations__r.Name = 'China (Chinese)'}">
+        <!--JS 20181212 component for signatures -->
+        <br/>
+              <c:Email_Signatures translation="{!Enrollment__c.Training_Translations__r.Name}" Region="{!Enrollment__c.Training_Event__r.China_Region__c}" ver="HTML"/>
+    </apex:outputpanel>
+    <apex:outputpanel rendered="{!OR(Enrollment__c.Training_Translations__r.Name = 'Malaysia (English)',Enrollment__c.Training_Translations__r.Name = 'Malaysia (Malay)')}">
+        <!--JS 20181212 component for signatures -->
+              <c:Email_Signatures translation="{!Enrollment__c.Training_Translations__r.Name}" Region="{!Enrollment__c.Training_Event__r.MY_Region__c}" ver="HTML"/>
+    </apex:outputpanel>
+
+    
+</apex:page>

@@ -1,0 +1,254 @@
+<apex:page standardController="Training_Event__c" sidebar="false">
+    <apex:sectionHeader title="Edit Costs"/>
+            <apex:form >
+            <apex:pageBlock >
+                <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton value="Re-calculate" action="{!quicksave}"/>
+                </apex:pageBlockButtons>
+                
+                     
+                  
+ <table cellpadding="3" cellspacing="0" border="0.1" style="text-align:center; font-size:10pt;">
+        <THEAD>
+            <tr>
+                <th style="border:1px solid #000000;border-right:0;">Instructor Name</th>
+                <th style="border:1px solid #000000;border-right:0;">Internal?</th>
+                <th style="border:1px solid #000000;border-right:0;">Department</th>
+                <th style="border:1px solid #000000;">Training Days</th>
+            </tr>
+        </THEAD>
+        <TBODY>
+            <tr>
+                <td align="left"  style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer__r.Name}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer__r.Internal_Instructor__c}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer__r.Instructor_Department__c}</td>
+                <td style="border:1px solid #000000;border-top:0;">{!BLANKVALUE(Training_Event__c.Instructor_1_Days__c,Training_Event__c.Course_Duration_Days__c)}</td>
+            </tr>
+            <apex:panelGroup rendered="{!NOT(ISBLANK(Training_Event__c.Trainer_2nd__c))}">
+            <tr>
+                <td align="left"  style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer_2nd__r.Name}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer_2nd__r.Internal_Instructor__c}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Trainer_2nd__r.Instructor_Department__c}</td>
+                <td style="border:1px solid #000000;border-top:0;">{!BLANKVALUE(Training_Event__c.Instructor_2_Days__c,Training_Event__c.Course_Duration_Days__c)}</td>
+            </tr>
+            </apex:panelGroup>
+            <apex:panelGroup rendered="{!NOT(ISBLANK(Training_Event__c.Instructor_3rd__c))}">
+            <tr>
+                <td align="left"  style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_3rd__r.Name}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_3rd__r.Internal_Instructor__c}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_3rd__r.Instructor_Department__c}</td>
+                <td style="border:1px solid #000000;border-top:0;">{!BLANKVALUE(Training_Event__c.Instructor_3_Days__c,Training_Event__c.Course_Duration_Days__c)}</td>
+            </tr>
+            </apex:panelGroup>
+            <apex:panelGroup rendered="{!NOT(ISBLANK(Training_Event__c.Instructor_4th__c))}">
+            <tr>
+                <td align="left"  style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_4th__r.Name}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_4th__r.Internal_Instructor__c}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_4th__r.Instructor_Department__c}</td>
+                <td style="border:1px solid #000000;border-top:0;">{!BLANKVALUE(Training_Event__c.Instructor_4_Days__c,Training_Event__c.Course_Duration_Days__c)}</td>
+            </tr>
+            </apex:panelGroup>
+                        <apex:panelGroup rendered="{!NOT(ISBLANK(Training_Event__c.Instructor_5th__c))}">
+            <tr>
+                <td align="left"  style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_5th__r.Name}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_5th__r.Internal_Instructor__c}</td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Instructor_5th__r.Instructor_Department__c}</td>
+                <td style="border:1px solid #000000;border-top:0;">{!BLANKVALUE(Training_Event__c.Instructor_5_Days__c,Training_Event__c.Course_Duration_Days__c)}</td>
+            </tr>
+            </apex:panelGroup>
+            <tr>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:outputtext value="{0, number, integer}"><apex:param value="{!Training_Event__c.Total_No_of_Instructors__c}"/></apex:outputText> Instructor(s) </td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td style="border:1px solid #000000;border-top:0;">  <apex:outputtext value="{0, number, integer}"><apex:param value="{!Training_Event__c.Man_Days__c}"/></apex:outputText> Man Day(s) </td>
+            </tr>
+          
+        </TBODY>
+        
+</table>
+
+
+ <br/> <br/> 
+ No of Delegates: {!Training_Event__c.Enrollment_Count__c}
+ <br/> <br/> 
+
+    
+                
+ <table cellpadding="3" cellspacing="0" border="0.1" style="text-align:center; font-size:10pt;">
+        <THEAD>
+            <tr >
+                <th style="border:0;"></th>
+                <th style="border:0;"></th>
+                <th bgcolor="#CCCCCC" style="border:1px solid #000000;border-right:0;">Estimated Costs</th>
+                <th bgcolor="#CCCCCC" style="border:1px solid #000000;border-right:0;">Enter Adjusted or Actual Costs</th>
+                <th bgcolor="#CCCCCC" style="border:1px solid #000000;">Total</th>
+            </tr>
+        </THEAD>
+        <TBODY>
+            <tr>
+                <td align="left" rowspan="12" style="border:1px solid #000000;border-right:0;" >Instructor Costs</td>
+                <td align="left" style="border:1px solid #000000;border-right:0;">Instructor Fees</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;">{!Training_Event__c.Estimated_Instructors_Fee__c}</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;"><apex:inputField value="{!Training_Event__c.Instructors_Fee_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Instructors_Fee__c}</td>
+            </tr>
+            
+            <tr>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">ER Fees</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_ER_Fees__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"></td>
+            </tr>
+
+            
+            <tr>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">IR Fees</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_IR_Fees__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"></td>
+            </tr>
+
+            <tr>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">IR Fees (Tutors in JP)</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_IR_Tutor_Costs_JP__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"></td>
+            </tr>
+
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Subsistence</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Instructors_Subs__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Instructors_Subs_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Instructors_Subsistence__c}  </td>
+            </tr>
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Accommodation</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Instructors_Accom__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Instructors_Accom_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"> {!Training_Event__c.Instructors_accommodation__c}</td>
+            </tr>
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Travel</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.Estimated_Actual_Instructors_Travel__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"> {!Training_Event__c.Instructors_Travel__c}</td>
+            </tr> 
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Incentive</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> {!Training_Event__c.Estimated_Instructors_Incentive__c} </td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.Instructors_Incent_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"> {!Training_Event__c.Instructor_Incentive__c}</td>
+            </tr>
+            <!-- 01 March 2017 Vim added fields to calculate additional MEA cost TR Added 23/03/18 -->
+            <tr>
+                <apex:panelGroup rendered="{!OR(Training_Event__c.Event_Country__c= 'ME', Training_Event__c.Event_Country__c= 'SA',Training_Event__c.Event_Country__c= 'TR')}">
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Visa </td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.Actual_Visa_Fees__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Actual_Visa_Fees__c}</td>
+                </apex:panelGroup>
+            </tr>
+              
+            <tr>
+                <apex:panelGroup rendered="{!OR(Training_Event__c.Event_Country__c= 'ME', Training_Event__c.Event_Country__c= 'SA',Training_Event__c.Event_Country__c= 'TR')}">
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Flight </td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.Actual_Flight_Cost__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Actual_Flight_Cost__c}</td>
+                </apex:panelGroup>
+            </tr>
+            <tr>
+                <apex:panelGroup rendered="{!OR(Training_Event__c.Event_Country__c= 'ME', Training_Event__c.Event_Country__c= 'SA')}">
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Courier </td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.Actual_Courier_Cost__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Actual_Courier_Cost__c}</td>
+                </apex:panelGroup>
+            </tr>
+                 <!-- 20 April Rachel added Instructor KM Cost -->
+            <tr>
+                <apex:panelGroup rendered="{!Training_Event__c.Event_Country__c= 'TR'}">
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Total Car Miles/Km Cost </td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"> <apex:inputField value="{!Training_Event__c.ER_Instructor_Car_Miles_Km_Cost__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.ER_Instructor_Car_Miles_Km_Cost__c}</td>
+                </apex:panelGroup>
+            </tr>
+                       
+            <!-- Vim code ends here -->
+            <tr>
+                <td align="left" rowspan="2" style="border:1px solid #000000;border-right:0;" >Venue Costs</td>
+                <td align="left" style="border:1px solid #000000;border-right:0;">Venue</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;">{!Training_Event__c.Estimated_Venue_Costs__c}</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;"><apex:inputField value="{!Training_Event__c.Venue_Cost_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Venue_Cost__c}</td>
+            </tr>
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Refreshments</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Refreshment_Cost__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Refreshment_Cost_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Refreshment_Cost__c}</td>
+            </tr>            
+            <tr>
+                <td align="left" rowspan="6" style="border:1px solid #000000;border-right:0;" >Other Costs</td>
+                <td align="left" style="border:1px solid #000000;border-right:0;">Materials</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;">{!Training_Event__c.Estimated_Materials_Costs__c}</td>
+                <td align="right" style="border:1px solid #000000;border-right:0;"><apex:inputField value="{!Training_Event__c.Materials_Cost_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;">{!Training_Event__c.Materials_Cost__c}</td>
+            </tr>  
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Stationary</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Stationary_Costs__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Stationary_Costs_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Stationary_Costs__c}</td>
+            </tr>          
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Exam Fees</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Exam_Fees__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Exam_Fees_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Exam_Fees__c}</td>
+            </tr>                    
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Standards</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Costs_of_Standards__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Standards_Actual_Adjustment__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Standards_Costs__c}</td>
+            </tr>
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Partner Fees</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;">{!Training_Event__c.Estimated_Partner_Fees__c}</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Estimated_Actual_Partner_Fees__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;"> {!Training_Event__c.Partner_Fees__c}</td>
+            </tr>  
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-top:0;border-right:0;">Other</td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;border-right:0;"><apex:inputField value="{!Training_Event__c.Estimated_Actual_Other_Costs__c}"/></td>
+                <td align="right" style="border:1px solid #000000;border-top:0;">{!Training_Event__c.Other_Costs__c}</td>
+            </tr> 
+            <tr>
+                <td align="left" style="border:1px solid #000000;border-right:0;">Notes</td>
+                <td align="left" colspan="4" style="border:1px solid #000000;"><apex:inputField value="{!Training_Event__c.Notes_on_Costs__c}"/></td>
+            </tr>
+            <tr >
+                <td align="left" style="border:2px solid #000000;border-right:0;" ><br/>Total<br/><br/></td>
+                <td align="left" style="border:2px solid #000000;border-right:0;" colspan="2">Actual Costs?<br/> (Please tick if you have entered the actual costs.) <apex:inputField value="{!Training_Event__c.Actual_Costs__c}"/></td>
+                <td align="right" style="border:2px solid #000000;" colspan="2"><apex:outputField value=" {!Training_Event__c.Total_Event_Costs__c}"/></td>
+            </tr>
+            
+
+
+
+      
+            
+            
+        </TBODY>
+       
+</table>
+                             
+              </apex:pageBlock>
+            </apex:form>
+</apex:page>

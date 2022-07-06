@@ -1,0 +1,87 @@
+<apex:page standardController="Enrollment__c" recordSetVar="Enrollments" sidebar="false" extensions="UpdateInvoiceDetailsController">
+    <apex:sectionHeader title="Mark Attendance"/>
+            <apex:form >
+            <apex:pageBlock >
+                <apex:pageMessages />
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton action="{!quicksave}" value="Update"/>
+                </apex:pageBlockButtons>                            
+                <apex:pageBlockSection title="Selected Enrollments" columns="1" collapsible="False">
+                    <apex:pageBlockTable value="{!selected}" var="Enrollment">
+                       <apex:column value="{!Enrollment.name}"/>
+                       <apex:column value="{!Enrollment.CQI_ID__c}"/>                       
+                       <apex:column value="{!Enrollment.Delegate_name__r.Salutation}"/>
+                       <apex:column value="{!Enrollment.Delegate_name__c}"/>                       
+                       <apex:column headerValue="Delegate Email" value="{!Enrollment.Delegate_name__r.Email}"/>
+                       
+                       
+                       <!-- JS 20200915 enable update of all at once with code below <apex:column headerValue="Booking Status"><apex:inputField value="{!Enrollment.Booking_status__c}"/></apex:column>-->
+                       <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="Booking Status" for="bookingStatusMaster"/>
+                                <apex:inputField onchange="massUpdateRecords(event, 'bookingStatus')" value="{!dummyEnrollment.Booking_status__c}" id="bookingStatusMaster" style="margin-left:10px;"/>
+                                <apex:actionSupport event="onchange" reRender="cancReason"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputField id="bookingStatus" value="{!Enrollment.Booking_status__c}"/>
+                       </apex:column>
+                       
+                       <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLabel value="Exam Results" for="examResultMaster"/>
+                                <apex:inputField onchange="massUpdateRecords(event, 'examResult')" value="{!dummyEnrollment.Exam_results__c}" id="examResultMaster" style="margin-left:10px;"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputField id="examResult" value="{!Enrollment.Exam_results__c}"/>
+                       </apex:column>
+                       <!--<apex:column headerValue="Exam Results"><apex:inputField value="{!Enrollment.Exam_results__c}"/></apex:column>-->
+                       <apex:column headerValue="Exam %"><apex:inputField value="{!Enrollment.Exam_percentage__c}"/></apex:column>
+                       <apex:column headerValue="Exam Mark"><apex:inputField value="{!Enrollment.Exam_Mark__c}"/></apex:column>
+                       <apex:column value="{!Enrollment.Invoice_Number__c}"/>
+                       <apex:column >
+                       <apex:facet name="header">
+                        <apex:outputPanel >
+                            <apex:outputLabel value="Attendance Marked?" for="Select_All_Marked"/>
+                            <apex:inputCheckbox onclick="checkAll(this)" id="Select_All_Marked"/>
+                        </apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputField id="Marked" value="{!Enrollment.Attendance_Marked__c}"/> 
+                        </apex:column>
+                       <apex:column headerValue="Continuous Assessment"><apex:inputField value="{!Enrollment.Continuous_Assessment__c}"/></apex:column>                       
+                       <apex:column headerValue="Hold Certificate?"><apex:inputField value="{!Enrollment.Hold_Certificate__c}"/></apex:column>
+                       <apex:column headerValue="Hold Certificate Reason"><apex:inputField value="{!Enrollment.Hold_Cerificate_Reason__c}"/></apex:column>
+                       <apex:column headerValue="2nd Marker"><apex:inputField value="{!Enrollment.Marker_2nd__c}"/></apex:column>
+                     </apex:pageBlockTable>
+                </apex:pageBlockSection>                         
+              </apex:pageBlock>
+            </apex:form>
+            
+            <script type="text/javascript">
+                function checkAll(cb)
+                {
+                var inputElem = document.getElementsByTagName("input");           
+                for(var i=0; i<inputElem.length; i++)
+                    {    
+                 if(inputElem[i].id.indexOf("Marked")!=-1)                          
+                 inputElem[i].checked = cb.checked;
+                    }
+                }
+            </script>
+            <!-- 12/12/2019 JS copied from Pawel Chrzanowski - mass update records -->
+              <script type="text/javascript"> 
+                function massUpdateRecords(e, childName){
+                    var elements = document.getElementsByTagName('select');
+                    for(var i=0; i<elements.length; i++){
+                        if(elements[i].id.indexOf(childName) != -1){
+                            elements[i].value = e.currentTarget.value;
+                        }
+                    }
+                }
+              </script>
+            
+            
+</apex:page>

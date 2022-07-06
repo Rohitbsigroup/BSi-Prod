@@ -1,0 +1,8 @@
+<apex:component access="global">
+    <apex:attribute name="enrollment" description="enrollment" type="Enrollment__c" access="global"/>    
+      <!--Temasek-->
+      <apex:image rendered="{!enrollment.Training_Event__r.Additional_Logo__c='Temasek'}" height="1.7cm" style="position: fixed; left: 5cm; top:1.2cm; z-index:3"  url="{!URLFOR($Resource.TrainingCertificateLogos, 'Temasek.png')}"/>  
+      <!--Mapau-->
+<apex:image rendered="{!enrollment.Training_Event__r.Additional_Logo__c='Mapua'}" height="1.7cm" style="position: fixed; left: 4.5cm; top:1.2cm; z-index:3"  url="{!URLFOR($Resource.TrainingCertificateLogos, 'Mapua.png')}"/> 
+<apex:image rendered="{!enrollment.Training_Event__r.Additional_Logo__c='Mapua'}" height="1.3cm" style="position: fixed; left: 10cm; top:1.5cm; z-index:3"  url="{!URLFOR($Resource.TrainingCertificateLogos, 'CCESC.png')}"/> 
+</apex:component>

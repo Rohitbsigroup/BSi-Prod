@@ -1,0 +1,4 @@
+<apex:page standardController="Survey__c" sidebar="true">
+  <apex:sectionHeader title="Training Surveys"/>
+  <apex:enhancedList type="Survey__c" height="600" rowsPerPage="100"/>
+</apex:page>

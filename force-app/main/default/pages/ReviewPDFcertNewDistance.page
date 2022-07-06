@@ -1,0 +1,82 @@
+<apex:page renderAs="pdf" standardController="Enrollment__c" showHeader="false" pageStyle="all">
+<head>
+<style type="text/css" media="print">
+body{font-family: Arial Unicode MS;}
+@page{
+    @bottom-left { 
+    content: element(footer);      
+    }  
+    size: A4 portrait;
+    margin-top:.0cm;
+    margin-left:0cm;
+    margin-right:0cm;
+    margin-bottom:1.5cm;
+}
+.size15 {
+    font-weight: bold;
+    font-size: 15pt;
+    text-align: left;
+    line-height: 34px;
+}
+
+.size10 {
+    font-size: 10pt;
+    text-align: left;
+}              
+
+
+</style>
+</head>
+
+
+<body>
+<!---- this creates a table to insert the text in the correct places---->
+<table width="95%" align="center" table-layout="fixed">
+
+<!---- this inserts a space at the top---->
+<tr>
+    <td width ="0.1cm" ></td>
+    <td height="10cm"></td>
+</tr> 
+
+<tr>
+    <td width="0.1cm" height="60" ></td>
+    <td align="left" valign="middle">
+
+        <!---- this brings in the delegates name in English ---->
+        <apex:outputText styleclass="size15" rendered="{!IF(NOT(OR(Enrollment__c.Translation_Formula__c = 'China (Chinese)',Enrollment__c.Translation_Formula__c = 'Taiwan (Chinese)', Enrollment__c.Translation_Formula__c = 'Japan (Japanese)', Enrollment__c.Translation_Formula__c = 'Germany (Deutsch)')),true,false)}" value="{!Enrollment__c.Delegate_name__r.Name}" style="font-style:italic"/></td>
+</tr>
+
+<!---- this inserts a space---->
+<tr>
+    <td width ="0.1cm" ></td>
+    <td height="12.5cm"></td>
+</tr> 
+
+<!---- This pulls in the Issue date and reg number  ---->
+
+    <tr>
+        <td width="0.1cm" ></td>
+        <td align="left">
+            <apex:outputText styleClass="size10" value="Issue Date: "/><apex:outputText styleClass="size10" value="{!day(Today())}/{!month(Today())}/{!year(Today())}"/>
+
+        </td> 
+ </tr>
+ <tr>
+            <td width="0.1cm" ></td>
+        <td align="left">
+            <apex:outputText styleClass="size10" value="Registration number: "/>
+            <apex:outputText styleClass="size10" style="font-style:italic;" rendered="{!IF(Enrollment__c.Delegate_ID__c = null,False,True)}" value="{!Enrollment__c.Delegate_ID__c}"/>
+            <apex:outputText styleClass="size10" style="font-style:italic;" rendered="{!IF(Enrollment__c.Delegate_ID__c = null,True,False)}" value="{!Enrollment__c.Name}"/>
+
+                           
+
+        </td>   
+     </tr>    
+        
+</table>
+
+
+       
+</body>
+</apex:page>

@@ -1,0 +1,119 @@
+<apex:page controller="TrainingBookingController"
+           action="{!initCheck}"
+           language="{!pageLanguage}"
+           standardstylesheets="false"
+           showheader="false"
+           cache="false"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           docType="html-5.0">
+
+    <!-- PK(NEB) 10 Sep 2018 - Added doctype of html-5.0 for better mobile support -->
+    <apex:composition template="{!$Site.Template}">
+        <!-- *** Additional tracking *** -->
+        <!--
+        <apex:define name="analytics">
+                _gaq.push(['_addTrans', '{!objBooking.Id}', '', '<apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Net_Price__c - objBooking.Discount__c}" /></apex:outputText>', '<apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Tax__c}" /></apex:outputText>', '', '{!JSINHTMLENCODE(objBooking.Billing_City__c)}', '{!JSINHTMLENCODE(objBooking.Billing_Region__c)}', '{!JSINHTMLENCODE(objBooking.Billing_Country__c)}']);
+            <apex:variable value="" var="residential" rendered="{!objBooking.Is_Residential__c}">
+                <apex:variable value="" var="withAccomm" rendered="{!objBooking.Delegates_Inc_Accommodation__c > 0}">
+                _gaq.push(['_addItem', '{!objBooking.Id}', '{!selectedEvent.event.Name}', '{!courseName}', 'Training', '<apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Price_Inc_Accommodation__c}" /></apex:outputText>', '{!objBooking.Delegates_Inc_Accommodation__c}']);
+                </apex:variable>
+                <apex:variable value="" var="withoutAccomm" rendered="{!objBooking.Delegates_Exc_Accommodation__c > 0}">
+                _gaq.push(['_addItem', '{!objBooking.Id}', '{!selectedEvent.event.Name}', '{!courseName}', 'Training', '<apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Price_Exc_Accommodation__c}" /></apex:outputText>', '{!objBooking.Delegates_Exc_Accommodation__c}']);
+                </apex:variable>
+            </apex:variable>
+            <apex:variable value="" var="nonResidential" rendered="{!NOT(objBooking.Is_Residential__c)}">
+                _gaq.push(['_addItem', '{!objBooking.Id}', '{!selectedEvent.event.Name}', '{!courseName}', 'Training', '<apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Price_Per_Delegate__c}" /></apex:outputText>', '{!objBooking.Number_of_Delegates__c}']);
+            </apex:variable>
+                _gaq.push(['_trackTrans']);
+                _gaq.push(['_setCustomVar', 2, 'Promotional codes', '{!IF(objBooking.Promotional_Code__c='', 'None', objBooking.Promotional_Code__c)}', 3]);
+        </apex:define> -->
+
+        <!-- *** Additional tracking *** -->
+        <!-- VA 12 Oct 2016 Code added to support marketing tracking as per new code provided-->
+        <apex:define name="analytics">
+            dataLayer=[{
+                      'ecommerce': {
+                        'purchase': {
+                          'actionField': { // TRANSACTION INFORMATION
+                            'id': '{!objBooking.id}',  // Transaction ID. Required for purchases
+                            'affiliation': 'Training', // Use this field to identify Shop and Training site
+                            'currencyCode': '{!objBooking.CurrencyIsoCode}' , // Currency in which transaction conducted
+                            'revenue': <apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Net_Price__c - objBooking.Discount__c}" /></apex:outputText>,  // Total transaction value
+                          },
+                          'products': [{ // TRAINING PRODUCT OBJECT
+                            'name': '{!courseName}', // Name or ID is required.
+                            'id': '{!selectedEvent.event.Name}', // Unique identifier of the product
+                            'price': <apex:outputText value="{0,number,0.00}"><apex:param value="{!objBooking.Price_Per_Delegate__c}" /></apex:outputText>,  // Total price for that product
+                            'category': 'Training', // Category of item
+                            'quantity': {!objBooking.Number_of_Delegates__c},
+                            'coupon': '{!IF(objBooking.Promotional_Code__c='', 'None', objBooking.Promotional_Code__c)}'  // The coupon code
+                        }<apex:outputText rendered="{!objBooking.Delegates_Inc_Accommodation__c > 0}" >
+                            ,{ // ACCOMMODATION DURING PRODUCT OBJECT
+                            'name': 'Accommodation' ,
+                            'id':'{!accomodationProductId}',
+                            'price': {!pricePerDelegateAccomodation},
+                            'category': 'Accommodation',
+                            'quantity': {!objBooking.Delegates_Inc_Accommodation__c}}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!objBooking.Delegates_inc_extra_night__c > 0}" >
+                            ,{// ACCOMMODATION NIGHT BEFORE PRODUCT OBJECT
+                            'name': 'Extra Night' ,
+                            'id': '{!extraNightProductId}',
+                            'price': {!pricePerDelegateExtraNight},
+                            'category': 'Extra Night',
+                            'quantity': {!objBooking.Delegates_inc_extra_night__c}
+                            }
+                        </apex:outputText>
+                        ]
+                        }
+                      },
+                        'event' : 'transactionComplete'
+                    }];
+        </apex:define>
+
+        <!-- *** Details *** -->
+        <apex:define name="details">
+            <h1 class="title">{!courseName}</h1>
+            <apex:outputPanel layout="none" rendered="{!pageShowSelection}">
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingLocationHeader}"/>:&nbsp;
+                    <apex:outputField value="{!selectedEvent.event.Training_Venue__r.Name}"/>
+                </h2>
+                <h2 class="subtitle">
+                    <apex:outputText value="{!$Label.TrainingBookingDatesHeader}"/>:&nbsp;
+                    <c:TrainingBookingDates event="{!selectedEvent.event}" format="string" />
+                </h2>
+             </apex:outputPanel>
+            <h2 class="subtitle">
+                <apex:outputText value="{!$ObjectType.TrainingBooking__c.fields.Name.Label}"/>:&nbsp;
+                <apex:outputField value="{!objBooking.Name}"/>
+            </h2>
+        </apex:define>
+
+        <!-- *** Introduction *** -->
+        <apex:define name="introduction">
+            <p class="intro">{!$Label.TrainingBookingStep6Intro}</p>
+        </apex:define>
+
+        <!-- *** Body *** -->
+        <apex:define name="body">
+
+            <!-- PC K2 Payment Details component -->
+            <p class="intro">
+                <c:Payment_Details bookingId="{!objBooking.Id}" ver="HTML" source="form" />                   
+                {!$Label.TrainingBookingStep6Notes}
+            </p>
+        </apex:define>
+
+        <!-- *** Notes *** -->
+        <apex:define name="notes">
+            <p>&nbsp;</p>
+            <apex:form >
+                <apex:commandLink value="{!$Label.TrainingBookingPrintConfirmation}" target="_blank" action="{!printConfirmation}" styleClass="pseudo-button"/>
+            </apex:form>
+            <br/>
+        </apex:define>
+
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,97 @@
+<apex:page standardController="Quote__c">
+
+<script language="javascript" type="text/javascript">
+
+function popitup() {
+
+    var baseURL             = 'https://www.appextremes.com/apps/Conga/PointMerge.aspx';
+    var apiParams           = '?sessionId={!$Api.Session_ID}&serverUrl={!$Api.Partner_Server_URL_80}';
+    var quoteParams         = '&id={!Quote__c.Id}'; 
+    
+    var settings            = '&FP0=1&LG3=1&LG4=1&DS7=4&DS8=0'; 
+    var templateName        = '&OFN="[Proposal]"+{!Quote__c.Name}+{!Quote__c.Account__r.Name}'; 
+    var templateId          = '&templateid={!Quote__c.CongaWhichTemplates__c}';
+    var reportvar           = '&reportvar={!Quote__c.CongaOppID__c},';    
+    var DisableCongaIF      = '&DC={!IF(Quote__c.Completed__c="Yes","0","1")},';
+    var DisableCongaLabel   = '&DCL="Quote needs to be 100%",';
+    
+    var apiQueryParams      = '&queryid=';
+    var apiQueryParams1     = '[DrivTNew]a0aD00000024ve8?pv0={reportvar},';
+    var apiQueryParams2     = '[DrivTExist]a0aD00000024veG?pv0={reportvar},';
+    var apiQueryParams3     = '[DrivBGAddC]a0aD00000024veH?pv0={reportvar},';
+    var apiQueryParams4     = '[DrivBGComAdv]a0aD00000024veN?pv0={reportvar},';
+    var apiQueryParams5     = '[DrivBGWinNB]a0aD00000024veV?pv0={reportvar},';
+    var apiQueryParams6     = '[DrivQDemoEx]a0aD00000024veZ?pv0={reportvar},';
+    var apiQueryParams7     = '[DrivQOverAdv]a0aD00000024veI?pv0={reportvar},';
+    var apiQueryParams8     = '[DrivQGTNL]a0aD00000024veC?pv0={reportvar},';
+    var apiQueryParams9     = '[DrivIDemoAch]a0aD00000024veU?pv0={reportvar},';
+    var apiQueryParams10    = '[MasterOpp]a0aD00000024ve9?pv0={reportvar},';
+    var apiQueryParams11    = '[isTransfer]a0aD00000024veK?pv0={reportvar},';
+    var apiQueryParams12    = '[Sites]a0aD00000024veT?pv0={reportvar},';
+    var apiQueryParams13    = '[QAccount]a0aD00000024veW?pv0={!Quote__c.Account__c},'; 
+    var apiQueryParams14    = '[QMainContact]a0aD00000024veQ,';
+    var apiQueryParams15    = '[ProdTraining]a0aD00000024veY?pv0={reportvar},';
+    var apiQueryParams16    = '[ProdAll]a0aD00000024veA?pv0={reportvar},';
+    var apiQueryParams17    = '[CAVRollUp]a0aD00000024vee?pv0={reportvar},';
+    var apiQueryParams18    = '[AnnualRollUp]a0aD00000024veR?pv0={reportvar},';
+    var apiQueryParams19    = '[InitialRollUp]a0aD00000024ve7?pv0={reportvar},';
+    var apiQueryParams20    = '[EHrollUp]a0aD00000024ved?pv0={reportvar},';
+    var apiQueryParams21    = '[AMFrollUp]a0aD00000024vec?pv0={reportvar},';
+ 
+    var echoSignSigType     = '&esvisible=1&ESSignaturetype=2';
+    var echoSignContactID   = '&ESContactId=003D000000uUJdP';
+    var echoSignContactID1  = '&ESContactId1={!Quote__c.Contact__c}';
+    var echoSignOppID       = '&ESopportunityid={!Quote__c.CongaOppID__c},'; 
+    var echoSignCustField   = '&ESCustomField=Quote__c';
+    var echoSignCustFiledVal= '&ESCustomFieldValue={!Quote__c.Id}';
+
+    var url = baseURL + 
+              apiParams +
+              settings +
+              templateName +
+              quoteParams +
+              templateId +
+              reportvar +
+              DisableCongaIF +
+              DisableCongaLabel +
+              echoSignSigType +
+              echoSignContactID +
+              echoSignContactID1 +
+              echoSignOppID +
+              echoSignCustField +
+              echoSignCustFiledVal +
+              apiQueryParams +
+              apiQueryParams1 + 
+              apiQueryParams2 + 
+              apiQueryParams3 + 
+              apiQueryParams4 + 
+              apiQueryParams5 + 
+              apiQueryParams6 + 
+              apiQueryParams7 + 
+              apiQueryParams8 + 
+              apiQueryParams9 + 
+              apiQueryParams10 + 
+              apiQueryParams11 + 
+              apiQueryParams12 + 
+              apiQueryParams13 + 
+              apiQueryParams14 + 
+              apiQueryParams15 + 
+              apiQueryParams16 + 
+              apiQueryParams17 + 
+              apiQueryParams18 + 
+              apiQueryParams19 + 
+              apiQueryParams20 + 
+              apiQueryParams21;
+              
+    newwindow=window.open(url,'name','height=450,width=620');
+    if (window.focus) {newwindow.focus()}
+    return false;
+}
+
+</script>
+
+    <apex:outputLink value="#" onclick="return popitup()" styleclass="btn" style="text-decoration:none;">
+        Customer Proposal
+    </apex:outputLink>
+    <!--<a href="#" onclick="return popitup()">Link to popup</a>-->
+</apex:page>

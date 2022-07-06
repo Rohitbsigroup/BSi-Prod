@@ -1,0 +1,33 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" access="global">
+    <lightning:tabset selectedTabId="keyAccountPlanSummary">
+        <lightning:tab label="Summary">
+            <div id="pip">
+            	<c:KeyAccountPlanSummary aura:id='summaryId'/>
+            </div>
+        </lightning:tab>
+        <lightning:tab label="Vision">
+            <c:KeyAccountPlanVision/>
+        </lightning:tab>
+        <lightning:tab label="SWOT" id="KeyAccountPlanSwot">
+            <c:KeyAccountPlanSWOT/>
+        </lightning:tab>
+        <lightning:tab label="Opportunities" id="KeyAccountPlanOpportunities">
+            Ping
+        </lightning:tab>
+        <lightning:tab label="PDF" id="KeyAccountPlanPdf" onactive="{! c.downloadPdf}">
+            Ping2
+        </lightning:tab>
+    <div id="demo2">
+        <h1>Yo??</h1>
+    </div>
+    </lightning:tabset>
+    <div id="demo">
+        <h1>Yo!!</h1>
+    </div>
+    <form class="slds-form" id="form" action="/apex/KeyAccountPlanPdf">
+        <lightning:button label="Save as PDF" onclick="{! c.downloadPdf }"/>
+        <lightning:input aura:id="summaryHtmlFieldId" name="SummaryHtmlField" value="Empty" class="slds-hidden"/>
+        <lightning:input aura:id="visionHtmlFieldId" name="visionHtmlField" value="Empty" class="slds-hidden"/>
+        <lightning:input name="content-disposition" value='attachment; filename=TestPDF.pdf' class="slds-hidden"/>
+    </form>
+</aura:component>

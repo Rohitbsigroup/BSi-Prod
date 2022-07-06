@@ -1,0 +1,37 @@
+<apex:component controller="CIVMainController" allowDML="true">
+
+    <c:LoadingIconVF />
+
+    <apex:attribute name="theRecord" description="..." type="SObject" required="true" assignTo="{!record}"/>
+    <apex:attribute name="theName" description="..." type="String" required="false" assignTo="{!recordNameValue}"/>
+    <apex:attribute name="theCompany" description="..." type="String" required="false" assignTo="{!recordCompanyValue}"/>
+    <apex:attribute name="theEmail" description="..." type="String" required="false" assignTo="{!recordEmailValue}"/>
+    <apex:attribute name="thePhone" description="..." type="String" required="false" assignTo="{!recordPhoneValue}"/>
+    <apex:attribute name="thePostcode" description="..." type="String" required="false" assignTo="{!recordPostcodeValue}"/>
+    <apex:attribute name="theAccountId" description="..." type="String" required="false" assignTo="{!recordAccountId}"/>
+    <apex:attribute name="theContactId" description="..." type="String" required="false" assignTo="{!recordContactId}"/>
+
+    <apex:tabPanel switchType="client" selectedTab="matchesTab" id="theTabPanel">
+    	<!--  MATCHES TAB -->
+        <apex:tab label="{!$Label.CIV_Matches}" name="matches" id="tabMatches" title="{!$Label.CIV_Matches}">
+            <c:civMatches theRecord="{!record}" theName="{!recordNameValue}" theCompany="{!recordCompanyValue}"
+                theEmail="{!recordEmailValue}" thePostcode="{!recordPostcodeValue}" thePhone="{!recordPhoneValue}" 
+                theAccountId="{!recordAccountId}" theContactId="{!recordContactId}" />
+        </apex:tab>
+
+    	<!--  LINKED TAB -->        
+        <apex:tab label="{!$Label.CIV_Linked}" name="linked" id="tabLinked" title="{!$Label.CIV_Matches}">
+            <c:civLinked theRecord="{!record}" theAccountId="{!recordAccountId}" theContactId="{!recordContactId}" />
+        </apex:tab>
+
+    	<!--  ACTIVITIES TAB -->     
+        <apex:tab label="{!$Label.CIV_Activities}" name="activities" id="tabActivities" title="{!$Label.CIV_Activities}">
+             <c:civActivities theRecord="{!record}" theAccountId="{!recordAccountId}" theContactId="{!recordContactId}" />
+        </apex:tab>
+               
+    	<!--  CAMPAIGNS TAB -->        
+        <apex:tab label="{!$Label.CIV_Campaigns}" name="campaigns" id="tabCampaigns" title="{!$Label.CIV_Campaigns}">
+			<c:civCampaigns theRecord="{!record}" theAccountId="{!recordAccountId}" theContactId="{!recordContactId}" />
+        </apex:tab>        
+    </apex:tabPanel>
+</apex:component>

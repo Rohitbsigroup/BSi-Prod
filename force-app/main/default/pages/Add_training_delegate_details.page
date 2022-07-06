@@ -1,0 +1,129 @@
+<apex:page standardController="TrainingDelegate__c" recordSetVar="del" sidebar="false" extensions="AddTrainingDelegateDetailsController">
+    <head>
+        <style type="text/css">
+            .errorStyle{border: 2px solid #c00;}
+            .errorText{font-family: Arial, Helvetica, sans-serif; font-size: 12px; text-align: left; color: #d74c3b;}
+        </style>
+    </head>
+    <apex:sectionHeader title="Add Details"/>
+            <apex:form >
+            <apex:pageBlock >
+                <apex:pageMessages id="messages"/>
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!save}"/>
+                    <apex:commandButton value="Cancel" action="{!cancel}"/>
+                    <apex:commandButton value="Update" action="{!updateDelegates}" rerender="messages"/>
+                </apex:pageBlockButtons>    
+                
+                <!-- shows one table for all countries except China, china below --> 
+                               
+                <apex:pageBlockSection rendered="{!NOT(OR(CONTAINS($UserRole.Name, 'CN'),CONTAINS($UserRole.Name, 'TW'),CONTAINS($UserRole.Name, 'KR'),CONTAINS($UserRole.Name, 'JP')))}"  title="Delegates" columns="1" collapsible="False">
+
+                    <apex:pageBlockTable value="{!selected}" var="TrainingDelegate">
+                       <apex:column value="{!TrainingDelegate.Name}"/>
+                       <apex:column headerValue="Salutation"><apex:inputField value="{!TrainingDelegate.Salutation__c}"/></apex:column>
+                       <apex:column headerValue="First Name"><apex:inputField value="{!TrainingDelegate.First_Name__c}"/></apex:column>
+                       <apex:column headerValue="Last Name"><apex:inputField value="{!TrainingDelegate.Last_Name__c}"/></apex:column>
+                       <apex:column headerValue="Email">
+                           <apex:outputPanel >
+                               <apex:inputField value="{!TrainingDelegate.Email_Address__c}" onkeydown="this.value = this.value.trim()" onkeyup="this.value = this.value.trim(); validateEmailField(this);"/>
+                           </apex:outputPanel>
+                       </apex:column>
+                       <apex:column headerValue="Contact"><apex:inputField value="{!TrainingDelegate.Conversion_Contact__c}"/></apex:column>
+                       <apex:column headerValue="Job Title"><apex:inputField value="{!TrainingDelegate.Job_Title__c}"/></apex:column>
+                       <apex:column headerValue="Phone No."><apex:inputField value="{!TrainingDelegate.Mobile_Number__c}"/></apex:column>
+                       <apex:column >
+                       
+                           <apex:facet name="header">
+                           <apex:outputPanel >
+                                <apex:outputLabel value="Accommodation during?" for="Select_All_Marked"/>
+                                <apex:inputCheckbox onclick="checkAll(this)" id="Select_All_Marked"/>
+                           </apex:outputPanel>
+                           </apex:facet>
+                           <apex:inputField id="Marked" value="{!TrainingDelegate.Accommodation_Required__c}"/> 
+                           
+                           </apex:column>
+                           
+                       <apex:column headerValue="Accommodation night before"><apex:inputField value="{!TrainingDelegate.Accommodation_night_before__c}"/></apex:column>
+                       <apex:column headerValue="Examination?"><apex:inputField value="{!TrainingDelegate.Online_Exam__c}"/></apex:column>
+                       <!-- JS commenting out 20181203<apex:column headerValue="Standard?"><apex:inputField value="{!TrainingDelegate.Standard__c}"/></apex:column>-->
+                       <apex:column headerValue="Is booker?"><apex:inputField value="{!TrainingDelegate.Is_Booker__c}"/></apex:column>
+
+                </apex:pageBlockTable>
+                </apex:pageBlockSection>
+                
+                <!-- For CN' -->
+                           
+                <apex:pageBlockSection rendered="{!OR(CONTAINS($UserRole.Name, 'CN'),CONTAINS($UserRole.Name, 'TW'),CONTAINS($UserRole.Name, 'KR'),CONTAINS($UserRole.Name, 'JP'))}" title="Delegates" columns="1" collapsible="False">
+                    <apex:pageBlockTable value="{!selected}" var="TrainingDelegate">
+                       <apex:column value="{!TrainingDelegate.Name}"/>
+                       <apex:column headerValue="Salutation"><apex:inputField value="{!TrainingDelegate.Salutation__c}"/></apex:column>
+                       <apex:column headerValue="First Name"><apex:inputField value="{!TrainingDelegate.First_Name__c}"/></apex:column>
+                       <apex:column headerValue="Last Name"><apex:inputField value="{!TrainingDelegate.Last_Name__c}"/></apex:column>
+                       <apex:column headerValue="First Name(EN)"><apex:inputField value="{!TrainingDelegate.First_Name_English__c}"/></apex:column>
+                       <apex:column headerValue="Last Name(EN)"><apex:inputField value="{!TrainingDelegate.Last_Name_English__c}"/></apex:column>
+                       <apex:column headerValue="Email">
+                           <apex:outputPanel >
+                               <apex:inputField value="{!TrainingDelegate.Email_Address__c}" onkeydown="this.value = this.value.trim()" onkeyup="this.value = this.value.trim(); validateEmailField(this);"/>
+                           </apex:outputPanel>
+                       </apex:column>
+                       <apex:column headerValue="Contact"><apex:inputField value="{!TrainingDelegate.Conversion_Contact__c}"/></apex:column>
+                       <apex:column headerValue="Job Title"><apex:inputField value="{!TrainingDelegate.Job_Title__c}"/></apex:column>
+                       <apex:column headerValue="Phone No."><apex:inputField value="{!TrainingDelegate.Mobile_Number__c}"/></apex:column>
+                       <apex:column >
+                       
+                           <apex:facet name="header">
+                           <apex:outputPanel >
+                                <apex:outputLabel value="Accommodation during?" for="Select_All_Marked"/>
+                                <apex:inputCheckbox onclick="checkAll(this)" id="Select_All_Marked"/>
+                           </apex:outputPanel>
+                           </apex:facet>
+                           <apex:inputField id="Marked" value="{!TrainingDelegate.Accommodation_Required__c}"/> 
+                           
+                           </apex:column>
+                           
+                       <apex:column headerValue="Accommodation night before"><apex:inputField value="{!TrainingDelegate.Accommodation_night_before__c}"/></apex:column>
+                       <apex:column headerValue="Examination?"><apex:inputField value="{!TrainingDelegate.Online_Exam__c}"/></apex:column>
+                       <!-- JS commenting out 20181203 <apex:column headerValue="Standard?"><apex:inputField value="{!TrainingDelegate.Standard__c}"/></apex:column>-->
+                       <apex:column headerValue="Is booker?"><apex:inputField value="{!TrainingDelegate.Is_Booker__c}"/></apex:column>
+ 
+                </apex:pageBlockTable>
+                </apex:pageBlockSection>
+              </apex:pageBlock>
+            </apex:form>
+            
+            <script type="text/javascript">
+                function checkAll(cb)
+                {
+                var inputElem = document.getElementsByTagName("input");           
+                for(var i=0; i<inputElem.length; i++)
+                    {    
+                 if(inputElem[i].id.indexOf("Marked")!=-1)                          
+                 inputElem[i].checked = cb.checked;
+                    }
+                }
+
+                function validateEmailField(e){
+                    var email = e.value.trim();
+                    if(email == '' || validateEmail(email)){
+                        e.classList.remove('errorStyle');
+                        if(e.parentElement.children.length > 1){
+                            e.parentElement.removeChild(e.parentElement.lastChild);
+                        }
+                    }else{
+                        e.classList.add('errorStyle');
+                        if(e.parentElement.children.length == 1){
+                            var div = document.createElement('div');
+                            div.setAttribute('class', 'errorText');
+                            div.innerHTML = '<b>Error:</b> Invalid Email Address.';
+                            e.parentElement.appendChild(div);
+                        }
+                    }
+                }
+                
+                function validateEmail(email){
+                    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return re.test(email);
+                }
+            </script>
+</apex:page>

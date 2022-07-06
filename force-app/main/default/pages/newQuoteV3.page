@@ -1,0 +1,814 @@
+<apex:page controller="NewQuoteControllerV3" action="{!CheckManageSites}" tabStyle="Quote__c" id="thePage" sidebar="false">
+    <apex:sectionHeader subtitle="{!$Label.SiteProductSelection}" title="{!$Label.Allocateitesandproducts}" />
+
+    <style type="text/css">
+        .header {
+            position: absolute; 
+            margin-top: 8px;
+            margin-left: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            color: black;
+        }   
+    </style>
+
+    <script type="text/javascript">
+        function setFocusOnLoad() {} 
+
+        function noenter(ev)  {
+            if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+                doProductSearch();
+                return false;
+            } else {
+              return true;
+            }
+        }
+
+        function openQuestionPopup(url, windowName, product, productType)  {
+            /* alert(url); */
+            if (productType == 'IMS') {
+                CreateIMSQuestion(product);
+            } else if (productType == 'SAMPLING') {
+                CreateSamplingQuestion(product);
+            }
+ 			
+            var win = window.open(url, windowName, "width=1200,height=700,scrollbars=yes");
+
+            var timer = setInterval(
+                function() {
+                    if(win.closed) {  
+                        clearInterval(timer);
+                        window.focus();
+                        
+                        if (productType == 'IMS') {
+                            RefreshIMSQuestion(product);
+                        } else if (productType == 'SAMPLING') {
+                            RefreshSamplingQuestion(product);
+                        }
+                    }
+                }, 1000);                           
+        }       
+    </script>
+
+    <apex:actionStatus id="status">
+    <apex:facet name="start">
+            <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="200px" ImageUrl="{!$Resource.loading}"/>
+        </apex:facet>
+    </apex:actionStatus>
+
+    <!-- PAGE MESSAGES -->
+    <apex:outputPanel id="pageMessages" >  
+	    <apex:pageMessages />
+		<apex:outputPanel rendered="{!hasMessages}" >
+			<script>
+				location.href = "#";
+				location.href = "#pageMessages";		
+			</script>
+		</apex:outputPanel>
+	</apex:outputPanel>    
+
+    <!-- WARNINGS -->
+<!-- 
+    <apex:outputpanel rendered="{!ISBLANK(opp.Pricebook2Id)}">
+        <table width="100%" style="background-color:#C25454;"><tr>
+            <td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+            <td style="vertical-align:middle;"><apex:outputText value="{!$Label.NoDefaultPricebook}" style="font-weight:bold;"/></td> 
+        </tr></table>
+    </apex:outputpanel>
+ -->
+    <apex:outputpanel rendered="{!!opp.QuoteReady__c}">
+        <table width="100%" style="background-color:#C25454;"><tr>
+            <td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+            <td style="vertical-align:middle;"><apex:outputLink value="/{!opp.Id}" style="font-weight:bold;">{!$Label.OpportunityNotReadyQuote}</apex:outputLink></td> 
+        </tr></table>
+    </apex:outputpanel>
+    <apex:outputpanel rendered="{!missingSiteType}">
+        <table width="100%" style="background-color:#C25454;"><tr>
+            <td style="vertical-align:middle;" width="35px"><apex:image value="{!$Resource.icon_warning}" width="30"/></td>
+            <td style="vertical-align:middle;">
+                <apex:outputText value="{!$Label.SiteTypeError + ': '}" style="font-weight:bold;"/>
+                <apex:repeat value="{!missingSiteTypes}" var="missingSite">
+                    <apex:outputLink value="/{!missingSite.Site__c}" target="_blank">{!missingSite.SiteName__c}</apex:outputLink>&nbsp;
+                </apex:repeat>                  
+            </td> 
+        </tr></table>
+    </apex:outputpanel>
+
+    <br />
+
+
+    <!-- FORM -->
+    <apex:form id="theForm">
+        <apex:actionFunction name="doProductSearch" action="{!searchProducts}" status="status" reRender="productSearchResults,suggestedProductResults" />
+
+        <apex:actionRegion >
+            <apex:actionFunction name="RefreshSamplingQuestion" rerender="productSiteGrid,samplingTable,pageMessages" action="{!CheckForSamplingAvailableQuestion}" >
+                <apex:param name="samplingProductQuestion" id="samplingProductQuestion" assignTo="{!selectedProduct}" value="" />
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion >
+            <apex:actionFunction name="RefreshIMSQuestion" rerender="productSiteGrid,samplingTable,pageMessages" action="{!CheckForIMSAvailableQuestion}" >
+                <apex:param name="imsProductQuestion" id="imsProductQuestion" assignTo="{!selectedProduct}" value="" />
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion >
+            <apex:actionFunction name="CreateSamplingQuestion" action="{!CreateSamplingQuestion}" rerender="pageMessages">
+                <apex:param name="selectedSamplingProduct" id="selectedSamplingProduct" assignTo="{!selectedSamplingProduct}" value=""  />
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion >
+            <apex:actionFunction name="CreateIMSQuestion" action="{!CreateIMSQuestion}" rerender="pageMessages">
+                <apex:param name="selectedIMSProduct" id="selectedIMSProduct" assignTo="{!selectedIMSProduct}" value=""  />
+            </apex:actionFunction>
+        </apex:actionRegion>
+                
+        <!-- SITE SECTION -->
+        <apex:outputPanel id="siteSummaryPanel">
+            <apex:pageBlock id="siteSummary" mode="edit" >
+                <apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+                    <apex:outputPanel style="cursor:pointer;">
+                        <apex:image value="/img/icon/custom51_100/books32.png" height="30"/>
+                        <apex:image value="/img/arrow_up.gif" rendered="{!ShowSiteSummary}" />
+                        <apex:image value="/img/arrow_dwn.gif" rendered="{!!ShowSiteSummary}" />                    
+                        <apex:outputText value="{!$Label.SiteSummary} - {!IF(IsMultiSite, $Label.MultiSiteQuote + ' (' & TEXT(sites.size) & ' ' + $Label.Sites + ')', $Label.SingleSiteQuote)}" styleclass="header"/>
+                        <apex:actionSupport event="onclick" action="{!ToggleSiteSummary}" rerender="siteSummaryPanel" />
+                    </apex:outputPanel>
+                </apex:panelGrid>
+            
+                <apex:outputPanel rendered="{!ShowSiteSummary}" >
+                    <apex:pageBlockSection showHeader="false" columns="3">
+                        
+                        <!-- HQ Summary, Network / Transient messages -->
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <table width="100%" style="padding:10px;">
+                                    <tr>
+                                        <td width="35px"><apex:image value="{!$Resource.icon_namedhq}" width="30" styleclass="helpHQ" rendered="{!!ISBLANK(siteHQ)}"/></td>
+                                        <td>
+                                            <apex:panelGrid columns="1" rendered="{!!ISBLANK(siteHQ)}">
+                                                <a href="/{!siteHQ.Site__c}" target="_blank" style="font-weight:bold;" id="{!siteHQ.Site__c}" onblur="LookupHoverDetail.getHover('{!siteHQ.Site__c}').hide();" 
+                                                    onfocus="LookupHoverDetail.getHover('{!siteHQ.Site__c}','../{!siteHQ.Site__c}/m?retURL=%2F{!siteHQ.Site__c}&isAjaxRequest=1').show();"
+                                                    onmouseout="LookupHoverDetail.getHover('{!siteHQ.Site__c}').hide();"
+                                                    onmouseover="LookupHoverDetail.getHover('{!siteHQ.Site__c}','../{!siteHQ.Site__c}/m?retURL=%2F{!siteHQ.Site__c}&isAjaxRequest=1').show();">
+                                                    {!siteHQ.SiteName__c}
+                                                </a>
+                                                <apex:outputText value="{!siteHQ.SiteType__c}" style="font-weight:bold;" styleclass="required"/>
+                                                <apex:outputText value="{!siteHQ.Site__r.Street__c}" styleclass="text"/>
+                                                <apex:outputText value="{!siteHQ.Site__r.Postcode__c}, {!siteHQ.Site__r.City__c}" styleclass="text"/>
+                                                <apex:outputText value="{!siteHQ.Site__r.Country__c}" styleclass="text"/>
+                                            </apex:panelGrid>
+                                        </td>
+                                    </tr>
+                                    <apex:outputPanel layout="none" rendered="{!!ISBLANK(siteTransient.Site__c)}">
+                                        <tr>
+                                            <td width="35px"><apex:image value="{!$Resource.icon_transient}" width="30" styleclass="helpTR" rendered="{!quote.Transient__c}"/></td>
+                                            <td>
+                                                <apex:panelGrid columns="2">
+                                                    <a href="/{!siteTransient.Site__c}" target="_blank"  style="font-weight:bold;" id="{!siteTransient.Site__c}" onblur="LookupHoverDetail.getHover('{!siteTransient.Site__c}').hide();" 
+                                                        onfocus="LookupHoverDetail.getHover('{!siteTransient.Site__c}','../{!siteTransient.Site__c}/m?retURL=%2F{!siteTransient.Site__c}&isAjaxRequest=1').show();"
+                                                        onmouseout="LookupHoverDetail.getHover('{!siteTransient.Site__c}').hide();"
+                                                        onmouseover="LookupHoverDetail.getHover('{!siteTransient.Site__c}','../{!siteTransient.Site__c}/m?retURL=%2F{!siteTransient.Site__c}&isAjaxRequest=1').show();">
+                                                        {!siteTransient.SiteName__c}
+                                                    </a>
+                                                    <apex:outputText value=""/>
+                                                    <apex:outputText value="{!$ObjectType.Site__c.fields.SecurityIssue__c.label}" styleclass="text"/>
+                                                    <apex:outputText value="{!siteTransient.Site__r.SecurityIssue__c}" styleclass="text" style="font-weight:bold;{!IF(siteTransient.Site__r.SecurityIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+                                                    <apex:outputText value="{!$ObjectType.Site__c.fields.GeographicIssue__c.label}" styleclass="text"/>
+                                                    <apex:outputText value="{!siteTransient.Site__r.GeographicIssue__c}" styleclass="text" style="font-weight:bold;{!IF(siteTransient.Site__r.GeographicIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+                                                </apex:panelGrid>
+                                            </td>
+                                        </tr>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!!ISBLANK(siteNetwork)}">
+                                        <tr>
+                                            <td width="35px"><apex:image value="{!$Resource.icon_network}" width="30" styleclass="helpNE" rendered="{!quote.Network__c}"/></td>
+                                            <td>
+                                                <apex:panelGrid columns="2">
+                                                    <a href="/{!siteNetwork.Site__c}" target="_blank"  style="font-weight:bold;" id="{!siteNetwork.Site__c}" onblur="LookupHoverDetail.getHover('{!siteNetwork.Site__c}').hide();" 
+                                                        onfocus="LookupHoverDetail.getHover('{!siteNetwork.Site__c}','../{!siteNetwork.Site__c}/m?retURL=%2F{!siteNetwork.Site__c}&isAjaxRequest=1').show();"
+                                                        onmouseout="LookupHoverDetail.getHover('{!siteNetwork.Site__c}').hide();"
+                                                        onmouseover="LookupHoverDetail.getHover('{!siteNetwork.Site__c}','../{!siteNetwork.Site__c}/m?retURL=%2F{!siteNetwork.Site__c}&isAjaxRequest=1').show();">
+                                                        {!siteNetwork.SiteName__c}
+                                                    </a>
+                                                    <apex:outputText value=""/>
+                                                    <apex:outputText value="{!$ObjectType.Site__c.fields.SecurityIssue__c.label}" styleclass="text"/>
+                                                    <apex:outputText value="{!siteNetwork.Site__r.SecurityIssue__c}" styleclass="text" style="font-weight:bold;{!IF(siteNetwork.Site__r.SecurityIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+                                                    <apex:outputText value="{!$ObjectType.Site__c.fields.GeographicIssue__c.label}" styleclass="text"/>
+                                                    <apex:outputText value="{!siteNetwork.Site__r.GeographicIssue__c}" styleclass="text" style="font-weight:bold;{!IF(siteNetwork.Site__r.GeographicIssue__c == 'Yes','color:#A23233','color:#299E35')}"/>
+                                                </apex:panelGrid>
+                                            </td>
+                                        </tr>
+                                    </apex:outputPanel>
+                                </table>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+
+                        <!-- Site Summary -->
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <table width="100%" style="padding:10px;">      
+                                    <tr>                        
+                                        <td style="width:35px;"><apex:image value="{!$Resource.icon_named}" width="30" styleclass="helpNA" rendered="{!IsMultiSite}"/></td>
+                                        <td>
+                                            <apex:outputpanel layout="block" rendered="{!IsMultiSite}" style="overflow:auto;width:100%;height:200px">
+                                                <table width="100%" style="padding:10px;" cellpadding="5">
+                                                    <th class="tableheader">{!$Label.TH_Site}</th>
+                                                    <th class="tableheader">{!$Label.TH_Type}</th>
+                                                    <apex:repeat value="{!sites}" var="ns">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="/{!ns.Id}" target="_blank" style="font-size:11px;font-weight:bold;" id="{!ns.Id}" onblur="LookupHoverDetail.getHover('{!ns.Id}').hide();" 
+                                                                    onfocus="LookupHoverDetail.getHover('{!ns.Id}','../{!ns.Id}/m?retURL=%2F{!ns.Id}&isAjaxRequest=1').show();"
+                                                                    onmouseout="LookupHoverDetail.getHover('{!ns.Id}').hide();"
+                                                                    onmouseover="LookupHoverDetail.getHover('{!ns.Id}','../{!ns.Id}/m?retURL=%2F{!ns.Id}&isAjaxRequest=1').show();">
+                                                                    {!ns.Name}
+                                                                </a>
+                                                            </td>
+                                                            <td>{!IF(ISBLANK(ns.Type), $Label.SiteTypeMissing, ns.Type)}</td>
+                                                        </tr>                       
+                                                    </apex:repeat>
+                                                </table>    
+                                            </apex:outputpanel>             
+                                        </td>       
+                                    </tr>
+                                </table>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+
+                        <!-- Contacts Summary -->
+                        <apex:pageblockSectionItem >
+                            <apex:actionRegion >
+                            <apex:outputPanel >
+                                <table width="100%" style="padding:10px;">      
+                                    <tr>                        
+                                        <td style="width:35px;"><apex:image value="/img/icon/documents32.png" width="30" styleclass="helpNA" /></td>
+                                        <td>
+                                            <apex:outputpanel layout="block">
+                                                <table width="100%">
+                                                    <thead>
+                                                        <th class="tableheader">{!$Label.TH_Default_Settings}</th>
+                                                        <th class="tableheader">
+                                                            <apex:actionRegion >
+                                                                <apex:inputCheckbox value="{!useDefaults}" rendered="{!!isNew}" id="resetDefaults" />
+                                                            </apex:actionRegion>
+                                                            <apex:outputLabel value="{!$Label.ResettoDefaults}" for="resetDefaults" styleclass="text" style="font-weight:bold;" />                                                          
+                                                        </th>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="width:140px;vertical-align:middle;"> 
+                                                                <apex:image value="/img/icon/custom51_100/globe64.png" width="30" />
+                                                                <apex:outputLabel value="{!$Label.BluePrintLanguage}" styleclass="text" style="font-weight:bold;" />
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >                                            
+                                                                    <apex:selectList id="chooseBluePrintLanguage" value="{!selectedQuoteLanguage}" size="1">
+                                                                        <apex:selectOptions value="{!bluePrintLanguages}"/>
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width:140px;vertical-align:middle;">
+                                                                <apex:image value="{!$Resource.icon_person2}" width="30" />
+                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.Contact__c.label}" for="primaryContacts" styleclass="text" style="font-weight:bold;" />
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >
+                                                                    <apex:selectList value="{!quote.Contact__c}" multiselect="false" size="1" id="primaryContacts">
+                                                                        <apex:selectOptions value="{!ContactItems}" />            
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+                                                            </td>
+                                                        </tr>
+                    
+                                                        <tr>
+                                                            <td style="width:140px;vertical-align:middle;">
+                                                                <apex:image value="{!$Resource.icon_invoice}" width="30" />
+                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.Invoice_Contact__c.label}" for="invoiceContacts" styleclass="text" style="font-weight:bold;" />
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >
+                                                                    <apex:selectList value="{!quote.Invoice_Contact__c}" multiselect="false" size="1" id="invoiceContacts">
+                                                                        <apex:selectOptions value="{!ContactItems}" />            
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+                                                            </td>
+                                                        </tr>
+                    
+                                                        <tr>
+                                                            <td style="width:140px;vertical-align:middle;">
+                                                                <apex:image value="{!$Resource.icon_clock}" width="30" />
+                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.Booking__c.label}" for="bookingContacts" styleclass="text" style="font-weight:bold;" />
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >                                                            
+                                                                    <apex:selectList value="{!quote.Booking__c}" multiselect="false" size="1" id="bookingContacts">
+                                                                        <apex:selectOptions value="{!ContactItems}"/>            
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+                                                            </td>
+                                                        </tr>
+                                                        <apex:outputpanel layout="none" rendered="{!ShowCreditCheckContact}">
+                                                            <tr>
+                                                                <td style="width:140px;vertical-align:middle;">                                 
+                                                                    <apex:image value="{!$Resource.icon_creditcard}" width="30" />
+                                                                    <apex:outputLabel value="{!$ObjectType.Quote__c.fields.CreditCheck__c.label}" for="creditCheckContacts" styleclass="text" style="font-weight:bold;" />
+                                                                </td>
+                                                                <td style="vertical-align:middle;">
+                                                                    <apex:actionRegion >                                                                                                        
+                                                                        <apex:selectList value="{!quote.CreditCheck__c}" multiselect="false" size="1" id="creditCheckContacts">
+                                                                            <apex:selectOptions value="{!ContactItems}" />            
+                                                                        </apex:selectList>
+                                                                    </apex:actionRegion>
+                                                                </td>
+                                                            </tr>
+                                                        </apex:outputpanel>
+                                                        <tr>    
+                                                            <td style="width:140px;vertical-align:middle;"> 
+                                                                <apex:image value="/img/icon/people32.png" width="30" />                                
+                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.UseSiteContactDefaults__c.label}" for="useSiteContactDefaults" styleclass="text" style="font-weight:bold;" />
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >                                                                                                        
+                                                                    <apex:inputCheckbox value="{!quote.UseSiteContactDefaults__c}" id="useSiteContactDefaults" />
+                                                                </apex:actionRegion>                                                                    
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width:140px;">
+                                                                <apex:panelGrid columns="2">                                    
+                                                                    <apex:image value="/img/icon/products32.png" width="30" />
+                                                                    <apex:outputLabel value="{!$Label.PricebookandCurrency}" for="basePriceBook" styleclass="text" style="font-weight:bold;" />
+                                                                </apex:panelGrid>
+                                                            </td>
+                                                            <td style="vertical-align:middle;">
+                                                                <apex:actionRegion >                                                                                                        
+                                                                    <apex:selectList value="{!quote.PriceBook2Id__c}" multiselect="false" size="1" id="basePriceBook">
+                                                                        <apex:selectOptions value="{!PriceBookItems}" />            
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+                                                                <br />
+                                                                <apex:actionRegion >
+                                                                    <apex:selectList value="{!quote.CurrencyIsoCode}" multiselect="false" size="1" id="baseCurrency">
+                                                                        <apex:selectOptions value="{!CurrencyCodeItems}" />            
+                                                                    </apex:selectList>
+                                                                </apex:actionRegion>
+<!--                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.UseLocalPrices__c.label}" for="useLocalPrices" styleclass="text" style="font-weight:bold;" />-->
+                                                                <apex:actionRegion >                                                                
+                                                                    <apex:inputCheckbox value="{!quote.UseLocalPrices__c}" id="useLocalPrices" />
+                                                                </apex:actionRegion>                                                                
+                                                                <apex:outputLabel value="{!$ObjectType.Quote__c.fields.UseLocalPrices__c.label}" for="useLocalPrices" styleclass="text" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+                                                </table>    
+                                            </apex:outputpanel>             
+                                        </td>       
+                                    </tr>
+                                </table>
+                            </apex:outputPanel>
+                            </apex:actionRegion>
+                        </apex:pageblockSectionItem>                        
+                    </apex:pageBlockSection>
+                </apex:outputPanel>             
+            </apex:pageBlock>   
+        </apex:outputPanel>
+
+
+        <!-- PRODUCT SEARCH --> 
+        <apex:outputPanel id="searchPanel" >
+            <table width="100%">
+                <tr>
+                    <td style="vertical-align:top;" width="25%">    
+                        <apex:pageBlock id="searchFilter" mode="edit">
+                            <apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+                                <apex:outputPanel style="cursor:pointer">
+                                    <apex:image value="{!$Resource.icon_search}" height="30"/>
+                                    <apex:image value="/img/arrow_up.gif" rendered="{!ShowProductSearch}" />
+                                    <apex:image value="/img/arrow_dwn.gif" rendered="{!!ShowProductSearch}" />
+                                    <apex:outputText value="{!$Label.ProductSearch}" styleclass="header"/>
+                                    <apex:actionSupport event="onclick" action="{!ToggleProductSearch}" rerender="searchPanel" />
+                                </apex:outputPanel>
+                            </apex:panelGrid>
+                            
+                            <apex:outputPanel rendered="{!ShowProductSearch}" >
+                                <apex:pageBlockSection showHeader="false" columns="1">
+                                    <br />
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.Portfolio_Interests__c.label}"/>
+                                        <apex:outputText value="{!opp.Portfolio_Interests__c}" />
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.Product_Area_Interests__c.label}"/>
+                                        <apex:outputText value="{!opp.Product_Area_Interests__c}" />
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;background-color:NavajoWhite;">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.Product_Interests__c.label}"/>
+                                        <apex:outputText value="{!opp.Product_Interests__c}" />
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="" />                                   
+                                        <apex:commandButton action="{!AddProductInterests}" value="{!$Label.AddProductInterests}" status="status" reRender="productSiteGrid,suggestedProductResults,samplingTable,pageMessages" />
+                                    </apex:pageBlockSectionItem>
+                                    <br />
+
+                                    <apex:pageBlockSectionItem rendered="{!!ISBLANK(opp.Full_Standard__c)}" labelStyle="width:100px;" dataStyle="width:100px;background-color:{!IF(opp.Contract_Review_Completed__c,'LightGreen','Red')}">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.Full_Standard__c.label}"/>
+        								<apex:outputField value="{!opp.Full_Standard__c}"  />
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="" />                                   
+                                       	<apex:commandButton action="{!AddStandardProduct}" disabled="{!!opp.Contract_Review_Completed__c}" value="{!$Label.AddStandard}" status="status" reRender="productSiteGrid,suggestedProductResults,samplingTable,pageMessages" />
+                                    </apex:pageBlockSectionItem>
+                                    <br />
+
+                                    <apex:pageBlockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.PortfolioInterestArea__c.label}" for="productPortfolio"/>
+                                        <apex:selectList value="{!searchProductPortfolio}" size="1" id="productPortfolio">
+                                            <apex:selectOptions value="{!ProductPortfolioItems}"/>
+                                            <apex:actionSupport event="onchange" rerender="productArea"/>
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>                            
+                                    <apex:pageblockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="{!$ObjectType.Opportunity.fields.Product_Area_Interests__c.label}" for="productArea"/>
+                                        <apex:selectList id="productArea" value="{!searchProductArea}" size="1" disabled="{!ISNULL(searchProductPortfolio)}">
+                                            <apex:selectOptions value="{!ProductAreaItems}"/>
+                                            <apex:actionSupport event="onchange" reRender="productSearchResults"/>
+                                        </apex:selectList>
+                                    </apex:pageblockSectionItem>
+                                    <apex:pageblockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value="{!$Label.ProductCountries}" for="productCountries"/>
+
+                                        <apex:outputPanel >
+                                            <div style="overflow:auto;width:120px;height:40px;border-style:solid;border-color:#C0C0C0;border-width:1px;">                                       
+                                                <apex:selectCheckboxes id="productCountries" value="{!searchProductCountries}" layout="pageDirection" style="font-size:11px;">
+                                                    <apex:selectOptions value="{!ProductCountryItems}"/>
+                                                    <apex:actionSupport event="onchange" reRender="productSearchResults"/>
+                                                </apex:selectCheckboxes>
+                                            </div>
+                                        </apex:outputPanel>
+
+                                    </apex:pageblockSectionItem>                                                                    
+                                    <apex:pageblockSectionItem labelStyle="width:100px;" dataStyle="width:100px;" helpText="{!$Label.ProductSearchHelpText}">
+                                        <apex:outputLabel value="{!$Label.ProductName}" for="productName"/>
+                                        <apex:inputText id="productName" value="{!searchProductName}" onkeypress="return noenter(event);" />
+                                    </apex:pageblockSectionItem>
+                                    <apex:pageblockSectionItem labelStyle="width:100px;" dataStyle="width:100px;">
+                                        <apex:outputLabel value=""/> 
+                                        <apex:commandButton action="{!searchProducts}" value="{!$Label.Search}" status="status" reRender="productSearchResults,suggestedProductResults"/>
+                                    </apex:pageblockSectionItem>
+                                </apex:pageBlockSection>
+                            </apex:outputPanel>
+                        </apex:pageBlock>
+                    </td>
+                    <apex:outputPanel layout="none" rendered="{!ShowProductSearch}" >
+                        <td width="75%" style="vertical-align:top;">        
+                            <apex:pageBlock id="selectProducts" mode="edit">                
+    
+                                <apex:panelGrid cellpadding="2" cellspacing="2" columns="2" width="100%" bgcolor="#E1E6EE">
+                                    <apex:outputPanel >
+                                        <apex:image value="{!$Resource.icon_barcode}" height="30"/>
+                                        <apex:outputText value="{!$Label.SelectProducts}" styleclass="header"/>
+                                    </apex:outputPanel>
+                                </apex:panelGrid>
+    
+                                <apex:pageBlockSection showHeader="false" columns="2">
+                                    <apex:outputPanel id="productSearchResults" layout="block" style="position:relative;overflow:scroll;width:100%;height:255px;">
+                                        <apex:outputPanel >
+                                            <apex:image value="/img/icon/campaigns24.png" />
+                                            <apex:outputText value="{!$Label.SearchResults} {!IF(ProductSearchResults=null,'','('+TEXT(ProductSearchResults.size)+')')}" styleclass="header"/>
+                                        </apex:outputPanel>
+                                        <apex:pageBlockTable value="{!ProductSearchResults}" var="p" rules="cols" >
+                                            <apex:column width="25px">
+                                                <apex:facet name="header">
+<!--                                                    <apex:inputCheckbox />-->&nbsp;
+                                                </apex:facet>
+                                                <apex:inputCheckbox value="{!p.Selected}" id="selectLine1">
+                                                    <apex:actionSupport action="{!GetSuggestedProducts}" event="onclick" rerender="suggestedProductResults" />
+                                                </apex:inputCheckbox>
+                                            </apex:column>
+
+                                            <apex:column headerValue="{!$Label.Product}" width="80px" >
+                                            	<apex:outputText value="{!p.ClassificationName}" rendered="{!p.AllowMultipleInstances}" />
+                                            	<apex:outputText value="{!p.Name}" rendered="{!!p.AllowMultipleInstances}" />
+                                            </apex:column>
+
+                                            <apex:column headerValue="" width="80px" >
+                                            	<apex:outputText value="{!p.ClassificationName}" rendered="{!!p.AllowMultipleInstances}" />
+                                            	<apex:outputText value="{!p.Name}" rendered="{!p.AllowMultipleInstances}" />
+                                            </apex:column>
+
+                                            <apex:column headerValue="{!$Label.TH_Stream}" value="{!p.Area}" width="50px" />
+                                            <apex:column headerValue="{!$Label.TH_C_Code}" value="{!p.product.CCode__c}" width="35px" style="{!IF(p.product.RequiresCCodeToQuote__c,'font-weight:bold;','')}" /> 
+                                            <apex:column headerValue="{!$Label.TH_Type}" value="{!p.product.Type__c}" width="45px" /> 
+                                        </apex:pageBlockTable>
+                                    </apex:outputPanel>
+
+                                    <apex:outputPanel id="suggestedProductResults" layout="block" style="position:relative;overflow:scroll;width:100%;height:240px;">
+                                        <apex:outputPanel >
+                                            <apex:image value="/img/icon/custom51_100/redcross24.png" />
+                                            <apex:outputText value="{!$Label.Suggestions} {!IF(SuggestedProductResults=null,'','('+TEXT(SuggestedProductResults.size)+')')}" styleclass="header"/>
+                                        </apex:outputPanel>                                 
+                                        <apex:pageBlockTable value="{!SuggestedProductResults}" var="p" rules="cols" rows="50">
+                                            <apex:column width="35px">
+                                                <apex:facet name="header">&nbsp;</apex:facet>
+                                                <apex:inputCheckbox value="{!p.Selected}" id="selectLine1"/>
+                                            </apex:column>
+                                            <apex:column headerValue="{!$Label.Product}" value="{!p.product.name}" width="80px" />                                         
+                                            <apex:column headerValue="{!$Label.TH_Stream}" value="{!p.product.Product_Stream__c}" width="50px" />
+                                            <apex:column headerValue="{!$Label.TH_C_Code}" value="{!p.product.CCode__c}" width="50px" style="{!IF(p.product.RequiresCCodeToQuote__c,'font-weight:bold;','')}" /> 
+                                            <apex:column headerValue="{!$Label.TH_Type}" value="{!p.product.Type__c}" width="50px" />
+                                            <apex:column headerValue="{!$Label.Reason}" value="{!p.RelationshipType}" width="50px" />                                        
+                                        </apex:pageBlockTable>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSection>
+                                
+                                <div style="margin-left:25px;" >
+                                    <apex:commandButton action="{!AddSelectedProducts}" value="{!$Label.AddSelected}" status="status" reRender="productSiteGrid,samplingTable,pageMessages"/>
+                                    <div style="margin-right:10px;float:right;" >
+                                        <apex:commandButton action="{!ClearSuggestions}" value="{!$Label.ClearSuggestions}" reRender="suggestedProductResults,pageMessages"/>
+                                    </div>
+                                </div>
+                                <br />
+                            </apex:pageBlock>
+                        </td>
+                    </apex:outputPanel>
+                </tr>
+            </table>
+        </apex:outputPanel>
+        
+        <apex:pageBlock id="prodSites" mode="edit">
+            <apex:pageBlockButtons >    
+                <apex:commandButton action="{!Cancel}" value="{!$Label.Cancel}" immediate="true" />
+                <apex:commandButton action="{!ManageSites}" value="{!$Label.ManageSites}" />
+                <apex:commandButton action="{!QuickSave}" value="{!$Label.QuickSave}" status="status" rerender="pageMessages,resetDefaults" />
+                <apex:commandButton action="{!ShowSuggestedProductsFromGrid}" value="{!$Label.SuggestedProducts}" rerender="pageMessages,searchPanel" />
+                <apex:commandButton action="{!Next}" value="{!$Label.Next}" />
+            </apex:pageBlockButtons>
+
+            <apex:panelGrid cellpadding="2" cellspacing="2" columns="3" width="100%" bgcolor="#E1E6EE">
+                <apex:outputPanel style="cursor:pointer;">
+                    <apex:image value="/img/icon/bridge32.png" height="30"/>
+                    <apex:outputText value="Product Sites Grid" styleclass="header"/>
+                </apex:outputPanel>
+            </apex:panelGrid>
+                
+            <apex:pageBlockSection id="productsAndSiteSection">
+                <apex:outputPanel id="productSiteGrid">
+                    <div style="margin:0;padding:0;border-collapse:collapse;width:{!IF(ShowSelectionSummary,'850px','1300px')};max-height:450px;overflow:auto;">        
+                        <table style="border-collapse:collapse;table-layout:fixed;" class="list" border="0" cellpadding="0" cellspacing="0" >
+                            <!-- Column Headers -->         
+                            <thead class="rich-table-thead">
+                                <tr class="headerRow">
+                                    <th class="headerRow" style="width:160px;text-align:center;vertical-align:middle;">Products</th>
+                                    <th class="headerRow" style="width:50px;text-align:center;vertical-align:middle;">{!$Label.TH_Combi} / <br /> {!$Label.TH_IMS}</th>
+                                    <th class="headerRow" style="width:70px;text-align:center;vertical-align:middle;">{!$Label.TH_SamplingQuestion}</th>
+                                    <th class="headerRow" style="width:65px;text-align:center;vertical-align:middle;white-space:pre-wrap;word-wrap:break-word;">{!$Label.TH_AllQuestion}</th>
+                                    <apex:repeat value="{!Sites}" var="site">
+                                        <th style="white-space:pre-wrap;word-wrap:break-word;width:125px;{!IF(site.IsHQ,'background-color:NavajoWhite;','')}">
+                                            <apex:outputLink target="_blank" value="/{!site.Id}"> 
+                                                <apex:outputText value="{!IF(site.IsHQ, $Label.HQ, $Label.TH_Site + ' ' + TEXT(site.Index-1))}" /> - {!site.Type}<p />{!site.Name}
+                                            </apex:outputLink>
+                                        </th>
+                                    </apex:repeat>
+                                </tr>
+                            </thead>
+                            <!-- Categories & Products -->              
+                            <tbody>
+                                <apex:repeat value="{!productAreas}" var="prodArea" >
+                                    <!--  Categories -->
+                                    <apex:outputPanel layout="none" rendered="{!OR(!ShowSelectedOnly, AND(ShowSelectedOnly, prodArea.SelectedProductCount>0))}" >                   
+                                        <tr class="datarow">
+                                            <td class="datacell" style="text-align:left;">
+                                                <apex:outputPanel style="cursor:pointer;" >
+                                                    <apex:image value="/img/setup_plus.gif" style="cursor:pointer;" title="{!$Label.Expand}" rendered="{!prodArea.IsCollapsed}" />
+                                                    <apex:image value="/img/setup_minus.gif" style="cursor:pointer;" title="{!$Label.Collapse}" rendered="{!!prodArea.IsCollapsed}" />
+                                                    &nbsp;
+                                                    <apex:outputText style="font-weight:bold;" value="{!prodArea.Title + ' (' + TEXT(prodArea.SelectedProductCount) + ')'}" />
+                                                    <apex:actionSupport event="onclick" action="{!selectProductArea}" rerender="productSiteGrid,pageMessages">
+                                                        <apex:param assignTo="{!selectedProductArea}" value="{!prodArea.Title}" name="selectedProductArea" />
+                                                    </apex:actionSupport> 
+                                                </apex:outputPanel>
+                                            </td>
+                                        </tr>
+                                    </apex:outputPanel>
+                                    <!--  Products -->
+                                    <apex:actionRegion >
+                                    <apex:repeat value="{!prodArea.products}" var="product" rendered="{!!prodArea.IsCollapsed}">
+                                        <apex:outputPanel layout="none" rendered="{!OR(!ShowSelectedOnly, AND(ShowSelectedOnly, product.Selected))}" >
+                                            <tr class="datarow">
+                                                <td class="datacell" style="text-align:left;">
+                                                    <apex:inputCheckbox value="{!product.Selected}">
+                                                        <apex:actionSupport action="{!selectProduct}" event="onclick" rerender="productSiteGrid,samplingTable,pageMessages" status="status">
+                                                            <apex:param assignTo="{!selectedProduct}" value="{!product.InstanceName}" name="selectedProduct" />
+                                                        </apex:actionSupport>
+                                                    </apex:inputCheckbox>
+                                                    &nbsp;
+                                                    <apex:outputText value="{!product.DisplayName} " />
+                                                </td>
+
+                                                <apex:outputPanel id="productSiteRowData" layout="none" rendered="{!product.Selected}">
+                                                    <td class="datacell" style="text-align:center;">
+                                                        <apex:outputPanel id="imsAvailablePanel" rendered="{!product.SupportsIMS && HasMultipleIMSProducts}" >
+                                                            <apex:actionRegion >
+                                                                <apex:commandlink rerender="imsAvailablePanel" onclick="return openQuestionPopup('{!product.IMSQuestionURL}','{!product.InstanceName}','{!product.InstanceName}','IMS')" >
+                                                                    <apex:image value="{!$Resource.icon_configure}" style="cursor:pointer;" title="{!$Label.ClicktocompleteIMSquestions}" rendered="{!!quote.IMS_Complete__c}" />
+                                                                    <apex:image value="/img/msg_icons/confirm16.png" rendered="{!quote.IMS_Complete__c}" />
+                                                                </apex:commandlink>
+                                                            </apex:actionRegion>
+                                                        </apex:outputPanel>
+                                                        
+                                                        <apex:actionRegion >                                                    
+                                                            <apex:inputCheckbox value="{!product.IMS}" rendered="{!product.SupportsIMS && HasMultipleIMSProducts}" disabled="{!!quote.IMS_Complete__c}" >
+                                                                <apex:actionSupport action="{!selectIMSProduct}" event="onclick" rerender="productSiteGrid,pageMessages" status="status">
+                                                                    <apex:param assignTo="{!selectedIMSProduct}" value="{!product.InstanceName}" name="selectedIMSProduct" />
+                                                                </apex:actionSupport>
+                                                            </apex:inputCheckbox>
+                                                        </apex:actionRegion>
+                                                    </td>
+                                                    <td class="datacell" style="text-align:center;">
+                                                        <apex:outputPanel id="samplingAvailablePanel" rendered="{!product.SamplingAvailable}" >
+                                                            <apex:actionRegion >                                                
+                                                                <apex:commandlink rerender="samplingAvailablePanel" onclick="return openQuestionPopup('{!product.SampleQuestionURL}','{!product.InstanceName}','{!product.InstanceName}','SAMPLING')" rendered="{!product.SamplingAvailable}" >
+                                                                    <apex:image value="{!$Resource.icon_configure}" style="cursor:pointer;" title="{!$Label.Clicktocompletesamplingquestions}" rendered="{!!product.VerifiedForSampling}" />
+                                                                    <apex:image value="/img/msg_icons/confirm16.png" rendered="{!product.VerifiedForSampling}" />
+                                                                </apex:commandlink>
+                                                            </apex:actionRegion>
+                                                        </apex:outputPanel>
+    
+                                                        <apex:inputCheckbox value="{!product.UseSampling}" disabled="{!!product.VerifiedForSampling}" rendered="{!product.SamplingAvailable}">
+                                                            <apex:actionSupport action="{!UseSampling}" event="onclick" rerender="productSiteGrid,samplingTable,pageMessages" status="status">
+                                                                <apex:param assignTo="{!selectedSamplingProduct}" value="{!product.InstanceName}" name="selectedSamplingProduct" />                                             
+                                                            </apex:actionSupport>
+                                                        </apex:inputCheckbox>
+                                                    </td>                                                   
+                                                    <td style="vertical-align:middle;text-align:center;padding:0px;margin:0px;">
+                                                        <apex:commandButton style="height:17px;padding:2px;font-size:8pt;" value="Reg Path" action="{!SetProductRegPathToAllSites}" disabled="{!!AND(!product.HQOnly,sites.size>1)}" status="status" rerender="productSiteGrid,samplingTable,pageMessages">
+                                                            <apex:param assignTo="{!selectedProdRegPath}" value="{!product.InstanceName}" name="selectedProdRegPath" />                                     
+                                                        </apex:commandButton>
+                                                        
+                                                        <apex:outputPanel layout="none" rendered="{!product.IsRisk}" >
+                                                            <p style="margin-top:0.3em;margin-bottom:0em;" />
+                                                            <apex:commandButton style="height:17px;padding:2px;font-size:8pt;" value="Risk Level" action="{!SetProductRiskLevelToAllSites}" disabled="{!!AND(!product.HQOnly,sites.size>1)}" status="status" rerender="productSiteGrid,samplingTable,pageMessages">
+                                                                <apex:param assignTo="{!selectedProdRiskLevel}" value="{!product.InstanceName}" name="selectedProdRiskLevel" />                                     
+                                                            </apex:commandButton>
+                                                        </apex:outputPanel>
+                                                    </td>
+                                                    <apex:repeat value="{!Sites}" var="site" >
+                                                        <td class="datacell" style="text-align:center;">
+                                                            <apex:selectList value="{!product.SitesMap[site.Index].RegistrationPath}" multiselect="false" size="1" rendered="{!OR((NOT product.HQOnly),AND(site.IsHQ,product.HQOnly))}">
+                                                                <apex:selectOptions value="{!product.SitesMap[site.Index].RegistrationPathItems}" />
+                                                                <apex:actionSupport event="onchange" action="{!SelectRegistrationPath}" rerender="productSiteGrid,samplingTable,pageMessages" status="status">
+                                                                    <apex:param assignTo="{!selectedSiteProduct}" value="{!product.InstanceName}" name="selectedRPProduct" />
+                                                                    <apex:param assignTo="{!selectedSite}" value="{!site.Index}" name="selectedRPSite" />
+                                                                </apex:actionSupport>
+                                                            </apex:selectList>
+                                                            
+                                                            <apex:outputPanel layout="none" rendered="{!AND(product.IsRisk, OR((NOT product.HQOnly),AND(site.IsHQ,product.HQOnly)))}">
+                                                                <p style="margin-top:0.1em;margin-bottom:0em;" />
+                                                                <apex:selectList value="{!product.SitesMap[site.Index].RiskLevel}" multiselect="false" size="1">
+                                                                    <apex:selectOptions value="{!RiskLevelItems}" />
+                                                                    <apex:actionSupport event="onchange" action="{!SelectRiskLevel}" rerender="productSiteGrid,samplingTable,pageMessages" status="status">
+                                                                        <apex:param assignTo="{!selectedSiteProduct}" value="{!product.InstanceName}" name="selectedRLProduct" />
+                                                                        <apex:param assignTo="{!selectedSite}" value="{!site.Index}" name="selectedRLSite" />
+                                                                    </apex:actionSupport>                                                               
+                                                                </apex:selectList>
+                                                                <apex:image value="/img/msg_icons/warning16.png" rendered="{!AND(!ISBLANK(product.SitesMap[site.Index].CalculatedRiskLevel), product.SitesMap[site.Index].CalculatedRiskLevel!=UPPER(product.SitesMap[site.Index].RiskLevel))}"  title="{!IF(product.SitesMap[site.Index].CalculatedRiskLevel!='N/A','The calculated risk is: ' + product.SitesMap[site.Index].CalculatedRiskLevel, $Label.RiskLevelNotCalculated)}" style="cursor:help;" />
+                                                            </apex:outputPanel>
+                                                            
+                                                            <p style="margin-top:0.1em;margin-bottom:0em;" />
+                                                            
+                                                            <apex:inputCheckbox rendered="{!product.VerifiedForSampling && product.UseSampling && product.SitesMap[site.Index].Selectable}" value="{!product.SitesMap[site.Index].Selected}">
+                                                                <apex:actionSupport action="{!CheckForSamplingAvailable}" event="onchange" rerender="samplingTable">
+                                                                    <apex:param assignTo="{!selectedProduct}" value="{!product.InstanceName}" name="selectedSampleProduct" />
+                                                                </apex:actionSupport>
+                                                                <apex:outputText value="{!$Label.Sampled}" style="font-size:.9em" />
+                                                            </apex:inputCheckbox>
+                                                        </td>
+                                                    </apex:repeat>                                                                                                                      
+                                                </apex:outputPanel>
+                                            </tr>
+                                        </apex:outputPanel>                                     
+                                    </apex:repeat>
+                                    </apex:actionRegion>
+                                </apex:repeat>
+                            </tbody>                
+                        </table>
+                    </div>
+                    <br />
+                    <apex:commandButton value="{!$Label.ClearGrid}" action="{!ClearProductSelection}" status="status" rerender="productSiteGrid,samplingTable,pageMessages" />                      
+                </apex:outputPanel>
+                    
+                <apex:outputPanel id="samplingTable" layout="block">
+    
+                    <apex:outputPanel id="samplingTableHidden" style="cursor:pointer;" rendered="{!!ShowSelectionSummary}">
+                        <apex:actionSupport event="onclick" action="{!ToggleSelectionSummary}" rerender="productsAndSiteSection">
+                            <apex:image value="/img/func_icons/cal/leftArrow.gif" rendered="{!!ShowSelectionSummary}"  />
+                            <br/><br/>
+                            <apex:image value="/img/msg_icons/warning16.png" rendered="{!!ShowSelectionSummary && SampleWarnings}" title="{!$Label.SelectionIssues}" />
+                        </apex:actionSupport>
+                    </apex:outputPanel>
+
+                    <apex:outputPanel rendered="{!ShowSelectionSummary}">
+                        <table style="border-collapse:collapse;table-layout:fixed;width:420px;" class="list" border="0" cellpadding="0" cellspacing="0">
+                            <!-- Column Headers -->         
+                            <thead class="rich-table-thead">
+                                <tr class="headerRow">
+                                    <th class="headerRow" style="width:78px;text-align:center;">
+                                        <div style="float:left;">
+                                            <apex:image value="/img/func_icons/cal/rightArrow.gif" rendered="{!ShowSelectionSummary}" style="cursor:pointer;">
+                                                <apex:actionSupport event="onclick" action="{!ToggleSelectionSummary}" rerender="productsAndSiteSection" />
+                                            </apex:image>
+                                        </div>
+                                        Type
+                                    </th>
+                                    <th class="headerRow" style="text-align:center;width:70px;">{!$Label.Product}</th>
+                                    <th class="headerRow" style="text-align:center;width:70px;">{!$Label.TH_RegistrationPath}</th>
+                                    <th class="headerRow" style="text-align:center;vertical-align:middle;width:22px;padding:0px;"><apex:image value="/img/icon/circle16.png" title="{!$Label.Total}" /></th>
+                                    <th class="headerRow" style="text-align:center;vertical-align:middle;width:22px;padding:0px;"><apex:image value="/img/icon/reports16.png" title="{!$Label.TH_Sampling}" /></th>
+                                    <th class="headerRow" style="text-align:left;vertical-align:middle;width:21px;padding:0px 0px 0px 6px;"><apex:image value="/img/icon/hexagon16.png" title="{!$Label.Selected}" /></th>      
+                                </tr>
+                            </thead>
+                            
+                            <apex:variable value="{!0}" var="totalSelectedAmount" />
+                            
+                            <tbody><tr><td colspan="6" style="padding:0px;margin:0px;">
+                                <table style="border-collapse:collapse;table-layout:fixed;" class="list" border="0" cellpadding="0" cellspacing="0">
+                                <apex:repeat value="{!samplingMap}" var="samplingSiteType" id="samplingSiteType">
+                                    <tr style="height:40px;">
+                                        <td style="background-color:lightblue;text-align:center;width:48px;font-weight:bold;vertical-align:middle;font-size:.9em;"><apex:outputText value="{!samplingSiteType}" escape="false"/></td>
+                                        <td style="width:150px;padding:0px;margin:0px;height:100%;">
+                                            <table style="border-collapse:collapse;table-layout:fixed;" class="list" border="0" cellpadding="0" cellspacing="0">
+                                                <apex:repeat value="{!samplingMap[samplingSiteType]}" var="samplingProduct" id="samplingProduct">
+                                                    <apex:outputPanel layout="none" rendered="{!productMap[samplingProduct].Selected}"> 
+                                                        <tr>
+                                                            <td style="background-color:{!IF(productMap[samplingProduct].UnvalidForSampling,'orange','lightgreen')};width:100px;font-weight:bold;vertical-align:middle;font-size:.9em;">
+                                                                <apex:outputText value="{!productMap[samplingProduct].DisplayName}" />
+                                                            </td>
+                                                            <td style="padding:0px;margin:0px;">
+                                                                <table style="border-collapse:collapse;table-layout:fixed;" class="list" border="0" cellpadding="0" cellspacing="0">
+                                                                    <apex:repeat value="{!samplingMap[samplingSiteType][samplingProduct]}" var="samplingRegPath" id="samplingRegPath">                                                          
+                                                                        <tr>
+                                                                            <td style="background-color:lightyellow;width:50px;font-weight:bold;font-size:.9em;">{!samplingRegPath}</td>
+
+                                                                            <apex:variable value="{!0}" var="amount" />
+                                                                            <apex:variable value="{!0}" var="selectedAmount" />
+                                                                            <apex:variable value="{!0}" var="selectableAmount" />
+                                                                    
+                                                                            <apex:repeat value="{!samplingMap[samplingSiteType][samplingProduct][samplingRegPath].pswMap}" var="samplingProdSite" id="samplingProdSite" >
+                                                                                <apex:variable var="amount" value="{!amount + IF(productMap[samplingProduct].Selected, 1, 0)}"/>
+                                                                                <apex:variable var="selectableAmount" value="{!selectableAmount + IF(productMap[samplingProduct].Selected && samplingMap[samplingSiteType][samplingProduct][samplingRegPath].pswMap[samplingProdSite].Selectable, 1, 0)}"/>
+                                                                                <apex:variable var="selectedAmount" value="{!selectedAmount + IF(productMap[samplingProduct].Selected && samplingMap[samplingSiteType][samplingProduct][samplingRegPath].pswMap[samplingProdSite].Selected, 1, 0)}"/>
+                                                                            </apex:repeat>
+                                                                            
+                                                                            <!-- DISPLAY AMOUNT -->
+                                                                            <td style="width:10px;vertical-align:middle;text-align:center;font-size:.9em;font-weight:bold;">
+                                                                                <apex:outputText value="{!amount}" />
+                                                                            </td>
+
+                                                                            <!-- DISPLAY SAMPLED AMOUNT -->                                                                         
+                                                                            <td style="width:10px;vertical-align:middle;text-align:center;font-size:.9em;font-weight:bold;">
+                                                                                <apex:outputText value="{!samplingMap[samplingSiteType][samplingProduct][samplingRegPath].MinSampleSize}"  rendered="{!productMap[samplingProduct].ValidForSampling && selectableAmount>0}" />
+                                                                                <apex:outputText value="-"  rendered="{!!productMap[samplingProduct].ValidForSampling || selectableAmount = 0}" />
+                                                                            </td>
+
+                                                                            <!-- DISPLAY SELECTED AMOUNT -->    
+                                                                            <td style="width:10px;vertical-align:middle;text-align:center;font-size:.9em;font-weight:bold;background-color:{!IF(productMap[samplingProduct].ValidForSampling && !samplingMap[samplingSiteType][samplingProduct][samplingRegPath].SelectionValid,'red','lime')};">
+                                                                                <apex:outputText value="{!selectedAmount}" title="{!IF(productMap[samplingProduct].ValidForSampling && !samplingMap[samplingSiteType][samplingProduct][samplingRegPath].SelectionValid,'','Selected sites does not meet the minimum sampling amount')}"/>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <apex:variable var="totalSelectedAmount" value="{!totalSelectedAmount + selectedAmount}"/>
+                                                                    </apex:repeat>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </apex:outputPanel>
+                                                </apex:repeat>  
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>                                  
+                            </table></td></tr></tbody>
+                            
+                            <tfoot>
+                                <tr class="footerRow" style="background-color:#D3D3D3;">
+                                    <td colspan="5" style="text-align:left;font-weight:bold;">&nbsp;{!$Label.Total}</td>
+                                    <td style="vertical-align:middle;text-align:center;font-size:.9em;font-weight:bold;"><apex:outputText value="{!totalSelectedAmount}" /></td>        
+                                </tr>
+                            </tfoot>
+                                                        
+                        </table>
+                    </apex:outputPanel>
+                </apex:outputPanel>                             
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+
+
+</apex:page>

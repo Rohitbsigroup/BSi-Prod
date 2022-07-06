@@ -1,0 +1,82 @@
+<apex:page renderAs="pdf" standardController="Personal_Qualification__c" showHeader="false">
+
+<head>
+
+<!--
+10/10/2018 - PC - used Signature from Static Resources
+-->
+
+<style type="text/css" media="print">
+
+body{
+    font-size: 11pt;
+    font-family: "Arial Unicode MS" "Sans-Serif";
+}   
+
+@page{
+    size: A4 portrait;
+    margin-top:.2.5cm;
+    margin-left:2cm;
+    margin-right:1.5cm;
+    margin-bottom:2.5cm;    
+}
+
+.size11 {
+    font-size: 11pt;}
+
+.size11left {
+   font-size: 11pt;
+   text-align: left;
+   font-family: "Arial Unicode MS" "Sans-Serif";
+}
+
+.smallcenter6 {
+    font-size: 6pt;   
+    text-align: center;
+}
+
+</style>
+</head>
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<!---- this brings in the name and address and date of the delegate ---->
+<apex:panelGrid styleClass="size11left" width="100%" cellspacing="0" cellpadding="0"> 
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.Name}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.Account.Name}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.MailingStreet}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.MailingCity}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.Mailing_District__c}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.MailingPostalCode}</apex:outputText>
+<apex:outputText >{!Personal_Qualification__c.Delegate__r.MailingCountry}</apex:outputText>
+<br/>
+<apex:outputText >{!day(TODAY())}/{!month(TODAY())}/{!year(TODAY())}</apex:outputText>
+</apex:panelGrid>
+
+<br/><br/>
+<!---- this brings in the salutation and delegate name ---->
+<apex:outputText value="{!Personal_Qualification__c.Training_Translations__r.Dear__c} {!Personal_Qualification__c.Delegate__r.Name},"/> 
+<br/><br/>
+<!---- this brings in the delegate number ---->
+<apex:outputText value="Student Number:"/><apex:outputText value=" {!Personal_Qualification__c.Delegate__r.Delegate_Number__c},"/>
+<br/><br/>
+<!---- Text for the Certificate Letter---->
+<apex:outputText value="Congratulations on successfully completing your {!Personal_Qualification__c.Qualification_Code__c} - {!Personal_Qualification__c.Qualification_Name__c}.
+You now have a nationally recognized qualification from a Registered Training Organization. Included with this package is a copy of your Certificate and a Statement of Attainment
+ which details your units of competence."></apex:outputText>
+<br/><br/>
+<apex:outputText value=" Thank you for selecting us as your training provider. We are always pleased to see our students gain new skills to help them suceed.
+ We are happy that we were able to assist you on your training journey, and wish you the best of luck in your future career prospects."></apex:outputText>
+<br/><br/>
+<apex:outputText value="If you have any further requirements please contact us on 1300 730 134 or sales.aus@bsigroup.com. "></apex:outputText>
+<br/><br/>
+Yours sincerely,
+<br/><br/>
+<!---- this brings in the manager signature, name and designation---->
+<apex:image height="0.7cm" url="{!URLFOR($Resource.TrainingCertificateSignatures, Personal_Qualification__c.Training_Translations__r.Signature_Image__c)}"/> 
+<br/><br/>
+<apex:outputText styleClass="size10" value="{!Personal_Qualification__c.Training_Translations__r.Training_Manager__c}"/> 
+</apex:page>

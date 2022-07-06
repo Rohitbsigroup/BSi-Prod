@@ -1,0 +1,32 @@
+<apex:page standardcontroller="Opportunity" extensions="bg_OpportunityCloneController"> 
+    
+    <style type="text/css"> 
+		.centerImage {
+			display: block; 
+			margin-left: auto; 
+			margin-right: auto;
+		}
+	</style>
+	
+	<apex:pagemessages id="messages"/>
+	
+	<apex:actionStatus stopText="" id="busyStatus" >
+		<apex:facet name="stop" >
+			<apex:image rendered="{!!hasErrors}" styleClass="centerImage" url="/img/loading32.gif" width="20px" height="20px" style="display: block; margin-left: auto; margin-right: auto;"/>
+		</apex:facet>
+	</apex:actionStatus>
+	
+	<apex:form >
+        <apex:pageBlock >
+	        <div align="center">
+	        	<apex:outputText id="helpText" value="{!IF(!hasErrors, $Label.OpportunityCloneLoading, $Label.OpportunityCloneFailed)}"/>
+	        </div>
+        </apex:pageBlock>
+		<apex:actionFunction name="clone" action="{!ConfiguratorClone}" status="busystatus" rerender="busyStatus, helpText, messages"/>
+	</apex:form>
+	
+	<script type="text/javascript">
+		clone();	
+	</script>
+	
+</apex:page>

@@ -1,0 +1,198 @@
+<apex:component controller="CIVLinkedController" allowDML="true">
+
+    <apex:attribute name="theRecord" description="..." type="SObject" required="true" assignTo="{!record}" />
+    <apex:attribute name="theAccountId" description="..." type="String" required="true" assignTo="{!accountId}" />
+    <apex:attribute name="theContactId" description="..." type="String" required="true" assignTo="{!contactId}" />
+
+    <apex:outputPanel rendered="{!refreshPage}">
+        <script>
+            window.top.location='/{!record.id}';
+        </script>
+    </apex:outputPanel>
+
+    <apex:form >
+        <apex:pageBlock id="tableBlock">
+            <apex:pageMessages />
+
+            <div style="height:190px; overflow:auto;">
+                <apex:pageBlockTable value="{!records}" var="lr">
+                    <!-- Object Type -->
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Object_Type}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="objecttype" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='objecttype'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>                    
+                        <apex:image id="theImage" value="{!lr.image}" width="16" height="16" style="vertical-align:middle;"/>&nbsp;
+                        <a href="/{!lr.recordId}" target="_blank">{!lr.objectType}</a>
+                    </apex:column>
+
+                    <!-- Owner -->
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Owner}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="owner" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='owner'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet> 
+                        <a href="/{!lr.ownerId}" target="_blank">{!lr.ownerName}</a>
+                    </apex:column>
+
+                    <!-- Status -->
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Status}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="status" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='status'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputText value="{!lr.status}" />
+                    </apex:column>
+
+                    <!-- Close Date -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Close_Date}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="closedate" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='closedate'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputText value=" {!lr.closeDate}" />
+                    </apex:column>   
+
+                    <!-- Name -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Name}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="name" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='name'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputText value="{!lr.name}" />
+                    </apex:column>  
+
+                    <!-- Company -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Company}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="company" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='company'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputLink value="/{!lr.AccountId}" target="_blank" rendered="{!!ISBLANK(lr.AccountId)}">{!lr.company}</apex:outputLink>
+                        <apex:outputText value="{!lr.company}" rendered="{!ISBLANK(lr.AccountId)}" />
+                    </apex:column>
+
+                    <!-- Email -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Email}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="email" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='email'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputLink value="/{!lr.ContactId}" target="_blank" rendered="{!!ISBLANK(lr.ContactId)}">{!lr.email}</apex:outputLink>
+                        <apex:outputText value="{!lr.email}" rendered="{!ISBLANK(lr.ContactId)}" />
+                    </apex:column> 
+
+                    <!-- Phone -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Phone}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="phone" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='phone'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputText value="{!lr.phone}" />
+                    </apex:column> 
+
+                    <!-- Postcode -->                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink action="{!sortResults}" value="{!$Label.CIV_Postcode}" rerender="tableBlock" status="loadStatus" >
+                                <apex:param name="sortCol" value="postcode" assignTo="{!sortColumnName}"/>
+                                <apex:outputPanel layout="none" rendered="{!sortColumnName='postcode'}">
+                                    &nbsp;
+                                    <apex:image rendered="{!!orderAsc}" value="/img/sort_desc_arrow.gif" style="vertical-align:middle;"/>
+                                    <apex:image rendered="{!orderAsc}" value="/img/sort_asc_arrow.gif" style="vertical-align:middle;"/>
+                                </apex:outputPanel>                                 
+                            </apex:commandLink>
+                        </apex:facet>
+                        <apex:outputText value="{!lr.postcode}" />
+                    </apex:column>
+
+                    <apex:column headerValue="{!$Label.CIV_Action}" styleClass="center" headerClass="center">
+                        <apex:commandLink id="removeLink" action="{!unlink}" style="text-decoration:none">
+                            <apex:commandButton value="{!$Label.CIV_Unlink}" style="width:40px;"  />
+                            <apex:param name="action" value="{!lr.action}" assignTo="{!selectedAction}" />
+                            <apex:param name="objectType" value="{!lr.objectType}" assignTo="{!selectedObjectType}" />
+                            <apex:param name="linkId"     value="{!lr.recordId}"   assignTo="{!selectedrecordId}" />
+                        </apex:commandLink>
+                    </apex:column>
+    
+                </apex:pageBlockTable>
+            </div>
+            
+            <div class="container">
+                <div class="leftCol">
+                    <apex:panelGrid columns="10">
+                        <apex:outputLabel styleClass="bold">{!$Label.CIV_Filters}:&nbsp;</apex:outputLabel>
+                        <apex:inputCheckbox value="{!showAccounts}" id="showAccounts">{!$ObjectType.Account.Label}</apex:inputCheckbox>
+                        <apex:inputCheckbox value="{!showContacts}" id="showContact">{!$ObjectType.Contact.Label}</apex:inputCheckbox>
+                        <apex:inputCheckbox value="{!showLeads}" id="showLeads">{!$ObjectType.Lead.Label}</apex:inputCheckbox>
+                        <apex:inputCheckbox value="{!showOpportunities}" id="showOpportunity">{!$ObjectType.Opportunity.Label}</apex:inputCheckbox>
+                    </apex:panelGrid>
+                </div>
+                <div class="rightCol">
+                    <apex:commandButton value="{!$Label.CIV_Refresh}" action="{!Refresh}" status="loadStatus" reRender="tableBlock" />
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="container">
+                <div class="leftCol">&nbsp;</div>
+                <div class="rightCol">
+                    <apex:panelGrid columns="4">
+                        <apex:commandLink action="{!previous}" rendered="{!hasPrevious}" status="loadStatus" reRender="tableBlock">{!$Label.CIV_Previous}</apex:commandlink>
+                        <apex:commandLink action="{!next}" rendered="{!hasNext}" status="loadStatus" reRender="tableBlock">{!$Label.CIV_Next}</apex:commandlink>
+                    </apex:panelGrid>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+        </apex:pageBlock>
+    </apex:form>
+    
+</apex:component>

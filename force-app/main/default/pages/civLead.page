@@ -1,0 +1,7 @@
+<apex:page standardController="Lead" sidebar="false" showHeader="false">
+
+	<c:civMain theRecord="{!Lead}" theName="{!Lead.Name}" theCompany="{!Lead.Company}"
+		theEmail="{!Lead.Email}" thePostcode="{!Lead.PostalCode}" thePhone="{!Lead.Phone}" 
+		theAccountId="{!Lead.Existing_Customer_Account__c}" theContactId="{!Lead.Contact__c}" />
+
+</apex:page>

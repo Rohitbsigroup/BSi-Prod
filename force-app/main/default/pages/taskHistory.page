@@ -1,0 +1,5 @@
+<apex:page standardController="Task" sidebar="false" showHeader="false">
+	<apex:outputpanel layout="block" style="overflow:auto;width:100%;height:300px">
+		<c:ActivityHistory objectID="{!IF(Task.WhatId != null, Task.WhatId, Task.WhoId)}" currentTask="{!Task.Id}" imageURL="{!$Resource.line_separator}" imageHeight="45"/>
+	</apex:outputpanel>
+</apex:page>

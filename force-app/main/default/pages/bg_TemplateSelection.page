@@ -1,0 +1,135 @@
+<apex:page controller="bg_TemplateSelectionController" sidebar="false" showheader="false" >
+
+    <!-- RELOAD THE PAGE SCRIPT -->
+    <apex:outputPanel id="reloadPanel" >
+        <apex:outputPanel rendered="{!reloadNeeded}">
+            <script type="text/javascript">
+                // Redirect the top level window
+                window.top.location.href = '{!reloadPageURL}';
+            </script>
+        </apex:outputPanel>    
+    </apex:outputPanel>
+
+    <apex:form id="form" >  
+
+        <apex:actionRegion >
+
+            <apex:actionStatus id="status">
+                <apex:facet name="start">
+                    <c:CustomStatus BackColor="#FFF" ImageWidth="200" ImageHeight="30" borderColor="#FFFFFF" borderSize="0" height="20px" width="220px" ImageUrl="{!$Resource.loading}"/>
+                </apex:facet>
+            </apex:actionStatus>
+    
+            <apex:outputPanel id="BoxPanel">
+                <apex:PageMessages id="msgs"/>
+                
+                <apex:pageBlock >
+                    <table  style="width:100%">
+                    <tr>
+                        <td> 
+                            <apex:outputLabel value="Template Name" for="nameFilter1"/> &nbsp;
+                            <apex:inputText label="Template Name" value="{!templateNameString}" id="nameFilter1"/>
+                        </td>
+                        <td> 
+                            <apex:outputLabel value="Template Group" for="typePl1"/> &nbsp;
+                            <apex:selectList value="{!TypeFilterString}" multiSelect="false" size="1" id="typePl1">
+                                <apex:selectOptions value="{!TypeFilter}" />
+                            </apex:selectList>
+                        </td>
+                        <td> 
+                            <apex:outputLabel value="Language" for="langPl1"/> &nbsp;
+                            <apex:selectList value="{!languageFilterString}" multiSelect="false" size="1" id="langPl1">
+                                <apex:selectOptions value="{!LanguageFilter}" />
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <apex:outputLabel value="Product Type" for="prodtyPl1"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <apex:selectList value="{!ProductTypeFilterString}" multiSelect="false" size="1" id="prodtyPl1">
+                                <apex:selectOptions value="{!ProductTypeFilter}" />
+                            </apex:selectList>
+                        </td>
+                        <td>
+                            <apex:outputLabel value="Country" for="countPl1"/> &nbsp;&nbsp;&nbsp;&nbsp;
+                            <apex:selectList value="{!CountryFilterString}" multiSelect="false" size="1" id="countPl1">
+                                <apex:selectOptions value="{!CountryFilter}" />
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                    </table>
+                    <br />
+                    
+                    <apex:pageBlockButtons location="bottom">
+                    	<apex:commandButton action="{!cancel}" value="{!$Label.Cancel}" rerender="reloadPanel" />
+                        <apex:commandButton action="{!generateURL}" value="Submit Selection" />
+                    </apex:pageBlockButtons>
+                    
+<!--                    <apex:outputLabel value="Template Name" for="nameFilter"/> &nbsp; -->
+<!--                    <apex:inputText label="Template Name" value="{!templateNameString}" id="nameFilter"/> -->
+<!--                    <br /> -->
+                    
+<!--                    <apex:outputLabel value="Template Group" for="typePl"/> &nbsp; -->
+<!--                    <apex:selectList value="{!TypeFilterString}" multiSelect="false" size="1" id="typePl"> -->
+<!--                        <apex:selectOptions value="{!TypeFilter}" /> -->
+<!--                    </apex:selectList> -->
+<!--                    <br /> -->
+                    
+<!--                    <apex:outputLabel value="Language" for="langPl"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+<!--                    <apex:selectList value="{!languageFilterString}" multiSelect="false" size="1" id="langPl"> -->
+<!--                        <apex:selectOptions value="{!LanguageFilter}" /> -->
+<!--                    </apex:selectList> -->
+<!--                    <br /> -->
+<!--                    <br /> -->
+                    <apex:commandButton id="filter" value="Filter Templates" action="{!Find}" />
+                    <br />
+                    <br />
+                    
+                    <table >
+                        <tr>
+                            <th style="width:50%" class="selectTitle">Available Templates</th>
+                            <th style="width:30px"></th>
+                            <th style="width:50%" class="selectTitle">Selected Templates</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <apex:selectList value="{!LeftSelectedList}" multiselect="true" style="width:100%" size="13" >
+                                    <apex:actionSupport event="ondblclick" action="{!ClickRight}" reRender="BoxPanel,msgs" status="status" />
+                                    <apex:selectOptions value="{!LeftOptionList}" />
+                                </apex:selectList>
+                                
+                            </td>
+                            
+                            <td style="vertical-align: middle;">
+                                <div>
+                                    <apex:image styleClass="picklistArrowRight" value="/s.gif">
+                                        <apex:actionSupport event="onclick" action="{!ClickRight}" reRender="BoxPanel,msgs"  status="status" />
+                                    </apex:image>
+                                    <br /> 
+                                    <br />
+                                    <apex:image styleClass="picklistArrowLeft" value="/s.gif">
+                                        <apex:actionSupport event="onclick" action="{!ClickLeft}" reRender="BoxPanel,msgs"  status="status" />
+                                    </apex:image>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <apex:selectList value="{!RightSelectedList}" multiselect="true" style="width:100%" size="13" >
+                                    <apex:actionSupport event="ondblclick" action="{!ClickLeft}" reRender="BoxPanel,msgs" status="status" />
+                                    <apex:selectOptions value="{!RightOptionList}" />
+                                </apex:selectList>
+                                
+                            </td>
+                        </tr>
+                    </table>
+                    <apex:outputLabel value="Selected Templates - Total Queries Used {!currentNoQueriesUsed} of 50" />
+<!--                    <button type="button" onclick="fillIn('names', '{!RightOptionIdsForReturn}')">Submit</button> -->
+                </apex:pageBlock>
+                
+            </apex:outputPanel>
+      
+        </apex:actionRegion> 
+    </apex:form>
+</apex:page>

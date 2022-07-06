@@ -1,0 +1,3 @@
+<apex:page showHeader="false" contentType="text/javascript" controller="PcaDefaultCountrySettingController">
+var pcaDefaultCountry = "{!DefaultCountry}";
+</apex:page>

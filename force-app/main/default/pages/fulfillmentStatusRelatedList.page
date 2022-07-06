@@ -1,0 +1,20 @@
+<apex:page standardController="Opportunity" extensions="emq_FulfillmentStatusRelatedList">
+    <apex:form >
+    <apex:pageBlock >
+        <apex:pageBlockTable value="{!fsList}" var="item">
+            <apex:column HeaderValue="Action" width="60">
+                <apex:outputLink style="color:#015ba7" value="{!URLFOR($Action.Fulfillment_Status__c.Edit, item.id, [retURL='/' & id])}" target="_parent">Edit</apex:outputLink> 
+            </apex:column>
+            <apex:column HeaderValue="Product Type" value="{!item.Product_Type__c}" />
+            <apex:column HeaderValue="Product Name" value="{!item.Product_Name__c}" />
+            <apex:column HeaderValue="Registration Path" value="{!item.Registration_Path__c}" />
+            <apex:column HeaderValue="Schedule Cycle" value="{!item.ScheduleCycle__c}" />
+            <apex:column HeaderValue="Phase" value="{!item.Phase__c}" />
+            <apex:column HeaderValue="Fee Type" value="{!item.FeeType__c}" />
+            <apex:column HeaderValue="Amount" value="{!item.Amount__c}" />
+            <apex:column HeaderValue="Status" value="{!item.Status__c}" />
+            <apex:column HeaderValue="Forecast Date" value="{!item.Forecast_Date__c}" />
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>
